@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { ChevronUp, ChevronDown, Search, Loader2, AlertCircle } from 'lucide-react';
+import formatCurrency from '../utils/formatCurrency';
+import formatDate from '../utils/formatDate';
 
 interface GrandMateriel {
     id: number;
@@ -23,6 +25,11 @@ interface GrandMateriel {
     created_at: string;
     updated_at: string;
 }
+
+
+
+// Format date helper
+
 
 type SortField = 'code_materiel' | 'designation' | null;
 type SortOrder = 'asc' | 'desc';
@@ -150,25 +157,22 @@ const TabGrandMateriel: React.FC = () => {
 
         return () => window.clearTimeout(timeoutId);
     }, [searchTerm]);
+y
 
-    // Format currency
-    const formatCurrency = (value: string | number) => {
-        return new Intl.NumberFormat('fr-FR', {
-            style: 'currency',
-            currency: 'DZD',
-        }).format(Number(value));
+    // Handle search input change
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(e.target.value);
+        setCurrentPage(1);
     };
 
-    // Format date
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('fr-FR');
-    };
+
 
 
 
     // Status badge
 
 
+    
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -215,6 +219,7 @@ const TabGrandMateriel: React.FC = () => {
                             placeholder="Rechercher par code matériel ou désignation..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
+                            onChange={handleSearchChange}
                             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
                         />
                     </div>
