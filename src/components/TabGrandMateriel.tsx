@@ -157,7 +157,6 @@ const TabGrandMateriel: React.FC = () => {
 
         return () => window.clearTimeout(timeoutId);
     }, [searchTerm]);
-y
 
     // Handle search input change
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {

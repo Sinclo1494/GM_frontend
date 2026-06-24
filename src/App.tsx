@@ -7,7 +7,7 @@ function App() {
 
 
   return (
-    <div className="min-h-screen flex flex-col .app">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1">
         <GrandMateriel />
