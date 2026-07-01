@@ -29,7 +29,7 @@ export default function Login() {
             const data = await loginUser(username, password);
 
             login(data.access);
-            navigate("/dashboard");
+            navigate("/");
         } catch {
             setError("Invalid username or password");
         } finally {
