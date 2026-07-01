@@ -6,6 +6,9 @@ import type {
   AnalyseQuantitativeResumeType,
   AnalyseQuantitativeType,
 } from "../types/analyseQuantitative";
+import { exportAnalyseQuantitative } from "../utils/exportPDF";
+
+
 
 const FILIALES = [
   { value: "A", label: "GEOTECHNIQUE" },
@@ -21,6 +24,17 @@ const FILIALES = [
 ];
 
 export default function AnalyseQuantitative() {
+
+  const handleExport = () => {
+    if (!resume || rowsTable.length === 0) return;
+
+    exportAnalyseQuantitative(resume, categories, {
+      filiale: codeFiliale,
+      dateDebut,
+      dateFin
+    });
+  };
+
   const [resume, setResume] =
     useState<AnalyseQuantitativeResumeType>();
   const [rowsTable, setRowsTable] = useState<
@@ -53,10 +67,8 @@ export default function AnalyseQuantitative() {
 
       setResume(resumeData);
       setRowsTable(tableData);
-      
-
-
-      console.log(tableData);
+      console.log("Resume Data:", resumeData);
+      console.log("Table Data:", tableData);
     } catch (err) {
       console.error(err);
     } finally {
@@ -66,23 +78,27 @@ export default function AnalyseQuantitative() {
   };
 
   const groupedByCategory = rowsTable.reduce((acc, row) => {
-        if (!acc[row.code_categorie]) {
-          acc[row.code_categorie] = {
-            title: row.libelle_categorie,
-            rows: [],
-          };
-        }
+    if (!acc[row.code_categorie]) {
+      acc[row.code_categorie] = {
+        code_categorie: row.code_categorie,
+        title: row.libelle_categorie,
+        rows: [],
+      };
+    }
 
-        acc[row.code_categorie].rows.push(row);
+    acc[row.code_categorie].rows.push(row);
 
-        return acc;
-      }, {} as Record<
-        string,
-        {
-          title: string;
-          rows: AnalyseQuantitativeType[];
-        }
-      >);
+    return acc;
+  }, {} as Record<
+    string,
+    {
+      code_categorie: string;
+      title: string;
+      rows: AnalyseQuantitativeType[];
+    }
+  >);
+
+  const categories = Object.values(groupedByCategory);
 
   return (
     <div className="p-6">
@@ -92,7 +108,7 @@ export default function AnalyseQuantitative() {
 
       {/* Filters */}
       <div className="mb-6 rounded-lg border bg-white p-4 shadow">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
           <div>
             <label className="mb-1 block text-sm font-medium">
               Filiale
@@ -143,6 +159,20 @@ export default function AnalyseQuantitative() {
               {loadingResume || loadingTable
                 ? "Calculating..."
                 : "Calculate"}
+            </button>
+          </div>
+          <div className="flex items-end">
+            <button
+              onClick={handleExport}
+              disabled={
+                !resume ||
+                rowsTable.length === 0 ||
+                loadingResume ||
+                loadingTable
+              }
+              className="w-full rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700 disabled:opacity-50"
+            >
+              Export PDF
             </button>
           </div>
         </div>

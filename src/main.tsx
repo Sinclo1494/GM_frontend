@@ -5,8 +5,11 @@ import { AuthProvider } from './context/AuthProvider.tsx';
 import Login from './pages/Login.tsx';
 import ProtectedRoute from './routes/ProtectedRoute.tsx';
 import App from './App.tsx';
+import Dashboard from './pages/Dashboard.tsx';
+import AnalyseQuantitative from './pages/AnalyseQuantitative.tsx';
 
 import './index.css';
+import GrandMateriel from './pages/GrandMateriel.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -14,13 +17,27 @@ createRoot(document.getElementById('root')!).render(
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <App />
-              </ProtectedRoute>}
-          />
+          <Route element={<App />}>
+            <Route
+              path="/reports/analyse-quantitative"
+              element={<ProtectedRoute><AnalyseQuantitative /></ProtectedRoute>}
+            />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>}
+            />
+            <Route
+              path="/Dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>}
+            />
+            
+          </Route>
         </Routes>
       </BrowserRouter>
     </AuthProvider>
