@@ -7,6 +7,7 @@ import ProtectedRoute from './routes/ProtectedRoute.tsx';
 import App from './App.tsx';
 import Dashboard from './pages/Dashboard.tsx';
 import AnalyseQuantitative from './pages/AnalyseQuantitative.tsx';
+import AnalyseExploitation from './pages/AnalyseExploitation.tsx';
 
 import './index.css';
 import GrandMateriel from './pages/GrandMateriel.tsx';
@@ -21,6 +22,10 @@ createRoot(document.getElementById('root')!).render(
             <Route
               path="/reports/analyse-quantitative"
               element={<ProtectedRoute><AnalyseQuantitative /></ProtectedRoute>}
+            />
+            <Route
+              path="/reports/analyse-exploitation"
+              element={<ProtectedRoute><AnalyseExploitation /></ProtectedRoute>}
             />
             <Route
               path="/"

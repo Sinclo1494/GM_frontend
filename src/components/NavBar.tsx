@@ -74,6 +74,13 @@ const Navbar = () => {
               >
                 Analyse Quantitative
               </Link>
+              <Link
+                to="/reports/analyse-exploitation"
+                onClick={() => setReportsOpen(false)}
+                className="block px-4 py-2 hover:bg-gray-100"
+              >
+                Analyse Exploitation
+              </Link>
             </div>
           )}
         </li>

@@ -6,6 +6,11 @@ import type {
   AnalyseQuantitativeType,
 } from "../types/analyseQuantitative";
 
+import type {
+  AnalyseExploitationResumeType,
+  AnalyseExploitationType,
+} from "../types/analyseExploitation";
+
 const COLORS = {
   primary: [31, 78, 121] as [number, number, number],
   secondary: [221, 235, 247] as [number, number, number],
@@ -17,6 +22,7 @@ const COLORS = {
 
 function drawHeader(
   pdf: jsPDF,
+  title: string,
   filters: {
     filiale: string;
     dateDebut: string;
@@ -32,7 +38,7 @@ function drawHeader(
   pdf.setTextColor(...COLORS.white);
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(20);
-  pdf.text("Analyse Quantitative", 14, 15);
+  pdf.text(title, 14, 15);
 
   pdf.setFontSize(10);
   pdf.text(
@@ -88,7 +94,7 @@ export function exportAnalyseQuantitative(
 ) {
   const pdf = new jsPDF("landscape");
 
-  drawHeader(pdf, filters);
+  drawHeader(pdf, "Analyse Quantitative", filters);
 
   // Resume Table
   autoTable(pdf, {
@@ -159,7 +165,7 @@ export function exportAnalyseQuantitative(
   categories.forEach((category) => {
     pdf.addPage();
 
-    drawHeader(pdf, filters);
+    drawHeader(pdf, "Analyse Quantitative", filters);
 
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(15);
@@ -249,4 +255,197 @@ export function exportAnalyseQuantitative(
   drawFooter(pdf);
 
   pdf.save("Analyse_Quantitative.pdf");
+}
+
+export function exportAnalyseExploitation(
+  resume: AnalyseExploitationResumeType,
+  categories: {
+    code_categorie: string;
+    title: string;
+    rows: AnalyseExploitationType[];
+  }[],
+  filters: {
+    filiale: string;
+    dateDebut: string;
+    dateFin: string;
+  },
+) {
+  const pdf = new jsPDF("landscape");
+
+  drawHeader(pdf, "Analyse de l'Exploitation du Matériel", filters);
+
+  // ===========================
+  // Resume
+  // ===========================
+  autoTable(pdf, {
+    startY: 42,
+
+    head: [[
+      "Nombre",
+      "Potentiel",
+      "Taux location",
+
+      "H. Service",
+      "H. Chômage",
+      "H. Panne",
+
+      "M. Service",
+      "M. Chômage",
+      "M. Panne",
+    ]],
+
+    body: [[
+      resume.nombre_total,
+      resume.total_potentiel.toFixed(1),
+      resume.taux_location_moyen.toFixed(2),
+
+      `${resume.heures_service.toFixed(1)} (${resume.pct_heures_service.toFixed(1)}%)`,
+      `${resume.heures_chomage.toFixed(1)} (${resume.pct_heures_chomage.toFixed(1)}%)`,
+      `${resume.heures_panne.toFixed(1)} (${resume.pct_heures_panne.toFixed(1)}%)`,
+
+      `${resume.montant_service.toFixed(2)} (${resume.pct_montant_service.toFixed(1)}%)`,
+      `${resume.montant_chomage.toFixed(2)} (${resume.pct_montant_chomage.toFixed(1)}%)`,
+      `${resume.montant_panne.toFixed(2)} (${resume.pct_montant_panne.toFixed(1)}%)`,
+    ]],
+
+    theme: "grid",
+
+    styles: {
+      font: "helvetica",
+      fontSize: 9,
+      cellPadding: 3,
+      lineColor: COLORS.border,
+      lineWidth: 0.2,
+      textColor: COLORS.text,
+      halign: "center",
+      valign: "middle",
+    },
+
+    headStyles: {
+      fillColor: COLORS.primary,
+      textColor: COLORS.white,
+      fontStyle: "bold",
+    },
+
+    bodyStyles: {
+      fillColor: COLORS.white,
+    },
+
+    alternateRowStyles: {
+      fillColor: COLORS.light,
+    },
+  });
+
+  // ===========================
+  // Category tables
+  // ===========================
+  categories.forEach((category) => {
+    pdf.addPage();
+
+    drawHeader(pdf, "Analyse de l'Exploitation du Matériel", filters);
+
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(15);
+    pdf.setTextColor(...COLORS.primary);
+
+    pdf.text(
+      `${category.code_categorie} - ${category.title}`,
+      14,
+      42,
+    );
+
+    autoTable(pdf, {
+      startY: 48,
+
+      head: [
+        [
+          "Code",
+          "Sous famille",
+          "Nb",
+          "Potentiel",
+          "Taux loc.",
+
+          "H. Service",
+          "H. Chômage",
+          "H. Panne",
+
+          "M. Service",
+          "M. Chômage",
+          "M. Panne",
+        ],
+      ],
+
+      body: category.rows.map((r) => [
+        r.code_sous_famille,
+        r.libelle_sous_famille,
+
+        r.nbr,
+        r.potentiel_total.toFixed(1),
+        r.taux_location.toFixed(2),
+
+        `${r.heures_service.toFixed(1)}\n${r.pct_heures_service.toFixed(1)}%`,
+        `${r.heures_chomage.toFixed(1)}\n${r.pct_heures_chomage.toFixed(1)}%`,
+        `${r.heures_panne.toFixed(1)}\n${r.pct_heures_panne.toFixed(1)}%`,
+
+        `${r.montant_service.toFixed(2)}\n${r.pct_montant_service.toFixed(1)}%`,
+        `${r.montant_chomage.toFixed(2)}\n${r.pct_montant_chomage.toFixed(1)}%`,
+        `${r.montant_panne.toFixed(2)}\n${r.pct_montant_panne.toFixed(1)}%`,
+      ]),
+
+      theme: "grid",
+
+      styles: {
+        font: "helvetica",
+        fontSize: 8,
+        cellPadding: 2.8,
+        lineWidth: 0.2,
+        lineColor: COLORS.border,
+        textColor: COLORS.text,
+        valign: "middle",
+        halign: "center",
+      },
+
+      columnStyles: {
+        0: {
+          cellWidth: 18,
+          fontStyle: "bold",
+        },
+
+        1: {
+          cellWidth: 55,
+          halign: "left",
+        },
+
+        2: {
+          cellWidth: 15,
+        },
+
+        3: {
+          cellWidth: 22,
+        },
+
+        4: {
+          cellWidth: 22,
+        },
+      },
+
+      headStyles: {
+        fillColor: COLORS.secondary,
+        textColor: COLORS.primary,
+        fontStyle: "bold",
+      },
+
+      alternateRowStyles: {
+        fillColor: COLORS.light,
+      },
+
+      bodyStyles: {
+        fillColor: COLORS.white,
+      },
+    });
+  });
+
+  drawFooter(pdf);
+
+  pdf.save("Analyse_Exploitation.pdf");
 }

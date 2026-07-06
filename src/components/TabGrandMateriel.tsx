@@ -90,7 +90,7 @@ const TabGrandMateriel: React.FC = () => {
                 setLoading(true);
                 setError(null);
                 const response = await axios.get<GrandMateriel[]>(
-                    'http://192.168.0.232:8000/api/grand-materiel/'
+                    'http://192.168.0.242:8000/api/grand-materiel/'
                 );
                 setData(response.data);
             } catch (err) {
