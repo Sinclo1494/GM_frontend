@@ -93,3 +93,16 @@ export const getAETPR = async ({
   return response.data;
 };
 
+export interface FilialeOption {
+  value: string;
+  label: string;
+}
+
+export const getFiliales = async (): Promise<FilialeOption[]> => {
+  const { data }= await axios.get<FilialeOption[]>(`${API}/filiale/`);
+  return data.map((filiale: any) => ({
+    value: filiale.code_filiale,
+    label: filiale.libelle_filiale,
+  }));
+};
+

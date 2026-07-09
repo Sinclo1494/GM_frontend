@@ -1,4 +1,4 @@
-import type { AnalyseQuantitativeResumeType } from "../types/analyseQuantitative";
+import type { AnalyseQuantitativeResumeType } from "../../types/analyseQuantitative";
 
 interface Props {
   data: AnalyseQuantitativeResumeType;

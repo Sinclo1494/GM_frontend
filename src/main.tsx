@@ -8,9 +8,10 @@ import App from './App.tsx';
 import Dashboard from './pages/Dashboard.tsx';
 import AnalyseQuantitative from './pages/AnalyseQuantitative.tsx';
 import AnalyseExploitation from './pages/AnalyseExploitation.tsx';
+import ImportCsv from './pages/ImportCSV.tsx';
 
 import './index.css';
-import GrandMateriel from './pages/GrandMateriel.tsx';
+import JournalMateriel from './pages/JournalMateriel.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -19,6 +20,10 @@ createRoot(document.getElementById('root')!).render(
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route element={<App />}>
+            <Route
+              path="/reports/journal-materiel"
+              element={<ProtectedRoute><JournalMateriel /></ProtectedRoute>}
+            />
             <Route
               path="/reports/analyse-quantitative"
               element={<ProtectedRoute><AnalyseQuantitative /></ProtectedRoute>}
@@ -39,6 +44,13 @@ createRoot(document.getElementById('root')!).render(
               element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>}
+            />
+            <Route
+              path="/Import-Csv"
+              element={
+                <ProtectedRoute>
+                  <ImportCsv />
                 </ProtectedRoute>}
             />
             

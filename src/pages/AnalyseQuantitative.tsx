@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { getAQTP, getAQTPR } from "../api/dataServices";
-import AnalyseQuantitativeResume from "../components/AnalyseQuantitativeResume";
-import AnalyseQuantitativeTable from "../components/AnalyseQuantitativeTable";
+import { useEffect, useState } from "react";
+import { getAQTP, getAQTPR, getFiliales } from "../api/dataServices";
+import AnalyseQuantitativeResume from "../components/AnalyseQuantitative/AnalyseQuantitativeResume";
+import AnalyseQuantitativeTable from "../components/AnalyseQuantitative/AnalyseQuantitativeTable";
 import type {
   AnalyseQuantitativeResumeType,
   AnalyseQuantitativeType,
@@ -9,21 +9,8 @@ import type {
 import { exportAnalyseQuantitative } from "../utils/exportPDF";
 
 
-
-const FILIALES = [
-  { value: "A", label: "GEOTECHNIQUE" },
-  { value: "C", label: "CANALISATIONS" },
-  { value: "D", label: "SOCIETE MERE" },
-  { value: "E", label: "ENGINEERING" },
-  { value: "G", label: "CONSTRUCTION" },
-  { value: "K", label: "CARRIERES" },
-  { value: "L", label: "PROMOTION" },
-  { value: "M", label: "ALREM" },
-  { value: "P", label: "TRAVAUX PUBLICS" },
-  { value: "R", label: "OUVRAGES D'ART" },
-];
-
 export default function AnalyseQuantitative() {
+  const [filiales, setFiliales] = useState<{ value: string; label: string }[]>([]);
 
   const handleExport = () => {
     if (!resume || rowsTable.length === 0) return;
@@ -98,6 +85,9 @@ export default function AnalyseQuantitative() {
   >);
 
   const categories = Object.values(groupedByCategory);
+  useEffect(() => {
+    getFiliales().then(setFiliales).catch(console.error);
+  }, []);
 
   return (
     <div className="p-6">
@@ -117,7 +107,7 @@ export default function AnalyseQuantitative() {
               onChange={(e) => setCodeFiliale(e.target.value)}
               className="w-full rounded border px-3 py-2"
             >
-              {FILIALES.map((f) => (
+              {filiales.map((f) => (
                 <option key={f.value} value={f.value}>
                   {f.value} - {f.label}
                 </option>

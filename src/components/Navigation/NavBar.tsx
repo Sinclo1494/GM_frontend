@@ -1,6 +1,6 @@
 import  { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/useAuth";
+import { useAuth } from "../../context/useAuth";
 
 const Navbar = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -34,10 +34,10 @@ const Navbar = () => {
 
         <li>
           <Link
-            to="/dashboard"
+            to="/import-csv"
             className="hover:text-gray-300 transition-colors"
           >
-            Grand Matériel
+            Importer CSV
           </Link>
         </li>
 
@@ -67,6 +67,14 @@ const Navbar = () => {
 
           {reportsOpen && (
             <div className="absolute left-0 mt-2 w-56 bg-white text-black rounded shadow-lg overflow-hidden z-50">
+              <Link
+                to="/reports/journal-materiel"
+                onClick={() => setReportsOpen(false)}
+                className="block px-4 py-2 hover:bg-gray-100"
+              >
+                Journal Matériel
+              </Link>
+              
               <Link
                 to="/reports/analyse-quantitative"
                 onClick={() => setReportsOpen(false)}
