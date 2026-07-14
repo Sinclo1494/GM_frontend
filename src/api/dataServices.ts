@@ -1,4 +1,4 @@
-const API = "http://192.168.0.242:8000/api";
+const API = "http://192.168.0.201:8000/api";
 
 import axios from "axios";
 import type {

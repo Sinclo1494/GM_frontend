@@ -181,7 +181,7 @@ const JournalMaterielTable: React.FC = () => {
                 setLoading(true);
                 setError(null);
                 const response = await axios.get<JournalMateriel[]>(
-                    "http://192.168.0.242:8000/api/grand-materiel/",
+                    "http://192.168.0.201:8000/api/grand-materiel/",
                 );
                 setData(response.data);
             } catch (err) {

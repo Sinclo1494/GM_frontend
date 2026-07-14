@@ -1,26 +1,29 @@
 interface Props {
-  progress: number;
+    title: string;
+    description?: string;
 }
 
 export default function ValidationProgress({
-  progress,
+    title,
+    description,
 }: Props) {
-  return (
-    <div className="rounded-lg border bg-white p-4">
-      <p className="font-medium mb-3">
-        Vérification en cours...
-      </p>
+    return (
+        <div className="rounded-xl border border-blue-200 bg-blue-50 p-6">
+            <div className="flex items-center gap-4">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-200 border-t-blue-600" />
 
-      <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
-        <div
-          className="h-full bg-blue-600 transition-all"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
+                <div>
+                    <p className="font-semibold text-blue-800">
+                        {title}
+                    </p>
 
-      <p className="text-sm text-gray-500 mt-2">
-        {progress} %
-      </p>
-    </div>
-  );
+                    {description && (
+                        <p className="mt-1 text-sm text-blue-600">
+                            {description}
+                        </p>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
 }

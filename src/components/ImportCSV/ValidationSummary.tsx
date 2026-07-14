@@ -1,51 +1,58 @@
+import type { ValidationSummaryData } from "../../types/importCsv";
+
 interface Props {
-  totalRows: number;
-  validRows: number;
-  errors: number;
+    summary: ValidationSummaryData;
 }
 
-export default function ValidationSummary({
-  totalRows,
-  validRows,
-  errors,
-}: Props) {
-  return (
-    <div className="rounded-lg border bg-white p-6">
-      <h2 className="text-lg font-semibold mb-4">
-        Résultat de la vérification
-      </h2>
+export default function ValidationSummary({ summary }: Props) {
+    return (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <SummaryCard
+                label="Total"
+                value={summary.total_rows}
+            />
 
-      <div className="grid md:grid-cols-3 gap-4">
-        <div className="rounded-lg bg-gray-50 p-4">
-          <p className="text-gray-500 text-sm">
-            Lignes analysées
-          </p>
+            <SummaryCard
+                label="Lignes valides"
+                value={summary.valid_rows}
+                className="border-green-200 bg-green-50 text-green-700"
+            />
 
-          <p className="text-2xl font-bold">
-            {totalRows}
-          </p>
+            <SummaryCard
+                label="Erreurs"
+                value={summary.errors}
+                className="border-red-200 bg-red-50 text-red-700"
+            />
+
+            <SummaryCard
+                label="Avertissements"
+                value={summary.warnings}
+                className="border-yellow-200 bg-yellow-50 text-yellow-700"
+            />
         </div>
+    );
+}
 
-        <div className="rounded-lg bg-green-50 p-4">
-          <p className="text-gray-500 text-sm">
-            Lignes valides
-          </p>
+interface SummaryCardProps {
+    label: string;
+    value: number;
+    className?: string;
+}
 
-          <p className="text-2xl font-bold text-green-600">
-            {validRows}
-          </p>
+function SummaryCard({
+    label,
+    value,
+    className = "",
+}: SummaryCardProps) {
+    return (
+        <div
+            className={`rounded-xl border bg-white p-5 shadow-sm ${className}`}
+        >
+            <p className="text-sm">{label}</p>
+
+            <p className="mt-2 text-3xl font-bold">
+                {value}
+            </p>
         </div>
-
-        <div className="rounded-lg bg-red-50 p-4">
-          <p className="text-gray-500 text-sm">
-            Erreurs
-          </p>
-
-          <p className="text-2xl font-bold text-red-600">
-            {errors}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
+    );
 }

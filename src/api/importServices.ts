@@ -1,16 +1,35 @@
 import axios from "axios";
 
-const VALIDATE_URL = "http://127.0.0.1:8000/api/pointage-validate/";
-const IMPORT_URL = "http://127.0.0.1:8000/api/pointage-import/";
 
-function buildFormData(file: File, mapping: Record<number, string>,filiale:string) {
+const VALIDATE_URL =
+  "http://127.0.0.1:8000/api/pointage-validate/";
+
+const IMPORT_URL =
+  "http://127.0.0.1:8000/api/pointage-import/";
+
+
+// ---------------------------------------------------------
+// Validation FormData
+// ---------------------------------------------------------
+
+function buildValidationFormData(
+  file: File,
+  mapping: Record<number, string>,
+  filiale: string
+) {
   const formData = new FormData();
+
   formData.append("file", file);
   formData.append("mapping", JSON.stringify(mapping));
-  formData.append('filiale',filiale)
+  formData.append("filiale", filiale);
 
   return formData;
 }
+
+
+// ---------------------------------------------------------
+// Validate Pointage CSV
+// ---------------------------------------------------------
 
 export async function validatePointage(
   file: File,
@@ -19,29 +38,28 @@ export async function validatePointage(
 ) {
   const response = await axios.post(
     VALIDATE_URL,
-    buildFormData(file, mapping,filiale),
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
+    buildValidationFormData(
+      file,
+      mapping,
+      filiale
+    )
   );
 
   return response.data;
 }
 
+
+// ---------------------------------------------------------
+// Import already validated Pointage data
+// ---------------------------------------------------------
+
 export async function importPointage(
-  file: File,
-  mapping: Record<number, string>,
-  filiale: string
+  validationId: string
 ) {
   const response = await axios.post(
     IMPORT_URL,
-    buildFormData(file, mapping,filiale),
     {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+      validation_id: validationId,
     }
   );
 
