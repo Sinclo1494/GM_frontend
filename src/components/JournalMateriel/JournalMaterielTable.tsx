@@ -12,6 +12,9 @@ import {
 import formatCurrency from "../../utils/FormatCurrency";
 import formatDate from "../../utils/FormatDate";
 
+const API = import.meta.env.VITE_API_BASE_URL;
+const GM_URL = `${API}/api/grand-materiel/`
+
 interface JournalMateriel {
     id: number;
     code_materiel: string;
@@ -181,7 +184,7 @@ const JournalMaterielTable: React.FC = () => {
                 setLoading(true);
                 setError(null);
                 const response = await axios.get<JournalMateriel[]>(
-                    "http://192.168.0.201:8000/api/grand-materiel/",
+                    GM_URL,
                 );
                 setData(response.data);
             } catch (err) {

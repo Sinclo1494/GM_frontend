@@ -1,4 +1,4 @@
-const API = "http://192.168.0.201:8000/api";
+const API = import.meta.env.VITE_API_BASE_URL;
 
 import axios from "axios";
 import type {

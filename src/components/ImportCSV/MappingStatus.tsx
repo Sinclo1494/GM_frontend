@@ -1,7 +1,10 @@
 import { AlertTriangle } from "lucide-react";
-import type { EXPECTED_FIELDS } from "../../constants/expectedFields";
 
-type ExpectedField = (typeof EXPECTED_FIELDS)[number];
+type ExpectedField = {
+    value: string;
+    label: string;
+    required: boolean;
+}
 
 interface Props {
     missingRequired: ExpectedField[];

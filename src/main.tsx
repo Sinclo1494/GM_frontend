@@ -8,7 +8,13 @@ import App from './App.tsx';
 import Dashboard from './pages/Dashboard.tsx';
 import AnalyseQuantitative from './pages/AnalyseQuantitative.tsx';
 import AnalyseExploitation from './pages/AnalyseExploitation.tsx';
-import ImportCsv from './pages/ImportCSV.tsx';
+import PointageImportCsv from './pages/ImportPointageCSV.tsx';
+import GMImportCsv from './pages/ImportGrandMaterielCSV.tsx';
+import MarqueImportCsv from './pages/ImportMarqueCSV.tsx';
+import TypeMarqueImportCsv from './pages/ImportTypeMarqueCSV.tsx';
+import SousFamilleImportCsv from './pages/ImportSousFamilleCSV.tsx';
+
+
 
 import './index.css';
 import JournalMateriel from './pages/JournalMateriel.tsx';
@@ -47,10 +53,38 @@ createRoot(document.getElementById('root')!).render(
                 </ProtectedRoute>}
             />
             <Route
-              path="/Import-Csv"
+              path="/imports/pointage-csv"
               element={
                 <ProtectedRoute>
-                  <ImportCsv />
+                  <PointageImportCsv />
+                </ProtectedRoute>}
+            />
+            <Route
+              path="/imports/gm-csv"
+              element={
+                <ProtectedRoute>
+                  <GMImportCsv />
+                </ProtectedRoute>}
+            />
+            <Route
+              path="/imports/marque-csv"
+              element={
+                <ProtectedRoute>
+                  <MarqueImportCsv />
+                </ProtectedRoute>}
+            />
+            <Route
+              path="/imports/type-marque-csv"
+              element={
+                <ProtectedRoute>
+                  <TypeMarqueImportCsv />
+                </ProtectedRoute>}
+            />
+            <Route
+              path="/imports/sous-famille-csv"
+              element={
+                <ProtectedRoute>
+                  <SousFamilleImportCsv />
                 </ProtectedRoute>}
             />
             

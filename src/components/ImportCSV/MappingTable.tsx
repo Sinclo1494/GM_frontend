@@ -1,9 +1,16 @@
 import MappingRow from "./MappingRow";
 import type { PreviewColumn } from "../../types/importCsv";
 
+type ExpectedField = {
+    value: string;
+    label: string;
+    required: boolean;
+}
+
 interface Props {
     preview: PreviewColumn[];
     mapping: Record<number, string>;
+    expectedFields: ExpectedField[];
     onMappingChange: (
         columnIndex: number,
         fieldName: string
@@ -13,6 +20,7 @@ interface Props {
 export default function MappingTable({
     preview,
     mapping,
+    expectedFields,
     onMappingChange,
 }: Props) {
     const usedFields = Object.values(mapping);
@@ -43,6 +51,7 @@ export default function MappingTable({
                                 mapping[column.index] || ""
                             }
                             usedFields={usedFields}
+                            expectedFields={expectedFields}
                             onChange={onMappingChange}
                         />
                     ))}

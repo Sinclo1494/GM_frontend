@@ -8,7 +8,6 @@ import {
 import UploadZone from "../components/ImportCSV/UploadZone";
 import FileInformation from "../components/ImportCSV/FileInformation";
 import ImportStepper from "../components/ImportCSV/ImportStepper";
-import ImportSettings from "../components/ImportCSV/ImportSettings";
 import MappingTable from "../components/ImportCSV/MappingTable";
 import MappingStatus from "../components/ImportCSV/MappingStatus";
 import ValidationProgress from "../components/ImportCSV/ValidationProgress";
@@ -17,16 +16,13 @@ import ValidationIssueTable from "../components/ImportCSV/ValidationIssueTable";
 import ImportSuccess from "../components/ImportCSV/ImportSuccess";
 
 import {
-    validatePointage,
-    importPointage,
+    validateTypeMarque,
+    importTypeMarque,
 } from "../api/importServices";
 
-import {
-    type FilialeOption,
-    getFiliales,
-} from "../api/dataServices";
 
-import { EXPECTED_FIELDS } from "../constants/expectedFields";
+
+import { TYPE_MARQUE_EXPECTED_FIELDS } from "../constants/expectedFields";
 
 import type {
     ValidationResult,
@@ -35,24 +31,19 @@ import type {
 } from "../types/importCsv";
 
 
-const STORAGE_KEY = "pointage-column-mapping";
+const STORAGE_KEY = "type-marque-column-mapping";
 
 
-export default function ImportCsvPage() {
+export default function TypeMarqueImportCsvPage() {
 
     // ---------------------------------------------------------
     // State
     // ---------------------------------------------------------
-
+    const expectedFields = TYPE_MARQUE_EXPECTED_FIELDS
     const [step, setStep] = useState(1);
 
     const [file, setFile] = useState<File | null>(null);
 
-    const [filiales, setFiliales] =
-        useState<FilialeOption[]>([]);
-
-    const [selectedFiliale, setSelectedFiliale] =
-        useState("");
 
     const [preview, setPreview] =
         useState<PreviewColumn[]>([]);
@@ -96,7 +87,7 @@ export default function ImportCsvPage() {
 
     const usedFields = Object.values(mapping);
 
-    const missingRequired = EXPECTED_FIELDS.filter(
+    const missingRequired = TYPE_MARQUE_EXPECTED_FIELDS.filter(
         (field) =>
             field.required &&
             !usedFields.includes(field.value)
@@ -208,21 +199,6 @@ export default function ImportCsvPage() {
 
 
     // ---------------------------------------------------------
-    // Filiale handler
-    // ---------------------------------------------------------
-
-    const handleFilialeChange = (
-        value: string
-    ) => {
-
-        invalidateValidation();
-
-        setSelectedFiliale(value);
-
-    };
-
-
-    // ---------------------------------------------------------
     // Mapping handlers
     // ---------------------------------------------------------
 
@@ -280,7 +256,6 @@ export default function ImportCsvPage() {
 
         if (
             !file ||
-            !selectedFiliale ||
             missingRequired.length > 0
         ) {
             return null;
@@ -298,10 +273,10 @@ export default function ImportCsvPage() {
         try {
 
             const response: ValidationResult =
-                await validatePointage(
+                await validateTypeMarque(
                     file,
                     mapping,
-                    selectedFiliale
+                    "",
                 );
 
             setResult(response);
@@ -344,7 +319,7 @@ export default function ImportCsvPage() {
         try {
 
             const response: ImportResult =
-                await importPointage(
+                await importTypeMarque(
                     result.validation_id
                 );
 
@@ -366,17 +341,6 @@ export default function ImportCsvPage() {
     };
 
 
-    // ---------------------------------------------------------
-    // Load filiales
-    // ---------------------------------------------------------
-
-    useEffect(() => {
-
-        getFiliales()
-            .then(setFiliales)
-            .catch(console.error);
-
-    }, []);
 
 
     // ---------------------------------------------------------
@@ -436,7 +400,7 @@ export default function ImportCsvPage() {
 
                         <>
 
-                            <div className="grid gap-6 lg:grid-cols-2">
+                            <div className="grid gap-6 lg:grid-cols-1">
 
 
                                 {/* Accepted format */}
@@ -487,19 +451,6 @@ export default function ImportCsvPage() {
 
                                 </div>
 
-
-                                {/* Import settings */}
-
-                                <ImportSettings
-                                    filiales={filiales}
-                                    selectedFiliale={
-                                        selectedFiliale
-                                    }
-                                    onFilialeChange={
-                                        handleFilialeChange
-                                    }
-                                />
-
                             </div>
 
 
@@ -533,7 +484,7 @@ export default function ImportCsvPage() {
 
                             {/* Continue */}
 
-                            {file && selectedFiliale && (
+                            {file && (
 
                                 <div className="mt-8 flex justify-end">
 
@@ -593,6 +544,7 @@ export default function ImportCsvPage() {
                             <MappingTable
                                 preview={preview}
                                 mapping={mapping}
+                                expectedFields={expectedFields}
                                 onMappingChange={
                                     handleMappingChange
                                 }

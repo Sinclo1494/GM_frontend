@@ -1,12 +1,20 @@
 import axios from "axios";
+const API = import.meta.env.VITE_API_BASE_URL;
 
+const POINTAGE_VALIDATE_URL = `${API}/api/pointage-validate/`;
+const POINTAGE_IMPORT_URL = `${API}/api/pointage-import/`;
 
-const VALIDATE_URL =
-  "http://127.0.0.1:8000/api/pointage-validate/";
+const GM_VALIDATE_URL = `${API}/api/gm-validate/`;
+const GM_IMPORT_URL = `${API}/api/gm-import/`;
 
-const IMPORT_URL =
-  "http://127.0.0.1:8000/api/pointage-import/";
+const MARQUE_VALIDATE_URL = `${API}/api/marque-validate/`;
+const MARQUE_IMPORT_URL = `${API}/api/marque-import/`;
 
+const TYPE_MARQUE_VALIDATE_URL = `${API}/api/type-marque-validate/`;
+const TYPE_MARQUE_IMPORT_URL = `${API}/api/type-marque-import/`;
+
+const SOUS_FAMILLE_VALIDATE_URL = `${API}/api/sous-famille-validate/`;
+const SOUS_FAMILLE_IMPORT_URL = `${API}/api/sous-famille-import/`;
 
 // ---------------------------------------------------------
 // Validation FormData
@@ -15,7 +23,7 @@ const IMPORT_URL =
 function buildValidationFormData(
   file: File,
   mapping: Record<number, string>,
-  filiale: string
+  filiale: string,
 ) {
   const formData = new FormData();
 
@@ -26,7 +34,6 @@ function buildValidationFormData(
   return formData;
 }
 
-
 // ---------------------------------------------------------
 // Validate Pointage CSV
 // ---------------------------------------------------------
@@ -34,34 +41,141 @@ function buildValidationFormData(
 export async function validatePointage(
   file: File,
   mapping: Record<number, string>,
-  filiale: string
+  filiale: string,
 ) {
   const response = await axios.post(
-    VALIDATE_URL,
-    buildValidationFormData(
-      file,
-      mapping,
-      filiale
-    )
+    POINTAGE_VALIDATE_URL,
+    buildValidationFormData(file, mapping, filiale),
   );
 
   return response.data;
 }
-
 
 // ---------------------------------------------------------
 // Import already validated Pointage data
 // ---------------------------------------------------------
 
-export async function importPointage(
-  validationId: string
+export async function importPointage(validationId: string) {
+  const response = await axios.post(POINTAGE_IMPORT_URL, {
+    validation_id: validationId,
+  });
+
+  return response.data;
+}
+
+// ---------------------------------------------------------
+// Validate Grand Materiel CSV
+// ---------------------------------------------------------
+
+export async function validateGM(
+  file: File,
+  mapping: Record<number, string>,
+  filiale: string,
 ) {
   const response = await axios.post(
-    IMPORT_URL,
-    {
-      validation_id: validationId,
-    }
+    GM_VALIDATE_URL,
+    buildValidationFormData(file, mapping, filiale),
   );
 
   return response.data;
 }
+
+// ---------------------------------------------------------
+// Import already validated Pointage data
+// ---------------------------------------------------------
+
+export async function importGM(validationId: string) {
+  const response = await axios.post(GM_IMPORT_URL, {
+    validation_id: validationId,
+  });
+
+  return response.data;
+}
+
+// ---------------------------------------------------------
+// Validate Marque CSV
+// ---------------------------------------------------------
+
+export async function validateMarque(
+  file: File,
+  mapping: Record<number, string>,
+  filiale: string,
+) {
+  const response = await axios.post(
+    MARQUE_VALIDATE_URL,
+    buildValidationFormData(file, mapping, filiale),
+  );
+
+  return response.data;
+}
+
+// ---------------------------------------------------------
+// Import already validated Marque data
+// ---------------------------------------------------------
+
+export async function importMarque(validationId: string) {
+  const response = await axios.post(MARQUE_IMPORT_URL, {
+    validation_id: validationId,
+  });
+
+  return response.data;
+}
+
+// ---------------------------------------------------------
+// Validate Type Marque CSV
+// ---------------------------------------------------------
+
+export async function validateTypeMarque(
+  file: File,
+  mapping: Record<number, string>,
+  filiale: string,
+) {
+  const response = await axios.post(
+    TYPE_MARQUE_VALIDATE_URL,
+    buildValidationFormData(file, mapping, filiale),
+  );
+
+  return response.data;
+}
+
+// ---------------------------------------------------------
+// Import already validated Type Marque data
+// ---------------------------------------------------------
+
+export async function importTypeMarque(validationId: string) {
+  const response = await axios.post(TYPE_MARQUE_IMPORT_URL, {
+    validation_id: validationId,
+  });
+
+  return response.data;
+}
+
+// ---------------------------------------------------------
+// Validate Sous Famille CSV
+// ---------------------------------------------------------
+
+export async function validateSousFamille(
+  file: File,
+  mapping: Record<number, string>,
+  filiale: string,
+) {
+  const response = await axios.post(
+    SOUS_FAMILLE_VALIDATE_URL,
+    buildValidationFormData(file, mapping, filiale),
+  );
+
+  return response.data;
+}
+
+// ---------------------------------------------------------
+// Import already validated Sous Famille data
+// ---------------------------------------------------------
+
+export async function importSousFamille(validationId: string) {
+  const response = await axios.post(SOUS_FAMILLE_IMPORT_URL, {
+    validation_id: validationId,
+  });
+
+  return response.data;
+}
+

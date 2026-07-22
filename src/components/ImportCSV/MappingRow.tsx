@@ -1,11 +1,15 @@
 import { FileSpreadsheet } from "lucide-react";
-import { EXPECTED_FIELDS } from "../../constants/expectedFields";
 import type { PreviewColumn } from "../../types/importCsv";
-
+type ExpectedField = {
+    value: string;
+    label: string;
+    required: boolean;
+}
 interface Props {
     column: PreviewColumn;
     selectedField: string;
     usedFields: string[];
+    expectedFields : ExpectedField[]
     onChange: (
         columnIndex: number,
         fieldName: string
@@ -16,6 +20,7 @@ export default function MappingRow({
     column,
     selectedField,
     usedFields,
+    expectedFields,
     onChange,
 }: Props) {
     return (
@@ -52,7 +57,7 @@ export default function MappingRow({
                         Ignorer
                     </option>
 
-                    {EXPECTED_FIELDS.map((field) => (
+                    {expectedFields.map((field:ExpectedField) => (
                         <option
                             key={field.value}
                             value={field.value}
