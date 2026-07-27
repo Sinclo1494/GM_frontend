@@ -13,6 +13,8 @@ import GMImportCsv from './pages/ImportGrandMaterielCSV.tsx';
 import MarqueImportCsv from './pages/ImportMarqueCSV.tsx';
 import TypeMarqueImportCsv from './pages/ImportTypeMarqueCSV.tsx';
 import SousFamilleImportCsv from './pages/ImportSousFamilleCSV.tsx';
+import SituationAffectationImportCsv from './pages/ImportSituationAffectationCSV.tsx';
+import SiteImportCsv from './pages/ImportSiteCSV.tsx';
 
 
 
@@ -85,6 +87,20 @@ createRoot(document.getElementById('root')!).render(
               element={
                 <ProtectedRoute>
                   <SousFamilleImportCsv />
+                </ProtectedRoute>}
+            />
+            <Route
+              path="/imports/situation-affectation-csv"
+              element={
+                <ProtectedRoute>
+                  <SituationAffectationImportCsv />
+                </ProtectedRoute>}
+            />
+            <Route
+              path="/imports/site-csv"
+              element={
+                <ProtectedRoute>
+                  <SiteImportCsv />
                 </ProtectedRoute>}
             />
             

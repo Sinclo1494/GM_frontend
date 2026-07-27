@@ -14,6 +14,7 @@ import ValidationProgress from "../components/ImportCSV/ValidationProgress";
 import ValidationSummary from "../components/ImportCSV/ValidationSummary";
 import ValidationIssueTable from "../components/ImportCSV/ValidationIssueTable";
 import ImportSuccess from "../components/ImportCSV/ImportSuccess";
+import ImportError from "../components/ImportCSV/ImportError";
 
 import {
     validateSousFamille,
@@ -79,6 +80,8 @@ export default function SousFamilleImportCsvPage() {
 
     const [importResult, setImportResult] =
         useState<ImportResult | null>(null);
+    const [importError, setImportError] =
+        useState<string | null>(null);
 
 
     // ---------------------------------------------------------
@@ -106,6 +109,7 @@ export default function SousFamilleImportCsvPage() {
 
         setResult(null);
         setImportResult(null);
+        setImportError(null);
 
     };
 
@@ -306,6 +310,7 @@ export default function SousFamilleImportCsvPage() {
     // ---------------------------------------------------------
 
     const runImport = async () => {
+        setImportError(null);
 
         if (
             !result?.success ||
@@ -325,12 +330,20 @@ export default function SousFamilleImportCsvPage() {
 
             setImportResult(response);
 
-        } catch (error) {
+        } catch (error: any) {
 
             console.error(
                 "Erreur pendant l'import :",
                 error
             );
+
+            const message =
+                error.response?.data?.message ??
+                error.response?.data?.detail ??
+                error.message ??
+                "Une erreur est survenue pendant l'import.";
+
+            setImportError(message);
 
         } finally {
 
@@ -373,7 +386,7 @@ export default function SousFamilleImportCsvPage() {
                 <div className="border-b p-6">
 
                     <h1 className="text-3xl font-bold">
-                        Import des données
+                        Sous Familles Matériel - Import Des Données
                     </h1>
 
                     <p className="mt-2 text-gray-500">
@@ -760,6 +773,15 @@ export default function SousFamilleImportCsvPage() {
                             )}
 
 
+                            {/* Import error */}
+
+                            {importError && (
+
+                                <ImportError
+                                    message={importError}
+                                />
+
+                            )}
                             {/* Import success */}
 
                             {importResult && (

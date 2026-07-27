@@ -1,20 +1,26 @@
 import axios from "axios";
 const API = import.meta.env.VITE_API_BASE_URL;
 
-const POINTAGE_VALIDATE_URL = `${API}/api/pointage-validate/`;
-const POINTAGE_IMPORT_URL = `${API}/api/pointage-import/`;
+const POINTAGE_VALIDATE_URL = `${API}/pointage-validate/`;
+const POINTAGE_IMPORT_URL = `${API}/pointage-import/`;
 
-const GM_VALIDATE_URL = `${API}/api/gm-validate/`;
-const GM_IMPORT_URL = `${API}/api/gm-import/`;
+const GM_VALIDATE_URL = `${API}/gm-validate/`;
+const GM_IMPORT_URL = `${API}/gm-import/`;
 
-const MARQUE_VALIDATE_URL = `${API}/api/marque-validate/`;
-const MARQUE_IMPORT_URL = `${API}/api/marque-import/`;
+const MARQUE_VALIDATE_URL = `${API}/marque-validate/`;
+const MARQUE_IMPORT_URL = `${API}/marque-import/`;
 
-const TYPE_MARQUE_VALIDATE_URL = `${API}/api/type-marque-validate/`;
-const TYPE_MARQUE_IMPORT_URL = `${API}/api/type-marque-import/`;
+const TYPE_MARQUE_VALIDATE_URL = `${API}/type-marque-validate/`;
+const TYPE_MARQUE_IMPORT_URL = `${API}/type-marque-import/`;
 
-const SOUS_FAMILLE_VALIDATE_URL = `${API}/api/sous-famille-validate/`;
-const SOUS_FAMILLE_IMPORT_URL = `${API}/api/sous-famille-import/`;
+const SOUS_FAMILLE_VALIDATE_URL = `${API}/sous-famille-validate/`;
+const SOUS_FAMILLE_IMPORT_URL = `${API}/sous-famille-import/`;
+
+const SITUATION_AFFECTATION_VALIDATE_URL = `${API}/situation-affectation-validate/`;
+const SITUATION_AFFECTATION_IMPORT_URL = `${API}/situation-affectation-import/`;
+
+const SITE_VALIDATE_URL = `${API}/site-validate/`;
+const SITE_IMPORT_URL = `${API}/site-import/`;
 
 // ---------------------------------------------------------
 // Validation FormData
@@ -179,3 +185,52 @@ export async function importSousFamille(validationId: string) {
   return response.data;
 }
 
+// ---------------------------------------------------------
+// Validate Situation / Affectation CSV
+// ---------------------------------------------------------
+
+export async function validateSituationAffectation(
+  file: File,
+  mapping: Record<number, string>,
+  filiale: string,
+) {
+  const response = await axios.post(
+    SITUATION_AFFECTATION_VALIDATE_URL,
+    buildValidationFormData(file, mapping, filiale),
+  );
+
+  return response.data;
+}
+
+// ---------------------------------------------------------
+// Import already validated Situation / Affectation data
+// ---------------------------------------------------------
+
+export async function importSituationAffectation(validationId: string) {
+  const response = await axios.post(SITUATION_AFFECTATION_IMPORT_URL, {
+    validation_id: validationId,
+  });
+
+  return response.data;
+}
+
+export async function validateSite(
+  file: File,
+  mapping: Record<number, string>,
+  filiale: string,
+) {
+  const response = await axios.post(
+    SITE_VALIDATE_URL,
+    buildValidationFormData(file, mapping, filiale),
+  );
+
+  return response.data;
+}
+
+export async function importSite(validationId: string) {
+  const response = await axios.post(SITE_IMPORT_URL, {
+    validation_id: validationId,
+  });
+
+  return response.data;
+}

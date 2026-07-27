@@ -234,3 +234,127 @@ export const SOUS_FAMILLE_EXPECTED_FIELDS = [
   },
 
 ];
+
+export const SITUATION_AFFECTATION_EXPECTED_FIELDS = [
+  {
+    value: "code_materiel",
+    label: "Code matériel",
+    required: true,
+  },
+
+  {
+    value: "code_type_affectation",
+    label: "Code type affectation",
+    required: true,
+  },
+
+  {
+    value: "code_type_situation",
+    label: "Code type situation",
+    required: true,
+  },
+
+  {
+    value: "code_site",
+    label: "Code site",
+    required: true,
+  },
+
+  {
+    value: "date_affectation",
+    label: "Date affectation",
+    required: true,
+  },
+
+  {
+    value: "code_type_etat_materiel",
+    label: "Code type état matériel",
+    required: true,
+  },
+
+  {
+    value: "date_modification",
+    label: "Date modification",
+    required: false,
+  },
+
+  {
+    value: "est_bloque",
+    label: "Bloqué",
+    required: false,
+  },
+
+  {
+    value: "date_situation",
+    label: "Date situation",
+    required: false,
+  },
+];
+
+export const SITE_EXPECTED_FIELDS = [
+  {
+    value: "code_site",
+    label: "Code site",
+    required: true,
+  },
+  {
+    value: "code_filiale",
+    label: "Code filiale",
+    required: true,
+  },
+  {
+    value: "code_region",
+    label: "Code région",
+    required: true,
+  },
+  {
+    value: "libelle_site",
+    label: "Libellé site",
+    required: true,
+  },
+  {
+    value: "code_agence",
+    label: "Code agence",
+    required: true,
+  },
+  {
+    value: "type_site",
+    label: "Type site",
+    required: true,
+  },
+  {
+    value: "code_division",
+    label: "Code division",
+    required: false,
+  },
+  {
+    value: "numero_ss_employeur",
+    label: "Numéro SS employeur",
+    required: true,
+  },
+  {
+    value: "code_commune_site",
+    label: "Code commune",
+    required: true,
+  },
+  {
+    value: "jour_cloture_mouv_RH_paie",
+    label: "Jour clôture RH/Paie",
+    required: false,
+  },
+  {
+    value: "date_ouverture_site",
+    label: "Date d'ouverture",
+    required: false,
+  },
+  {
+    value: "date_cloture_site",
+    label: "Date de clôture",
+    required: false,
+  },
+  {
+    value: "est_bloque",
+    label: "Bloqué",
+    required: false,
+  },
+];

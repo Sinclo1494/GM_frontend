@@ -92,6 +92,20 @@ const Navbar = () => {
               >
                 Sous Familles Materiel
               </Link>
+              <Link
+                to="/imports/situation-affectation-csv"
+                onClick={() => setImportsOpen(false)}
+                className="block px-4 py-2 hover:bg-gray-100"
+              >
+                Situtations-Affectations
+              </Link>
+              <Link
+                to="/imports/site-csv"
+                onClick={() => setImportsOpen(false)}
+                className="block px-4 py-2 hover:bg-gray-100"
+              >
+                Sites
+              </Link>
             </div>
           )}
         </li>

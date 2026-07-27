@@ -8,6 +8,7 @@ import {
 import UploadZone from "../components/ImportCSV/UploadZone";
 import FileInformation from "../components/ImportCSV/FileInformation";
 import ImportStepper from "../components/ImportCSV/ImportStepper";
+import ImportSettings from "../components/ImportCSV/ImportSettings";
 import MappingTable from "../components/ImportCSV/MappingTable";
 import MappingStatus from "../components/ImportCSV/MappingStatus";
 import ValidationProgress from "../components/ImportCSV/ValidationProgress";
@@ -17,13 +18,18 @@ import ImportSuccess from "../components/ImportCSV/ImportSuccess";
 import ImportError from "../components/ImportCSV/ImportError";
 
 import {
-    validateMarque,
-    importMarque,
+    validateSituationAffectation,
+    importSituationAffectation,
 } from "../api/importServices";
 
+import {
+    type FilialeOption,
+    getFiliales,
+} from "../api/dataServices";
 
-
-import { MARQUE_EXPECTED_FIELDS } from "../constants/expectedFields";
+import {
+    SITUATION_AFFECTATION_EXPECTED_FIELDS,
+} from "../constants/expectedFields";
 
 import type {
     ValidationResult,
@@ -31,20 +37,28 @@ import type {
     PreviewColumn,
 } from "../types/importCsv";
 
+const STORAGE_KEY =
+    "situation-affectation-column-mapping";
 
-const STORAGE_KEY = "marque-column-mapping";
-
-
-export default function MarqueImportCsvPage() {
+export default function ImportSituationAffectationCSV() {
 
     // ---------------------------------------------------------
     // State
     // ---------------------------------------------------------
-    const expectedFields = MARQUE_EXPECTED_FIELDS
+
+    const expectedFields =
+        SITUATION_AFFECTATION_EXPECTED_FIELDS;
+
     const [step, setStep] = useState(1);
 
-    const [file, setFile] = useState<File | null>(null);
+    const [file, setFile] =
+        useState<File | null>(null);
 
+    const [filiales, setFiliales] =
+        useState<FilialeOption[]>([]);
+
+    const [selectedFiliale, setSelectedFiliale] =
+        useState("");
 
     const [preview, setPreview] =
         useState<PreviewColumn[]>([]);
@@ -83,23 +97,22 @@ export default function MarqueImportCsvPage() {
     const [importError, setImportError] =
         useState<string | null>(null);
 
-
     // ---------------------------------------------------------
     // Mapping information
     // ---------------------------------------------------------
 
     const usedFields = Object.values(mapping);
 
-    const missingRequired = MARQUE_EXPECTED_FIELDS.filter(
-        (field) =>
-            field.required &&
-            !usedFields.includes(field.value)
-    );
+    const missingRequired =
+        SITUATION_AFFECTATION_EXPECTED_FIELDS.filter(
+            (field) =>
+                field.required &&
+                !usedFields.includes(field.value)
+        );
 
     const ignoredColumns = preview.filter(
         (column) => !mapping[column.index]
     ).length;
-
 
     // ---------------------------------------------------------
     // Invalidate previous validation
@@ -112,7 +125,6 @@ export default function MarqueImportCsvPage() {
         setImportError(null);
 
     };
-
 
     // ---------------------------------------------------------
     // Read CSV preview
@@ -174,7 +186,6 @@ export default function MarqueImportCsvPage() {
 
     };
 
-
     // ---------------------------------------------------------
     // File handlers
     // ---------------------------------------------------------
@@ -191,7 +202,6 @@ export default function MarqueImportCsvPage() {
 
     };
 
-
     const handleRemoveFile = () => {
 
         invalidateValidation();
@@ -201,6 +211,19 @@ export default function MarqueImportCsvPage() {
 
     };
 
+    // ---------------------------------------------------------
+    // Filiale handler
+    // ---------------------------------------------------------
+
+    const handleFilialeChange = (
+        value: string
+    ) => {
+
+        invalidateValidation();
+
+        setSelectedFiliale(value);
+
+    };
 
     // ---------------------------------------------------------
     // Mapping handlers
@@ -238,7 +261,6 @@ export default function MarqueImportCsvPage() {
 
     };
 
-
     const resetMapping = () => {
 
         invalidateValidation();
@@ -251,7 +273,6 @@ export default function MarqueImportCsvPage() {
 
     };
 
-
     // ---------------------------------------------------------
     // Validation
     // ---------------------------------------------------------
@@ -260,6 +281,7 @@ export default function MarqueImportCsvPage() {
 
         if (
             !file ||
+            !selectedFiliale ||
             missingRequired.length > 0
         ) {
             return null;
@@ -267,20 +289,16 @@ export default function MarqueImportCsvPage() {
 
         setLoading(true);
 
-        /*
-         * The previous validation result must no longer
-         * be importable after a new validation attempt.
-         */
         setResult(null);
         setImportResult(null);
 
         try {
 
             const response: ValidationResult =
-                await validateMarque(
+                await validateSituationAffectation(
                     file,
                     mapping,
-                    "",
+                    selectedFiliale
                 );
 
             setResult(response);
@@ -303,15 +321,12 @@ export default function MarqueImportCsvPage() {
         }
 
     };
-
-
     // ---------------------------------------------------------
     // Import
     // ---------------------------------------------------------
 
     const runImport = async () => {
         setImportError(null);
-
         if (
             !result?.success ||
             !result.validation_id
@@ -324,7 +339,7 @@ export default function MarqueImportCsvPage() {
         try {
 
             const response: ImportResult =
-                await importMarque(
+                await importSituationAffectation(
                     result.validation_id
                 );
 
@@ -353,8 +368,17 @@ export default function MarqueImportCsvPage() {
 
     };
 
+    // ---------------------------------------------------------
+    // Load filiales
+    // ---------------------------------------------------------
 
+    useEffect(() => {
 
+        getFiliales()
+            .then(setFiliales)
+            .catch(console.error);
+
+    }, []);
 
     // ---------------------------------------------------------
     // Persist mapping
@@ -369,7 +393,6 @@ export default function MarqueImportCsvPage() {
 
     }, [mapping]);
 
-
     // ---------------------------------------------------------
     // Render
     // ---------------------------------------------------------
@@ -380,13 +403,12 @@ export default function MarqueImportCsvPage() {
 
             <div className="rounded-2xl border bg-white shadow">
 
-
                 {/* HEADER */}
 
                 <div className="border-b p-6">
 
                     <h1 className="text-3xl font-bold">
-                        Marques Matériel - Import Des Données
+                        Situations-Affectations - Import Des Données
                     </h1>
 
                     <p className="mt-2 text-gray-500">
@@ -396,14 +418,11 @@ export default function MarqueImportCsvPage() {
 
                 </div>
 
-
                 {/* STEPPER */}
 
                 <ImportStepper step={step} />
 
-
                 <div className="p-8">
-
 
                     {/* ================================================= */}
                     {/* STEP 1 - FILE                                    */}
@@ -413,8 +432,7 @@ export default function MarqueImportCsvPage() {
 
                         <>
 
-                            <div className="grid gap-6 lg:grid-cols-1">
-
+                            <div className="grid gap-6 lg:grid-cols-2">
 
                                 {/* Accepted format */}
 
@@ -464,24 +482,42 @@ export default function MarqueImportCsvPage() {
 
                                 </div>
 
-                            </div>
+                                {/* Import settings */}
 
+                                <ImportSettings
+                                    filiales={filiales}
+                                    selectedFiliale={
+                                        selectedFiliale
+                                    }
+                                    onFilialeChange={
+                                        handleFilialeChange
+                                    }
+                                />
+
+                            </div>
 
                             {/* File upload / information */}
 
                             <div className="mt-6">
 
                                 {!file ? (
+
                                     <div className="mt-6">
+
                                         <UploadZone
                                             onFileSelected={handleFileSelected}
                                         />
+
                                     </div>
+
                                 ) : (
+
                                     <div className="mt-6 space-y-4">
+
                                         <FileInformation file={file} />
 
                                         <div className="flex justify-end">
+
                                             <button
                                                 type="button"
                                                 onClick={handleRemoveFile}
@@ -489,15 +525,18 @@ export default function MarqueImportCsvPage() {
                                             >
                                                 Supprimer le fichier
                                             </button>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
 
+                                        </div>
+
+                                    </div>
+
+                                )}
+
+                            </div>
 
                             {/* Continue */}
 
-                            {file && (
+                            {file && selectedFiliale && (
 
                                 <div className="mt-8 flex justify-end">
 
@@ -512,6 +551,7 @@ export default function MarqueImportCsvPage() {
                                         <ArrowRight
                                             size={18}
                                         />
+
                                     </button>
 
                                 </div>
@@ -521,8 +561,6 @@ export default function MarqueImportCsvPage() {
                         </>
 
                     )}
-
-
                     {/* ================================================= */}
                     {/* STEP 2 - MAPPING                                 */}
                     {/* ================================================= */}
@@ -551,7 +589,6 @@ export default function MarqueImportCsvPage() {
 
                             </div>
 
-
                             {/* Mapping */}
 
                             <MappingTable
@@ -562,7 +599,6 @@ export default function MarqueImportCsvPage() {
                                     handleMappingChange
                                 }
                             />
-
 
                             {/* Mapping status */}
 
@@ -579,7 +615,6 @@ export default function MarqueImportCsvPage() {
 
                             </div>
 
-
                             {/* Navigation */}
 
                             <div className="mt-8 flex justify-between">
@@ -593,8 +628,8 @@ export default function MarqueImportCsvPage() {
                                     <ArrowLeft size={18} />
 
                                     Retour
-                                </button>
 
+                                </button>
 
                                 <button
                                     disabled={
@@ -626,7 +661,6 @@ export default function MarqueImportCsvPage() {
 
                     )}
 
-
                     {/* ================================================= */}
                     {/* STEP 3 - VALIDATION / IMPORT                     */}
                     {/* ================================================= */}
@@ -634,7 +668,6 @@ export default function MarqueImportCsvPage() {
                     {step === 3 && (
 
                         <div className="space-y-8">
-
 
                             {/* Validation header */}
 
@@ -653,7 +686,6 @@ export default function MarqueImportCsvPage() {
 
                                 </div>
 
-
                                 <button
                                     onClick={runValidation}
                                     disabled={loading || importing}
@@ -666,7 +698,6 @@ export default function MarqueImportCsvPage() {
 
                             </div>
 
-
                             {/* Validation progress */}
 
                             {loading && (
@@ -678,13 +709,11 @@ export default function MarqueImportCsvPage() {
 
                             )}
 
-
                             {/* Validation result */}
 
                             {result && (
 
                                 <div className="space-y-6">
-
 
                                     <ValidationSummary
                                         summary={
@@ -692,14 +721,12 @@ export default function MarqueImportCsvPage() {
                                         }
                                     />
 
-
                                     <ValidationIssueTable
                                         issues={
                                             result.errors
                                         }
                                         severity="error"
                                     />
-
 
                                     {result.warnings.length > 0 && (
 
@@ -715,8 +742,6 @@ export default function MarqueImportCsvPage() {
                                 </div>
 
                             )}
-
-
                             {/* Navigation / Import */}
 
                             <div className="flex justify-between border-t pt-6">
@@ -734,8 +759,8 @@ export default function MarqueImportCsvPage() {
                                     <ArrowLeft size={18} />
 
                                     Retour
-                                </button>
 
+                                </button>
 
                                 {result?.success &&
                                     result.validation_id &&
@@ -760,7 +785,6 @@ export default function MarqueImportCsvPage() {
 
                             </div>
 
-
                             {/* Import progress */}
 
                             {importing && (
@@ -771,8 +795,6 @@ export default function MarqueImportCsvPage() {
                                 />
 
                             )}
-
-
                             {/* Import error */}
 
                             {importError && (
@@ -782,6 +804,7 @@ export default function MarqueImportCsvPage() {
                                 />
 
                             )}
+                            
                             {/* Import success */}
 
                             {importResult && (

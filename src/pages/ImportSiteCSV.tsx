@@ -17,13 +17,13 @@ import ImportSuccess from "../components/ImportCSV/ImportSuccess";
 import ImportError from "../components/ImportCSV/ImportError";
 
 import {
-    validateMarque,
-    importMarque,
+    validateSite,
+    importSite,
 } from "../api/importServices";
 
 
 
-import { MARQUE_EXPECTED_FIELDS } from "../constants/expectedFields";
+import { SITE_EXPECTED_FIELDS } from "../constants/expectedFields";
 
 import type {
     ValidationResult,
@@ -32,15 +32,15 @@ import type {
 } from "../types/importCsv";
 
 
-const STORAGE_KEY = "marque-column-mapping";
+const STORAGE_KEY = "site-column-mapping";
 
 
-export default function MarqueImportCsvPage() {
+export default function SiteImportCsvPage() {
 
     // ---------------------------------------------------------
     // State
     // ---------------------------------------------------------
-    const expectedFields = MARQUE_EXPECTED_FIELDS
+    const expectedFields = SITE_EXPECTED_FIELDS
     const [step, setStep] = useState(1);
 
     const [file, setFile] = useState<File | null>(null);
@@ -90,7 +90,7 @@ export default function MarqueImportCsvPage() {
 
     const usedFields = Object.values(mapping);
 
-    const missingRequired = MARQUE_EXPECTED_FIELDS.filter(
+    const missingRequired = SITE_EXPECTED_FIELDS.filter(
         (field) =>
             field.required &&
             !usedFields.includes(field.value)
@@ -277,7 +277,7 @@ export default function MarqueImportCsvPage() {
         try {
 
             const response: ValidationResult =
-                await validateMarque(
+                await validateSite(
                     file,
                     mapping,
                     "",
@@ -324,7 +324,7 @@ export default function MarqueImportCsvPage() {
         try {
 
             const response: ImportResult =
-                await importMarque(
+                await importSite(
                     result.validation_id
                 );
 
@@ -386,7 +386,7 @@ export default function MarqueImportCsvPage() {
                 <div className="border-b p-6">
 
                     <h1 className="text-3xl font-bold">
-                        Marques Matériel - Import Des Données
+                        Sites - Import Des Données
                     </h1>
 
                     <p className="mt-2 text-gray-500">

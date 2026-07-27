@@ -13,7 +13,7 @@ import formatCurrency from "../../utils/FormatCurrency";
 import formatDate from "../../utils/FormatDate";
 
 const API = import.meta.env.VITE_API_BASE_URL;
-const GM_URL = `${API}/api/grand-materiel/`
+const GM_URL = `${API}/grand-materiel/`
 
 interface JournalMateriel {
     id: number;
