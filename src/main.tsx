@@ -15,6 +15,7 @@ import TypeMarqueImportCsv from './pages/ImportTypeMarqueCSV.tsx';
 import SousFamilleImportCsv from './pages/ImportSousFamilleCSV.tsx';
 import SituationAffectationImportCsv from './pages/ImportSituationAffectationCSV.tsx';
 import SiteImportCsv from './pages/ImportSiteCSV.tsx';
+import RegularisationImportCsv from './pages/ImportRegularisationCSV.tsx';
 
 
 
@@ -101,6 +102,13 @@ createRoot(document.getElementById('root')!).render(
               element={
                 <ProtectedRoute>
                   <SiteImportCsv />
+                </ProtectedRoute>}
+            />
+            <Route
+              path="/imports/regularisation-gm-csv"
+              element={
+                <ProtectedRoute>
+                  <RegularisationImportCsv />
                 </ProtectedRoute>}
             />
             

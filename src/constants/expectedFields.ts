@@ -358,3 +358,36 @@ export const SITE_EXPECTED_FIELDS = [
     required: false,
   },
 ];
+
+export const REGULARISATION_GM_EXPECTED_FIELDS = [
+  {
+    value: "code_site",
+    label: "Code site",
+    required: true,
+  },
+  {
+    value: "mmaa",
+    label: "Mois / Année",
+    required: true,
+  },
+  {
+    value: "montant_regularisation",
+    label: "Montant régularisation",
+    required: true,
+  },
+  {
+    value: "observation",
+    label: "Observation",
+    required: false,
+  },
+  {
+    value: "est_bloque",
+    label: "Est bloqué",
+    required: false,
+  },
+  {
+    value: "date_modification",
+    label: "Date de modification",
+    required: false,
+  },
+];

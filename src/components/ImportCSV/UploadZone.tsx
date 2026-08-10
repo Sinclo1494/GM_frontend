@@ -2,7 +2,7 @@ import { Upload } from "lucide-react";
 import { useRef } from "react";
 
 interface Props {
-  onFileSelected: (file: File | null) => void;
+  onFileSelected: (file: File) => void | Promise<void>;
 }
 
 export default function UploadZone({ onFileSelected }: Props) {

@@ -22,6 +22,9 @@ const SITUATION_AFFECTATION_IMPORT_URL = `${API}/situation-affectation-import/`;
 const SITE_VALIDATE_URL = `${API}/site-validate/`;
 const SITE_IMPORT_URL = `${API}/site-import/`;
 
+const REGULARISATION_GM_VALIDATE_URL = `${API}/regularisation-gm-validate/`;
+const REGULARISATION_GM_IMPORT_URL = `${API}/regularisation-gm-import/`;
+
 // ---------------------------------------------------------
 // Validation FormData
 // ---------------------------------------------------------
@@ -229,6 +232,27 @@ export async function validateSite(
 
 export async function importSite(validationId: string) {
   const response = await axios.post(SITE_IMPORT_URL, {
+    validation_id: validationId,
+  });
+
+  return response.data;
+}
+
+export async function validateRegularisationGM(
+  file: File,
+  mapping: Record<number, string>,
+  filiale: string,
+) {
+  const response = await axios.post(
+    REGULARISATION_GM_VALIDATE_URL,
+    buildValidationFormData(file, mapping, filiale),
+  );
+
+  return response.data;
+}
+
+export async function importRegularisationGM(validationId: string) {
+  const response = await axios.post(REGULARISATION_GM_IMPORT_URL, {
     validation_id: validationId,
   });
 

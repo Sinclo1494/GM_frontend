@@ -35,7 +35,10 @@ const Navbar = () => {
         {/* CSV Import Dropdown */}
         <li className="relative">
           <button
-            onClick={() => setImportsOpen(!importsOpen)}
+            onClick={() => {
+              setImportsOpen(!importsOpen)
+              setReportsOpen(false)
+            }}
             className="flex items-center gap-1 hover:text-gray-300"
           >
             CSV Import
@@ -106,6 +109,13 @@ const Navbar = () => {
               >
                 Sites
               </Link>
+              <Link
+                to="/imports/regularisation-gm-csv"
+                onClick={() => setImportsOpen(false)}
+                className="block px-4 py-2 hover:bg-gray-100"
+              >
+                Régularisation GM
+              </Link>
             </div>
           )}
         </li>
@@ -113,7 +123,10 @@ const Navbar = () => {
         {/* Reports Dropdown */}
         <li className="relative">
           <button
-            onClick={() => setReportsOpen(!reportsOpen)}
+            onClick={() => {
+              setReportsOpen(!reportsOpen)
+              setImportsOpen(false)
+            }}
             className="flex items-center gap-1 hover:text-gray-300"
           >
             Reports
