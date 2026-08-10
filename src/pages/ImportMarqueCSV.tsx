@@ -376,7 +376,8 @@ export default function MarqueImportCsvPage() {
 
     return (
 
-        <div className="mx-auto max-w-7xl p-8">
+        <div className="
+         max-w-7xl p-8">
 
             <div className="rounded-2xl border bg-white shadow">
 
