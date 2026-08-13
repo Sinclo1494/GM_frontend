@@ -1,5 +1,7 @@
 import { FileSpreadsheet } from "lucide-react";
 import type { PreviewColumn } from "../../types/importCsv";
+import { components } from "../../theme/components";
+
 type ExpectedField = {
     value: string;
     label: string;
@@ -24,7 +26,7 @@ export default function MappingRow({
     onChange,
 }: Props) {
     return (
-        <tr className="border-t hover:bg-slate-50">
+        <tr className={components.table.row}>
             <td className="px-4 py-4 font-medium">
                 <div className="flex items-center gap-2">
                     <FileSpreadsheet size={18} />
@@ -51,7 +53,7 @@ export default function MappingRow({
                             event.target.value
                         )
                     }
-                    className="w-full rounded-lg border px-3 py-2"
+                    className={components.select}
                 >
                     <option value="">
                         Ignorer

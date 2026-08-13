@@ -35,6 +35,7 @@ import type {
     PreviewColumn,
 } from "../types/importCsv";
 
+import { components } from "../theme/components";
 
 const STORAGE_KEY = "regularisation-gm-column-mapping";
 
@@ -291,7 +292,6 @@ export default function RegularisationImportCsvPage() {
             setLoading(false);
 
         }
-
     };
 
 
@@ -336,7 +336,6 @@ export default function RegularisationImportCsvPage() {
             setImporting(false);
 
         }
-
     };
 
 
@@ -361,400 +360,403 @@ export default function RegularisationImportCsvPage() {
 
     return (
 
-        <div className="mx-auto max-w-7xl p-8">
+        <div className="p-6">
 
-            <div className="rounded-2xl border bg-white shadow">
+            <div className="mx-auto max-w-7xl">
 
+                <div className={components.card}>
 
-                <div className="border-b p-6">
+                    <div className={components.cardHeader}>
 
-                    <h1 className="text-3xl font-bold">
-                        Régularisation GM - Import Des Données
-                    </h1>
+                        <h1 className="text-xl font-bold text-gray-800">
+                            Régularisation GM - Import Des Données
+                        </h1>
 
-                    <p className="mt-2 text-gray-500">
-                        Importez un fichier CSV puis associez
-                        les colonnes avant la validation.
-                    </p>
+                        <p className={components.pageDescription}>
+                            Importez un fichier CSV puis associez
+                            les colonnes avant la validation.
+                        </p>
 
-                </div>
-
-
-                <ImportStepper step={step} />
+                    </div>
 
 
-                <div className="p-8">
+                    <ImportStepper step={step} />
 
 
-                    {step === 1 && (
-
-                        <>
-
-                            <div className="grid gap-6 lg:grid-cols-2">
+                    <div className="p-6">
 
 
-                                <div className="rounded-xl border bg-slate-50 p-6">
+                        {step === 1 && (
 
-                                    <h2 className="text-lg font-semibold text-slate-800">
-                                        Format accepté
-                                    </h2>
+                            <>
 
-                                    <p className="mt-1 text-sm text-slate-500">
-                                        Votre fichier doit respecter
-                                        les critères suivants.
-                                    </p>
+                                <div className="grid gap-6 lg:grid-cols-2">
 
-                                    <div className="mt-5 grid gap-3">
 
-                                        {[
-                                            "Format CSV",
-                                            "Encodage UTF-8",
-                                            "Séparateur ';'",
-                                            "Sans ligne d'en-tête",
-                                        ].map((item) => (
+                                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
 
-                                            <div
-                                                key={item}
-                                                className="flex items-center gap-3 py-2"
-                                            >
+                                        <h2 className="text-lg font-semibold text-slate-800">
+                                            Format accepté
+                                        </h2>
 
-                                                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-100">
+                                        <p className="mt-1 text-sm text-slate-500">
+                                            Votre fichier doit respecter
+                                            les critères suivants.
+                                        </p>
 
-                                                    <CheckCircle2
-                                                        size={18}
-                                                        className="shrink-0 text-green-600"
-                                                    />
+                                        <div className="mt-5 grid gap-3">
+
+                                            {[
+                                                "Format CSV",
+                                                "Encodage UTF-8",
+                                                "Séparateur ';'",
+                                                "Sans ligne d'en-tête",
+                                            ].map((item) => (
+
+                                                <div
+                                                    key={item}
+                                                    className="flex items-center gap-3 py-2"
+                                                >
+
+                                                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-100">
+
+                                                        <CheckCircle2
+                                                            size={18}
+                                                            className="shrink-0 text-green-600"
+                                                        />
+
+                                                    </div>
+
+                                                    <span className="text-sm font-medium text-slate-700">
+                                                        {item}
+                                                    </span>
 
                                                 </div>
 
-                                                <span className="text-sm font-medium text-slate-700">
-                                                    {item}
-                                                </span>
+                                            ))}
 
-                                            </div>
-
-                                        ))}
+                                        </div>
 
                                     </div>
+
+
+                                    <ImportSettings
+                                        filiales={filiales}
+                                        selectedFiliale={
+                                            selectedFiliale
+                                        }
+                                        onFilialeChange={
+                                            handleFilialeChange
+                                        }
+                                    />
+
 
                                 </div>
 
 
-                                <ImportSettings
-                                    filiales={filiales}
-                                    selectedFiliale={
-                                        selectedFiliale
-                                    }
-                                    onFilialeChange={
-                                        handleFilialeChange
+                                <div className="mt-6">
+
+                                    {!file ? (
+                                        <div className="mt-6">
+                                            <UploadZone
+                                                onFileSelected={handleFileSelected}
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div className="mt-6 space-y-4">
+                                            <FileInformation file={file} />
+
+                                            <div className="flex justify-end">
+                                                <button
+                                                    type="button"
+                                                    onClick={handleRemoveFile}
+                                                    className={components.button.danger}
+                                                >
+                                                    Supprimer le fichier
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+
+                                {file && selectedFiliale && (
+
+                                    <div className="mt-8 flex justify-end">
+
+                                        <button
+                                            onClick={() =>
+                                                setStep(2)
+                                            }
+                                            className={components.button.primaryLarge}
+                                        >
+                                            Continuer
+
+                                            <ArrowRight
+                                                size={18}
+                                            />
+                                        </button>
+
+                                    </div>
+
+                                )}
+
+                            </>
+
+                        )}
+
+
+                        {step === 2 && (
+
+                            <>
+
+                                <div className="mb-6">
+
+                                    <h2 className="text-xl font-semibold text-gray-800">
+                                        Correspondance des colonnes
+                                    </h2>
+
+                                    <p className="mt-1 text-gray-500">
+                                        Associez chaque colonne du fichier
+                                        à un champ métier.
+                                    </p>
+
+                                    <button
+                                        onClick={resetMapping}
+                                        className={components.button.secondary}
+                                    >
+                                        Réinitialiser la correspondance
+                                    </button>
+
+                                </div>
+
+
+                                <MappingTable
+                                    preview={preview}
+                                    mapping={mapping}
+                                    expectedFields={expectedFields}
+                                    onMappingChange={
+                                        handleMappingChange
                                     }
                                 />
 
 
-                            </div>
+                                <div className="mt-5">
+
+                                    <MappingStatus
+                                        missingRequired={
+                                            missingRequired
+                                        }
+                                        ignoredColumns={
+                                            ignoredColumns
+                                        }
+                                    />
+
+                                </div>
 
 
-                            <div className="mt-6">
+                                <div className="mt-8 flex justify-between">
 
-                                {!file ? (
-                                    <div className="mt-6">
-                                        <UploadZone
-                                            onFileSelected={handleFileSelected}
-                                        />
+                                    <button
+                                        onClick={() =>
+                                            setStep(1)
+                                        }
+                                        className={components.button.secondary}
+                                    >
+                                        <ArrowLeft size={18} />
+
+                                        Retour
+                                    </button>
+
+
+                                    <button
+                                        disabled={
+                                            missingRequired.length > 0 ||
+                                            loading
+                                        }
+                                        onClick={async () => {
+
+                                            const validationResult =
+                                                await runValidation();
+
+                                            if (validationResult) {
+
+                                                setStep(3);
+
+                                            }
+
+                                        }}
+                                        className={components.button.primary}
+                                    >
+                                        {loading
+                                            ? "Validation..."
+                                            : "Valider"}
+                                    </button>
+
+                                </div>
+
+                            </>
+
+                        )}
+
+
+                        {step === 3 && (
+
+                            <div className="space-y-8">
+
+
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+                                    <div>
+
+                                        <h2 className="text-2xl font-semibold text-gray-800">
+                                            Validation du fichier
+                                        </h2>
+
+                                        <p className="mt-1 text-gray-500">
+                                            Vous pouvez relancer la validation
+                                            autant de fois que nécessaire.
+                                        </p>
+
                                     </div>
-                                ) : (
-                                    <div className="mt-6 space-y-4">
-                                        <FileInformation file={file} />
 
-                                        <div className="flex justify-end">
-                                            <button
-                                                type="button"
-                                                onClick={handleRemoveFile}
-                                                className="rounded-lg border border-red-200 px-4 py-2 text-red-600 transition hover:bg-red-50"
-                                            >
-                                                Supprimer le fichier
-                                            </button>
-                                        </div>
-                                    </div>
+
+                                    <button
+                                        onClick={runValidation}
+                                        disabled={loading || importing}
+                                        className={components.button.successLarge}
+                                    >
+                                        {loading
+                                            ? "Validation..."
+                                            : "Relancer la validation"}
+                                    </button>
+
+                                </div>
+
+
+                                {loading && (
+
+                                    <ValidationProgress
+                                        title="Validation en cours"
+                                        description="Analyse et vérification des données du fichier..."
+                                    />
+
                                 )}
-                            </div>
 
 
-                            {file && selectedFiliale && (
+                                {result && (
 
-                                <div className="mt-8 flex justify-end">
+                                    <div className="space-y-6">
+
+
+                                        <ValidationSummary
+                                            summary={
+                                                result.summary
+                                            }
+                                        />
+
+
+                                        <ValidationIssueTable
+                                            issues={
+                                                result.errors
+                                            }
+                                            severity="error"
+                                        />
+
+
+                                        {result.warnings.length > 0 && (
+
+                                            <ValidationIssueTable
+                                                issues={
+                                                    result.warnings
+                                                }
+                                                severity="warning"
+                                            />
+
+                                        )}
+
+                                    </div>
+
+                                )}
+
+
+                                <div className="flex justify-between border-t border-slate-200 pt-6">
 
                                     <button
                                         onClick={() =>
                                             setStep(2)
                                         }
-                                        className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition hover:bg-blue-700"
+                                        disabled={
+                                            loading ||
+                                            importing
+                                        }
+                                        className={components.button.secondary}
                                     >
-                                        Continuer
+                                        <ArrowLeft size={18} />
 
-                                        <ArrowRight
-                                            size={18}
-                                        />
+                                        Retour
                                     </button>
 
-                                </div>
 
-                            )}
+                                    {result?.success &&
+                                        result.validation_id &&
+                                        !importResult && (
 
-                        </>
+                                            <button
+                                                onClick={
+                                                    runImport
+                                                }
+                                                disabled={
+                                                    importing ||
+                                                    loading
+                                                }
+                                                className={components.button.primaryLarge}
+                                            >
+                                                {importing
+                                                    ? "Importation..."
+                                                    : "Importer les données"}
+                                            </button>
 
-                    )}
-
-
-                    {step === 2 && (
-
-                        <>
-
-                            <div className="mb-6">
-
-                                <h2 className="text-xl font-semibold">
-                                    Correspondance des colonnes
-                                </h2>
-
-                                <p className="mt-1 text-gray-500">
-                                    Associez chaque colonne du fichier
-                                    à un champ métier.
-                                </p>
-
-                                <button
-                                    onClick={resetMapping}
-                                    className="mt-4 rounded-lg border px-4 py-2 transition hover:bg-gray-50"
-                                >
-                                    Réinitialiser la correspondance
-                                </button>
-
-                            </div>
-
-
-                            <MappingTable
-                                preview={preview}
-                                mapping={mapping}
-                                expectedFields={expectedFields}
-                                onMappingChange={
-                                    handleMappingChange
-                                }
-                            />
-
-
-                            <div className="mt-5">
-
-                                <MappingStatus
-                                    missingRequired={
-                                        missingRequired
-                                    }
-                                    ignoredColumns={
-                                        ignoredColumns
-                                    }
-                                />
-
-                            </div>
-
-
-                            <div className="mt-8 flex justify-between">
-
-                                <button
-                                    onClick={() =>
-                                        setStep(1)
-                                    }
-                                    className="flex items-center gap-2 rounded-lg border px-5 py-2 hover:bg-gray-50"
-                                >
-                                    <ArrowLeft size={18} />
-
-                                    Retour
-                                </button>
-
-
-                                <button
-                                    disabled={
-                                        missingRequired.length > 0 ||
-                                        loading
-                                    }
-                                    onClick={async () => {
-
-                                        const validationResult =
-                                            await runValidation();
-
-                                        if (validationResult) {
-
-                                            setStep(3);
-
-                                        }
-
-                                    }}
-                                    className="rounded-lg bg-blue-600 px-6 py-2 text-white disabled:cursor-not-allowed disabled:bg-gray-300"
-                                >
-                                    {loading
-                                        ? "Validation..."
-                                        : "Valider"}
-                                </button>
-
-                            </div>
-
-                        </>
-
-                    )}
-
-
-                    {step === 3 && (
-
-                        <div className="space-y-8">
-
-
-                            <div className="flex items-center justify-between">
-
-                                <div>
-
-                                    <h2 className="text-2xl font-semibold">
-                                        Validation du fichier
-                                    </h2>
-
-                                    <p className="mt-1 text-gray-500">
-                                        Vous pouvez relancer la validation
-                                        autant de fois que nécessaire.
-                                    </p>
+                                        )}
 
                                 </div>
 
 
-                                <button
-                                    onClick={runValidation}
-                                    disabled={loading || importing}
-                                    className="rounded-lg bg-green-600 px-6 py-3 font-medium text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-300"
-                                >
-                                    {loading
-                                        ? "Validation..."
-                                        : "Relancer la validation"}
-                                </button>
+                                {importing && (
 
-                            </div>
+                                    <ValidationProgress
+                                        title="Importation en cours"
+                                        description="Enregistrement des données validées..."
+                                    />
+
+                                )}
 
 
-                            {loading && (
+                                {importError && (
 
-                                <ValidationProgress
-                                    title="Validation en cours"
-                                    description="Analyse et vérification des données du fichier..."
-                                />
+                                    <ImportError
+                                        message={importError}
+                                    />
 
-                            )}
-
-
-                            {result && (
-
-                                <div className="space-y-6">
+                                )}
 
 
-                                    <ValidationSummary
-                                        summary={
-                                            result.summary
+                                {importResult && (
+
+                                    <ImportSuccess
+                                        result={
+                                            importResult
                                         }
                                     />
 
-
-                                    <ValidationIssueTable
-                                        issues={
-                                            result.errors
-                                        }
-                                        severity="error"
-                                    />
-
-
-                                    {result.warnings.length > 0 && (
-
-                                        <ValidationIssueTable
-                                            issues={
-                                                result.warnings
-                                            }
-                                            severity="warning"
-                                        />
-
-                                    )}
-
-                                </div>
-
-                            )}
-
-
-                            <div className="flex justify-between border-t pt-6">
-
-                                <button
-                                    onClick={() =>
-                                        setStep(2)
-                                    }
-                                    disabled={
-                                        loading ||
-                                        importing
-                                    }
-                                    className="flex items-center gap-2 rounded-lg border px-5 py-3 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                                >
-                                    <ArrowLeft size={18} />
-
-                                    Retour
-                                </button>
-
-
-                                {result?.success &&
-                                    result.validation_id &&
-                                    !importResult && (
-
-                                        <button
-                                            onClick={
-                                                runImport
-                                            }
-                                            disabled={
-                                                importing ||
-                                                loading
-                                            }
-                                            className="rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
-                                        >
-                                            {importing
-                                                ? "Importation..."
-                                                : "Importer les données"}
-                                        </button>
-
-                                    )}
+                                )}
 
                             </div>
 
-
-                            {importing && (
-
-                                <ValidationProgress
-                                    title="Importation en cours"
-                                    description="Enregistrement des données validées..."
-                                />
-
-                            )}
+                        )}
 
 
-                            {importError && (
-
-                                <ImportError
-                                    message={importError}
-                                />
-
-                            )}
-
-
-                            {importResult && (
-
-                                <ImportSuccess
-                                    result={
-                                        importResult
-                                    }
-                                />
-
-                            )}
-
-                        </div>
-
-                    )}
-
+                    </div>
 
                 </div>
 

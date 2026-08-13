@@ -11,7 +11,7 @@ export default function FileInformation({ file }: Props) {
       : `${(file.size / 1024).toFixed(2)} KB`;
 
   return (
-    <div className="rounded-lg border bg-green-50 border-green-200 p-4 flex items-center gap-4">
+    <div className="rounded-lg border border-green-200 bg-green-50 p-4 flex items-center gap-4">
       <FileText
         size={36}
         className="text-green-600"

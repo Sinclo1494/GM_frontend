@@ -48,9 +48,9 @@ function SummaryCard({
         <div
             className={`rounded-xl border bg-white p-5 shadow-sm ${className}`}
         >
-            <p className="text-sm">{label}</p>
+            <p className="text-sm text-gray-500">{label}</p>
 
-            <p className="mt-2 text-3xl font-bold">
+            <p className="mt-2 text-3xl font-bold text-gray-800">
                 {value}
             </p>
         </div>

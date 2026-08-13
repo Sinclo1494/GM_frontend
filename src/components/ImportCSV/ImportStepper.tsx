@@ -18,7 +18,7 @@ export default function ImportStepper({
     step,
 }: Props) {
     return (
-        <div className="flex justify-between border-b bg-slate-50 px-8 py-5">
+        <div className="flex justify-between border-b border-slate-200 bg-slate-50 px-8 py-5">
             {STEPS.map((label, index) => {
                 const stepNumber = index + 1;
                 const active = step === stepNumber;

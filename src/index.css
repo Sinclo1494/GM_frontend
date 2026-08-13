@@ -4,9 +4,15 @@
 @import '@fontsource/roboto/500.css';
 @import '@fontsource/roboto/700.css';
 
-
 body {
-   background-image: url("./assets/img/bg.PNG");
-   background-size:cover;
-   background-repeat:no-repeat;
+  margin: 0;
+  background-color: #f9fafb;
+  background-image: url("./assets/img/bg.PNG");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+#root {
+  min-height: 100vh;
 }

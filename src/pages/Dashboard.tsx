@@ -1,8 +1,12 @@
+import { components } from "../theme/components";
+
 export default function Dashboard() {
   return (
-    <div className="p-6 text-white">
-      <h1 className="text-2xl font-bold ">Dashboard</h1>
-      <p>This Section is under construction.</p>
+    <div className="p-6">
+      <div className="mx-auto max-w-7xl">
+        <h1 className={components.pageTitle}>Dashboard</h1>
+        <p className={components.pageDescription}>This Section is under construction.</p>
+      </div>
     </div>
   );
 }

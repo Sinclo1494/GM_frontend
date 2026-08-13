@@ -7,6 +7,7 @@ import type {
   AnalyseQuantitativeType,
 } from "../types/analyseQuantitative";
 import { exportAnalyseQuantitative } from "../utils/exportPDF";
+import { components } from "../theme/components";
 
 
 export default function AnalyseQuantitative() {
@@ -31,7 +32,6 @@ export default function AnalyseQuantitative() {
   const [loadingResume, setLoadingResume] = useState(false);
   const [loadingTable, setLoadingTable] = useState(false);
 
-  // Filter state
   const [codeFiliale, setCodeFiliale] = useState("P");
   const [dateDebut, setDateDebut] = useState("2025-09-01");
   const [dateFin, setDateFin] = useState("2025-09-30");
@@ -91,97 +91,96 @@ export default function AnalyseQuantitative() {
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6 text-gray-50">
-        Analyse Quantitative
-      </h1>
+      <div className="mx-auto max-w-7xl">
+        <header className="mb-6">
+          <h1 className={components.pageTitle}>Analyse Quantitative</h1>
+          <p className={components.pageDescription}>
+            Analyse quantitative du parc matériel par catégorie.
+          </p>
+        </header>
 
-      {/* Filters */}
-      <div className="mb-6 rounded-lg border bg-white p-4 shadow">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
-          <div>
-            <label className="mb-1 block text-sm font-medium">
-              Filiale
-            </label>
-            <select
-              value={codeFiliale}
-              onChange={(e) => setCodeFiliale(e.target.value)}
-              className="w-full rounded border px-3 py-2"
-            >
-              {filiales.map((f) => (
-                <option key={f.value} value={f.value}>
-                  {f.value} - {f.label}
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* Filters */}
+        <div className={components.card + " mb-6"}>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
+            <div>
+              <label className={components.label}>Filiale</label>
+              <select
+                value={codeFiliale}
+                onChange={(e) => setCodeFiliale(e.target.value)}
+                className={components.select}
+              >
+                {filiales.map((f) => (
+                  <option key={f.value} value={f.value}>
+                    {f.value} - {f.label}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <div>
-            <label className="mb-1 block text-sm font-medium">
-              Date début
-            </label>
-            <input
-              type="date"
-              value={dateDebut}
-              onChange={(e) => setDateDebut(e.target.value)}
-              className="w-full rounded border px-3 py-2"
-            />
-          </div>
+            <div>
+              <label className={components.label}>Date début</label>
+              <input
+                type="date"
+                value={dateDebut}
+                onChange={(e) => setDateDebut(e.target.value)}
+                className={components.input}
+              />
+            </div>
 
-          <div>
-            <label className="mb-1 block text-sm font-medium">
-              Date fin
-            </label>
-            <input
-              type="date"
-              value={dateFin}
-              onChange={(e) => setDateFin(e.target.value)}
-              className="w-full rounded border px-3 py-2"
-            />
-          </div>
+            <div>
+              <label className={components.label}>Date fin</label>
+              <input
+                type="date"
+                value={dateFin}
+                onChange={(e) => setDateFin(e.target.value)}
+                className={components.input}
+              />
+            </div>
 
-          <div className="flex items-end">
-            <button
-              onClick={handleCalculate}
-              disabled={loadingResume || loadingTable}
-              className="w-full rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
-            >
-              {loadingResume || loadingTable
-                ? "Calculating..."
-                : "Calculate"}
-            </button>
-          </div>
-          <div className="flex items-end">
-            <button
-              onClick={handleExport}
-              disabled={
-                !resume ||
-                rowsTable.length === 0 ||
-                loadingResume ||
-                loadingTable
-              }
-              className="w-full rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700 disabled:opacity-50"
-            >
-              Export PDF
-            </button>
+            <div className="flex items-end">
+              <button
+                onClick={handleCalculate}
+                disabled={loadingResume || loadingTable}
+                className={components.button.primary}
+              >
+                {loadingResume || loadingTable
+                  ? "Calculating..."
+                  : "Calculate"}
+              </button>
+            </div>
+            <div className="flex items-end">
+              <button
+                onClick={handleExport}
+                disabled={
+                  !resume ||
+                  rowsTable.length === 0 ||
+                  loadingResume ||
+                  loadingTable
+                }
+                className={components.button.success}
+              >
+                Export PDF
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      {resume && <AnalyseQuantitativeResume data={resume} />}
+        {resume && <AnalyseQuantitativeResume data={resume} />}
 
-      <div className="space-y-8">
-        {Object.entries(groupedByCategory).map(([codeCategorie, category]) => (
-          <div key={codeCategorie}>
-            <h2 className="mb-4 text-xl font-bold text-gray-50">
-              {codeCategorie}: {category.title}
-            </h2>
+        <div className="space-y-8">
+          {Object.entries(groupedByCategory).map(([codeCategorie, category]) => (
+            <div key={codeCategorie}>
+              <h2 className="mb-4 text-xl font-semibold text-gray-800">
+                {codeCategorie}: {category.title}
+              </h2>
 
-            <AnalyseQuantitativeTable
-              rows={category.rows}
-              loading={loadingTable}
-            />
-          </div>
-        ))}
+              <AnalyseQuantitativeTable
+                rows={category.rows}
+                loading={loadingTable}
+              />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

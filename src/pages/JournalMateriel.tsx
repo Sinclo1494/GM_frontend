@@ -3,17 +3,17 @@ import JournalMaterielTable from '../components/JournalMateriel/JournalMaterielT
 
 const JournalMateriel: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className=" mx-auto">
+    <div className="p-6">
+      <div className="mx-auto max-w-7xl">
         <header className="mb-6">
-          <h1 className="text-3xl font-semibold text-gray-800">Journal Matériel Matériel</h1>
+          <h1 className="text-2xl font-bold text-gray-800">Journal Matériel</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Consultation des équipements enregistrés.
+          </p>
         </header>
 
-        <main className="bg-white shadow rounded-lg p-4">
-          <div className="overflow-x-auto">
-            {/* JournalMaterielTable component should render the table/list */}
-            <JournalMaterielTable />
-          </div>
+        <main>
+          <JournalMaterielTable />
         </main>
       </div>
     </div>

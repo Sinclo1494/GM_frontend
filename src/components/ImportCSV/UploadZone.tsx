@@ -35,7 +35,7 @@ export default function UploadZone({ onFileSelected }: Props) {
           className="mx-auto text-blue-600 mb-4"
         />
 
-        <p className="font-semibold text-lg">
+        <p className="font-semibold text-lg text-gray-800">
           Déposez votre fichier CSV ici
         </p>
 

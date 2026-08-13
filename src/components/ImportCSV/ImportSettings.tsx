@@ -1,4 +1,5 @@
 import type { FilialeOption } from "../../api/dataServices";
+import { components } from "../../theme/components";
 
 interface Props {
     filiales: FilialeOption[];
@@ -12,7 +13,7 @@ export default function ImportSettings({
     onFilialeChange,
 }: Props) {
     return (
-        <div className="rounded-xl border bg-slate-50 p-6">
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
             <h2 className="text-lg font-semibold text-slate-800">
                 Paramètres d'import
             </h2>
@@ -24,7 +25,7 @@ export default function ImportSettings({
             <div className="mt-6">
                 <label
                     htmlFor="filiale"
-                    className="mb-2 block text-sm font-medium text-slate-700"
+                    className={components.label}
                 >
                     Filiale
                 </label>
@@ -35,7 +36,7 @@ export default function ImportSettings({
                     onChange={(event) =>
                         onFilialeChange(event.target.value)
                     }
-                    className="w-full rounded-lg border bg-white px-3 py-2 text-sm"
+                    className={components.select}
                 >
                     <option value="">
                         Sélectionnez une filiale...

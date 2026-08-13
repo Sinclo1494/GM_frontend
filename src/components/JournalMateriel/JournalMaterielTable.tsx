@@ -3,14 +3,15 @@
 import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import {
-    ChevronUp,
-    ChevronDown,
-    Search,
-    Loader2,
-    AlertCircle,
+  ChevronUp,
+  ChevronDown,
+  Search,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import formatCurrency from "../../utils/FormatCurrency";
 import formatDate from "../../utils/FormatDate";
+import { components } from "../../theme/components";
 
 const API = import.meta.env.VITE_API_BASE_URL;
 const GM_URL = `${API}/grand-materiel/`
@@ -34,8 +35,6 @@ interface JournalMateriel {
     created_at: string;
     updated_at: string;
 }
-
-// Format date helper
 
 type SortField =
     | "code_materiel"
@@ -62,13 +61,13 @@ interface SortIconProps {
 
 const SortIcon: React.FC<SortIconProps> = ({ field, sortField, sortOrder }) => {
     if (sortField !== field) {
-        return <div className="w-4 h-4 text-gray-300" />;
+        return <div className="h-4 w-4 text-gray-300" />;
     }
 
     return sortOrder === "asc" ? (
-        <ChevronUp className="w-4 h-4 text-blue-600" />
+        <ChevronUp className="h-4 w-4 text-blue-600" />
     ) : (
-        <ChevronDown className="w-4 h-4 text-blue-600" />
+        <ChevronDown className="h-4 w-4 text-blue-600" />
     );
 };
 
@@ -78,11 +77,11 @@ interface StatusBadgeProps {
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({ estBloque }) => {
     return estBloque ? (
-        <span className="px-3 py-1 text-xs font-semibold text-white bg-red-500 rounded-full">
+        <span className={components.badge.danger}>
             Bloqué
         </span>
     ) : (
-        <span className="px-3 py-1 text-xs font-semibold text-white bg-green-500 rounded-full">
+        <span className={components.badge.success}>
             Actif
         </span>
     );
@@ -99,24 +98,7 @@ const FilterInput = ({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Filtrer..."
-        className="
-            h-9
-            w-full
-            rounded-lg
-            border
-            border-slate-300
-            bg-white
-            px-3
-            text-xs
-            text-slate-700
-            placeholder:text-slate-400
-            shadow-sm
-            transition
-            focus:border-blue-500
-            focus:ring-2
-            focus:ring-blue-100
-            outline-none
-        "
+        className={components.input}
     />
 );
 
@@ -177,7 +159,6 @@ const JournalMaterielTable: React.FC = () => {
 
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
-    // Fetch data from API
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -203,7 +184,6 @@ const JournalMaterielTable: React.FC = () => {
     }, []);
     const contains = (value: string | null | undefined, filter: string) =>
         (value ?? "").toLowerCase().includes(filter.toLowerCase());
-    // Search logic
     const filteredData = useMemo(() => {
         return data.filter((item) => {
             const global =
@@ -230,7 +210,6 @@ const JournalMaterielTable: React.FC = () => {
         });
     }, [data, searchTerm, columnFilters]);
 
-    // Sorting logic
     const sortedData = useMemo(() => {
         const sorted = [...filteredData];
         if (!sortField) return sorted;
@@ -247,7 +226,6 @@ const JournalMaterielTable: React.FC = () => {
         return sorted;
     }, [filteredData, sortField, sortOrder]);
 
-    // Pagination logic
     const totalPages = Math.ceil(sortedData.length / itemsPerPage);
     const startIdx = (currentPage - 1) * itemsPerPage;
     const endIdx = startIdx + itemsPerPage;
@@ -281,7 +259,6 @@ const JournalMaterielTable: React.FC = () => {
         return items;
     }, [currentPage, totalPages]);
 
-    // Handle sorting
     const handleSort = (field: SortField) => {
         if (sortField === field) {
             setSortOrder(sortOrder === "asc" ? "desc" : "asc");
@@ -292,7 +269,6 @@ const JournalMaterielTable: React.FC = () => {
         setCurrentPage(1);
     };
 
-    // Reset pagination when search changes
     useEffect(() => {
         const timeoutId = window.setTimeout(() => {
             setCurrentPage(1);
@@ -301,20 +277,17 @@ const JournalMaterielTable: React.FC = () => {
         return () => window.clearTimeout(timeoutId);
     }, [searchTerm, columnFilters, itemsPerPage]);
 
-    // Handle search input change
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value);
         setCurrentPage(1);
     };
 
-    // Status badge
-
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-gray-100">
+            <div className="flex items-center justify-center min-h-[400px]">
                 <div className="flex flex-col items-center gap-4">
-                    <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
-                    <p className="text-gray-600 text-lg">Chargement des données...</p>
+                    <Loader2 className="h-10 w-10 text-blue-600 animate-spin" />
+                    <p className="text-gray-600">Chargement des données...</p>
                 </div>
             </div>
         );
@@ -322,16 +295,16 @@ const JournalMaterielTable: React.FC = () => {
 
     if (error) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-gray-100">
+            <div className="flex items-center justify-center min-h-[400px]">
                 <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full">
                     <div className="flex items-center gap-4 mb-4">
-                        <AlertCircle className="w-8 h-8 text-red-600" />
+                        <AlertCircle className="h-8 w-8 text-red-600" />
                         <h2 className="text-xl font-bold text-red-600">Erreur</h2>
                     </div>
                     <p className="text-gray-700 mb-4">{error}</p>
                     <button
                         onClick={() => window.location.reload()}
-                        className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                        className={components.button.primary}
                     >
                         Réessayer
                     </button>
@@ -342,85 +315,74 @@ const JournalMaterielTable: React.FC = () => {
 
     return (
         <div className="space-y-6">
-            <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+            <div className={components.table.wrapper}>
                 {/* Header */}
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-6 border-b border-gray-200">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-6 border-b border-slate-200">
                     <div>
-                        <h2 className="text-2xl font-bold text-gray-900">
+                        <h2 className="text-xl font-bold text-gray-900">
                             Consultation des équipements enregistrés.
                         </h2>
-                        
                     </div>
 
-                    {/* Search Bar */}
-                    <div className="relative w-full md:w-1/2">
-                        <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                        <input
-                            type="text"
-                            placeholder="Rechercher par code matériel ou désignation..."
-                            value={searchTerm}
-                            onChange={handleSearchChange}
-                            className="
-                                w-full
-                                rounded-xl
-                                border
-                                border-gray-300
-                                bg-white
-                                pl-10
-                                pr-4
-                                py-2.5
-                                text-sm
-                                focus:border-blue-500
-                                focus:ring-2
-                                focus:ring-blue-100
-                                outline-none
-                                "
-                        />
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-600">Lignes :</span>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                        {/* Search Bar */}
+                        <div className="relative w-full sm:w-80">
+                            <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Rechercher par code matériel ou désignation..."
+                                value={searchTerm}
+                                onChange={handleSearchChange}
+                                className={components.input + " pl-10"}
+                            />
+                        </div>
 
-                        <select
-                            value={itemsPerPage}
-                            onChange={(e) => {
-                                setItemsPerPage(Number(e.target.value));
-                                setCurrentPage(1);
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-600">Lignes :</span>
+
+                            <select
+                                value={itemsPerPage}
+                                onChange={(e) => {
+                                    setItemsPerPage(Number(e.target.value));
+                                    setCurrentPage(1);
+                                }}
+                                className={components.select}
+                            >
+                                <option value={10}>10</option>
+                                <option value={20}>20</option>
+                                <option value={50}>50</option>
+                                <option value={100}>100</option>
+                            </select>
+                        </div>
+
+                        <button
+                            onClick={() => {
+                                setSearchTerm("");
+                                setColumnFilters({
+                                    code_materiel: "",
+                                    designation: "",
+                                    num_serie: "",
+                                    immatriculation: "",
+                                    date_acquisition: "",
+                                    valeur_acquisition: "",
+                                    valeur_remplacement: "",
+                                    taux_amortissement: "",
+                                    puissance_materiel: "",
+                                    code_sous_famille: "",
+                                    code_type_marque: "",
+                                    code_filiale_g: "",
+                                    est_bloque: "",
+                                });
                             }}
-                            className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                            className={components.button.secondary}
                         >
-                            <option value={10}>10</option>
-                            <option value={20}>20</option>
-                            <option value={50}>50</option>
-                            <option value={100}>100</option>
-                        </select>
+                            Réinitialiser
+                        </button>
                     </div>
-                    <button
-                        onClick={() => {
-                            setSearchTerm("");
-                            setColumnFilters({
-                                code_materiel: "",
-                                designation: "",
-                                num_serie: "",
-                                immatriculation: "",
-                                date_acquisition: "",
-                                valeur_acquisition: "",
-                                valeur_remplacement: "",
-                                taux_amortissement: "",
-                                puissance_materiel: "",
-                                code_sous_famille: "",
-                                code_type_marque: "",
-                                code_filiale_g: "",
-                                est_bloque: "",
-                            });
-                        }}
-                        className="rounded-lg border px-4 py-2 text-sm hover:bg-gray-100"
-                    >
-                        Réinitialiser
-                    </button>
                 </div>
 
                 {/* Results info */}
-                <div className="px-6 py-3 border-b bg-white">
+                <div className="px-6 py-3 bg-slate-50 border-b border-slate-200">
                     <p className="text-sm text-gray-600">
                         Affichage de <span className="font-semibold">{startIdx + 1}</span> à{" "}
                         <span className="font-semibold">
@@ -435,29 +397,25 @@ const JournalMaterielTable: React.FC = () => {
                 {/* Table */}
                 <div className="overflow-x-auto">
                     <table className="w-full">
-                        <thead className="sticky top-0 z-20 bg-slate-100 border-b-2 border-slate-300 shadow-sm">
+                        <thead className={components.table.header + " border-b-2 border-slate-300"}>
                             <tr>
                                 {columns.map((column) => (
                                     <th
                                         key={column.key}
                                         onClick={() => handleSort(column.key)}
                                         className={`
-                    ${column.width}
-                    px-4
-                    py-3
-                    align-top
-                    bg-slate-100
-                    border-r
-                    border-slate-200
-                    last:border-r-0
-                    transition-colors
-                    hover:bg-slate-200
-                    cursor-pointer
-                `}
+                      ${column.width}
+                      px-4
+                      py-3
+                      align-top
+                      transition-colors
+                      hover:bg-slate-200
+                      cursor-pointer
+                  `}
                                     >
                                         <div className="flex flex-col gap-2">
                                             <div className="flex items-center justify-between">
-                                                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700">
+                                                <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
                                                     {column.label}
                                                 </span>
 
@@ -483,11 +441,11 @@ const JournalMaterielTable: React.FC = () => {
 
                                 <th
                                     onClick={() => handleSort("est_bloque")}
-                                    className="min-w-32.5 px-4 py-3 bg-slate-100 align-top"
+                                    className="min-w-[130px] px-4 py-3 align-top cursor-pointer hover:bg-slate-200 transition-colors"
                                 >
                                     <div className="flex flex-col gap-2">
                                         <div className="flex items-center justify-between">
-                                            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700">
+                                            <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
                                                 Statut
                                             </span>
 
@@ -506,21 +464,7 @@ const JournalMaterielTable: React.FC = () => {
                                                     est_bloque: e.target.value,
                                                 }))
                                             }
-                                            className=" h-9
-                                                        w-full
-                                                        rounded-lg
-                                                        border
-                                                        border-slate-300
-                                                        bg-white
-                                                        px-3
-                                                        text-xs
-                                                        text-slate-700
-                                                        shadow-sm
-                                                        focus:border-blue-500
-                                                        focus:ring-2
-                                                        focus:ring-blue-100
-                                                        outline-none
-                                                        "
+                                            className={components.input}
                                         >
                                             <option value="">Tous</option>
                                             <option value="false">Actif</option>
@@ -535,7 +479,7 @@ const JournalMaterielTable: React.FC = () => {
                                 paginatedData.map((item, idx) => (
                                     <tr
                                         key={item.id}
-                                        className={`border-b border-gray-200 hover:bg-blue-50 transition ${idx % 2 === 0 ? "bg-white" : "bg-gray-50"
+                                        className={`${components.table.row} ${idx % 2 === 0 ? "bg-white" : "bg-slate-50/50"
                                             }`}
                                     >
                                         <td className="px-4 py-3 text-sm text-gray-800 font-medium">
@@ -596,11 +540,11 @@ const JournalMaterielTable: React.FC = () => {
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                    <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
+                    <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <button
                             onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                             disabled={currentPage === 1}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+                            className={components.button.primary}
                         >
                             Précédent
                         </button>
@@ -618,9 +562,9 @@ const JournalMaterielTable: React.FC = () => {
                                     <button
                                         key={item}
                                         onClick={() => setCurrentPage(item)}
-                                        className={`px-3 py-1 rounded-lg text-sm font-medium transition ${currentPage === item
+                                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${currentPage === item
                                             ? "bg-blue-600 text-white"
-                                            : "bg-white text-gray-700 border border-gray-300 hover:border-blue-600"
+                                            : "bg-white text-gray-700 border border-slate-300 hover:border-blue-600"
                                             }`}
                                     >
                                         {item}
@@ -634,7 +578,7 @@ const JournalMaterielTable: React.FC = () => {
                                 setCurrentPage(Math.min(totalPages, currentPage + 1))
                             }
                             disabled={currentPage === totalPages}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+                            className={components.button.primary}
                         >
                             Suivant
                         </button>

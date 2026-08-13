@@ -26,9 +26,9 @@ export default function MappingTable({
     const usedFields = Object.values(mapping);
 
     return (
-        <div className="overflow-hidden rounded-xl border">
+        <div className="overflow-hidden rounded-xl border border-slate-200">
             <table className="w-full">
-                <thead className="sticky top-0 bg-slate-100">
+                <thead className="sticky top-0 bg-slate-100 border-b-2 border-slate-300">
                     <tr>
                         <th className="w-28 px-4 py-3 text-left">
                             Colonne
@@ -47,9 +47,7 @@ export default function MappingTable({
                         <MappingRow
                             key={column.index}
                             column={column}
-                            selectedField={
-                                mapping[column.index] || ""
-                            }
+                            selectedField={mapping[column.index] || ""}
                             usedFields={usedFields}
                             expectedFields={expectedFields}
                             onChange={onMappingChange}

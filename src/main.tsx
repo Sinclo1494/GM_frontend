@@ -21,6 +21,7 @@ import RegularisationImportCsv from './pages/ImportRegularisationCSV.tsx';
 
 import './index.css';
 import JournalMateriel from './pages/JournalMateriel.tsx';
+import Journalisation from './pages/Journalisation.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -32,6 +33,10 @@ createRoot(document.getElementById('root')!).render(
             <Route
               path="/reports/journal-materiel"
               element={<ProtectedRoute><JournalMateriel /></ProtectedRoute>}
+            />
+            <Route
+              path="/admin/journalisation"
+              element={<ProtectedRoute><Journalisation /></ProtectedRoute>}
             />
             <Route
               path="/reports/analyse-quantitative"

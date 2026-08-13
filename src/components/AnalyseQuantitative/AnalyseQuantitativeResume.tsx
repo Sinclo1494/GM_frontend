@@ -1,4 +1,5 @@
 import type { AnalyseQuantitativeResumeType } from "../../types/analyseQuantitative";
+import { components } from "../../theme/components";
 
 interface Props {
   data: AnalyseQuantitativeResumeType;
@@ -11,7 +12,7 @@ const StatCard = ({
   title: string;
   value: number | string;
 }) => (
-  <div className="rounded-xl bg-white shadow border p-4">
+  <div className={components.card}>
     <p className="text-sm text-gray-500">{title}</p>
     <p className="mt-2 text-3xl font-bold text-blue-600">{value}</p>
   </div>
@@ -24,14 +25,14 @@ const Section = ({
   title: string;
   items: { label: string; value: number }[];
 }) => (
-  <div className="rounded-xl bg-white shadow border p-6">
-    <h2 className="text-lg font-semibold mb-4">{title}</h2>
+  <div className={components.card}>
+    <h2 className="text-lg font-semibold mb-4 text-gray-800">{title}</h2>
 
     <div className="space-y-3">
       {items.map((item) => (
         <div
           key={item.label}
-          className="flex justify-between border-b pb-2 last:border-none"
+          className="flex justify-between border-b border-slate-100 pb-2 last:border-none"
         >
           <span className="text-gray-600">{item.label}</span>
 

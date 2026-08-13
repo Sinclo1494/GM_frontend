@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import type { ValidationIssue } from "../../types/importCsv";
+import { components } from "../../theme/components";
 
 interface Props {
     issues: ValidationIssue[];
@@ -32,9 +33,9 @@ export default function ValidationIssueTable({
     );
 
     return (
-        <div className="overflow-hidden rounded-xl border">
+        <div className={components.table.wrapper}>
             <div
-                className={`flex items-center justify-between border-b px-5 py-4 ${
+                className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b px-5 py-4 ${
                     isError ? "bg-red-50" : "bg-yellow-50"
                 }`}
             >
@@ -52,7 +53,7 @@ export default function ValidationIssueTable({
                 </div>
 
                 <span
-                    className={`rounded-full px-3 py-1 text-sm font-medium ${
+                    className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${
                         isError
                             ? "bg-red-100 text-red-700"
                             : "bg-yellow-100 text-yellow-700"
@@ -73,7 +74,7 @@ export default function ValidationIssueTable({
                         onChange={(event) =>
                             setMessageFilter(event.target.value)
                         }
-                        className="w-full max-w-xl rounded-lg border px-3 py-2 text-sm"
+                        className={components.select}
                     >
                         <option value="">
                             Tous les messages
@@ -99,7 +100,7 @@ export default function ValidationIssueTable({
             ) : (
                 <div className="max-h-125 overflow-auto">
                     <table className="w-full">
-                        <thead className="sticky top-0 bg-slate-100">
+                        <thead className={components.table.header + " border-b-2 border-slate-300"}>
                             <tr>
                                 <th className="w-24 px-4 py-3 text-left">
                                     Ligne
@@ -110,7 +111,7 @@ export default function ValidationIssueTable({
                                 <th className="px-4 py-3 text-left">
                                     Valeur
                                 </th>
-                                <th className="w-105 px-4 py-3 text-left">
+                                <th className="px-4 py-3 text-left">
                                     Message
                                 </th>
                             </tr>
@@ -120,7 +121,7 @@ export default function ValidationIssueTable({
                             {filteredIssues.map((issue, index) => (
                                 <tr
                                     key={index}
-                                    className={`border-t even:bg-slate-50 ${
+                                    className={`border-b even:bg-slate-50 ${
                                         isError
                                             ? "hover:bg-red-50"
                                             : "hover:bg-yellow-50"

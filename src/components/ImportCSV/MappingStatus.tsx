@@ -5,7 +5,6 @@ type ExpectedField = {
     label: string;
     required: boolean;
 }
-
 interface Props {
     missingRequired: ExpectedField[];
     ignoredColumns: number;
@@ -17,7 +16,7 @@ export default function MappingStatus({
 }: Props) {
     return (
         <div className="space-y-4">
-            <div className="rounded-lg border bg-amber-50 px-4 py-3 text-sm">
+            <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm">
                 Colonnes ignorées :
                 <span className="ml-2 font-bold">
                     {ignoredColumns}
@@ -33,12 +32,12 @@ export default function MappingStatus({
                     <div className="flex items-center gap-2">
                         <AlertTriangle size={18} />
 
-                        <span className="font-medium">
+                        <span className="font-medium text-yellow-800">
                             Champs obligatoires manquants
                         </span>
                     </div>
 
-                    <div className="mt-2 text-sm">
+                    <div className="mt-2 text-sm text-yellow-700">
                         {missingRequired
                             .map((field) => field.label)
                             .join(", ")}

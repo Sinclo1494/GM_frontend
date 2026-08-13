@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../api/auth";
 import { useAuth } from "../context/useAuth";
-
 import { components } from "../theme/components";
 
 export default function Login() {
@@ -39,7 +38,7 @@ export default function Login() {
 
     return (
         <div className="min-h-screen  flex items-center justify-center px-4 ">
-           
+            
             <div className="w-full max-w-md">
                 <form
                     onSubmit={handleSubmit}
@@ -58,7 +57,7 @@ export default function Login() {
 
                     {/* Username */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-200 mb-2">
+                        <label className={components.label}>
                             Username
                         </label>
 
@@ -73,7 +72,7 @@ export default function Login() {
 
                     {/* Password */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-200 mb-2">
+                        <label className={components.label}>
                             Password
                         </label>
 
@@ -103,7 +102,7 @@ export default function Login() {
                         </div>
                     </div>
                     {error && (
-                        <p className="text-md text-red-700 px-3 py-2 rounded-md">
+                        <p className="text-md text-red-700 px-3 py-2 rounded-md bg-red-50 border border-red-200">
                             {error}
                         </p>
                     )}
@@ -112,7 +111,7 @@ export default function Login() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className={`${components.loginButton} w-full flex items-center justify-center gap-2 disabled:opacity-70`}
+                        className={`${components.loginButton} w-full flex items-center justify-center gap-2`}
                     >
                         {loading && (
                             <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
