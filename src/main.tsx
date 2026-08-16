@@ -22,6 +22,25 @@ import RegularisationImportCsv from './pages/ImportRegularisationCSV.tsx';
 import './index.css';
 import JournalMateriel from './pages/JournalMateriel.tsx';
 import Journalisation from './pages/Journalisation.tsx';
+import EntreprisePage from './pages/EntreprisePage.tsx';
+import FilialePage from './pages/FilialePage.tsx';
+import DivisionPage from './pages/DivisionPage.tsx';
+import FamilleStructuresPage from './pages/FamilleStructuresPage.tsx';
+import CategorieGMPage from './pages/CategorieGMPage.tsx';
+import FamilleMaterielPage from './pages/FamilleMaterielPage.tsx';
+import SousFamilleMaterielPage from './pages/SousFamilleMaterielPage.tsx';
+import MarqueMaterielPage from './pages/MarqueMaterielPage.tsx';
+import TypeMarquePage from './pages/TypeMarquePage.tsx';
+import TypeAffectationPage from './pages/TypeAffectationPage.tsx';
+import TypeSituationPage from './pages/TypeSituationPage.tsx';
+import TypeEtatMaterielPage from './pages/TypeEtatMaterielPage.tsx';
+import SitePage from './pages/SitePage.tsx';
+import GrandMaterielPage from './pages/GrandMaterielPage.tsx';
+import AffectationMaterielPage from './pages/AffectationMaterielPage.tsx';
+import SituationMaterielPage from './pages/SituationMaterielPage.tsx';
+import PointagePage from './pages/PointagePage.tsx';
+import RegularisationGMPage from './pages/RegularisationGMPage.tsx';
+import RegularisationMoisGM2Page from './pages/RegularisationMoisGM2Page.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -116,7 +135,27 @@ createRoot(document.getElementById('root')!).render(
                   <RegularisationImportCsv />
                 </ProtectedRoute>}
             />
-            
+
+            <Route path="/gestion/entreprises" element={<ProtectedRoute><EntreprisePage /></ProtectedRoute>} />
+            <Route path="/gestion/filiales" element={<ProtectedRoute><FilialePage /></ProtectedRoute>} />
+            <Route path="/gestion/divisions" element={<ProtectedRoute><DivisionPage /></ProtectedRoute>} />
+            <Route path="/gestion/familles-structures" element={<ProtectedRoute><FamilleStructuresPage /></ProtectedRoute>} />
+            <Route path="/gestion/categories-gm" element={<ProtectedRoute><CategorieGMPage /></ProtectedRoute>} />
+            <Route path="/gestion/familles-materiel" element={<ProtectedRoute><FamilleMaterielPage /></ProtectedRoute>} />
+            <Route path="/gestion/sous-familles-materiel" element={<ProtectedRoute><SousFamilleMaterielPage /></ProtectedRoute>} />
+            <Route path="/gestion/marques-materiel" element={<ProtectedRoute><MarqueMaterielPage /></ProtectedRoute>} />
+            <Route path="/gestion/types-marque" element={<ProtectedRoute><TypeMarquePage /></ProtectedRoute>} />
+            <Route path="/gestion/types-affectation" element={<ProtectedRoute><TypeAffectationPage /></ProtectedRoute>} />
+            <Route path="/gestion/types-situation" element={<ProtectedRoute><TypeSituationPage /></ProtectedRoute>} />
+            <Route path="/gestion/types-etat-materiel" element={<ProtectedRoute><TypeEtatMaterielPage /></ProtectedRoute>} />
+            <Route path="/gestion/sites" element={<ProtectedRoute><SitePage /></ProtectedRoute>} />
+            <Route path="/gestion/grand-materiel" element={<ProtectedRoute><GrandMaterielPage /></ProtectedRoute>} />
+            <Route path="/gestion/affectations" element={<ProtectedRoute><AffectationMaterielPage /></ProtectedRoute>} />
+            <Route path="/gestion/situations" element={<ProtectedRoute><SituationMaterielPage /></ProtectedRoute>} />
+            <Route path="/gestion/pointages" element={<ProtectedRoute><PointagePage /></ProtectedRoute>} />
+            <Route path="/gestion/regularisations-gm" element={<ProtectedRoute><RegularisationGMPage /></ProtectedRoute>} />
+            <Route path="/gestion/regularisations-mois" element={<ProtectedRoute><RegularisationMoisGM2Page /></ProtectedRoute>} />
+
           </Route>
         </Routes>
       </BrowserRouter>

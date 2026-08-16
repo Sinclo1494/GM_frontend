@@ -8,6 +8,7 @@ const Navbar = () => {
   const [reportsOpen, setReportsOpen] = useState(false);
   const [importsOpen, setImportsOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
+  const [gestionOpen, setGestionOpen] = useState(false);
 
   const { logout } = useAuth();
   const navigate = useNavigate();
@@ -47,6 +48,7 @@ const Navbar = () => {
             onClick={() => {
               setImportsOpen(!importsOpen)
               setReportsOpen(false)
+              setGestionOpen(false)
               setAdminOpen(false)
             }}
             className="flex items-center gap-1 hover:text-gray-300 transition-colors"
@@ -125,6 +127,7 @@ const Navbar = () => {
             onClick={() => {
               setReportsOpen(!reportsOpen)
               setImportsOpen(false)
+              setGestionOpen(false)
               setAdminOpen(false)
             }}
             className="flex items-center gap-1 hover:text-gray-300 transition-colors"
@@ -163,6 +166,53 @@ const Navbar = () => {
           )}
         </li>
 
+        {/* Gestion Dropdown */}
+        <li className="relative">
+          <button
+            onClick={() => {
+              setGestionOpen(!gestionOpen)
+              setImportsOpen(false)
+              setReportsOpen(false)
+              setAdminOpen(false)
+            }}
+            className="flex items-center gap-1 hover:text-gray-300 transition-colors"
+          >
+            Gestion
+            <ChevronDown
+              className={`h-4 w-4 transition-transform ${gestionOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+
+          {gestionOpen && (
+            <div className={dropdownClass + " w-64"}>
+              <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">Référentiels</div>
+              <Link to="/gestion/entreprises" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Entreprises</Link>
+              <Link to="/gestion/filiales" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Filiales</Link>
+              <Link to="/gestion/divisions" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Divisions</Link>
+              <Link to="/gestion/familles-structures" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Familles Structures</Link>
+              <div className="border-t border-slate-100 my-1" />
+              <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">Matériel</div>
+              <Link to="/gestion/categories-gm" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Catégories GM</Link>
+              <Link to="/gestion/familles-materiel" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Familles Matériel</Link>
+              <Link to="/gestion/sous-familles-materiel" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Sous-Familles Matériel</Link>
+              <Link to="/gestion/marques-materiel" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Marques Matériel</Link>
+              <Link to="/gestion/types-marque" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Types de Marque</Link>
+              <Link to="/gestion/grand-materiel" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Grand Matériel</Link>
+              <div className="border-t border-slate-100 my-1" />
+              <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">Opérations</div>
+              <Link to="/gestion/types-affectation" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Types Affectation</Link>
+              <Link to="/gestion/types-situation" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Types Situation</Link>
+              <Link to="/gestion/types-etat-materiel" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Types État Matériel</Link>
+              <Link to="/gestion/sites" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Sites</Link>
+              <Link to="/gestion/affectations" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Affectations</Link>
+              <Link to="/gestion/situations" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Situations</Link>
+              <Link to="/gestion/pointages" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Pointages</Link>
+              <Link to="/gestion/regularisations-gm" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Régularisations GM</Link>
+              <Link to="/gestion/regularisations-mois" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Régularisations Mensuelles</Link>
+            </div>
+          )}
+        </li>
+
         {/* Administration Dropdown */}
         <li className="relative">
           <button
@@ -170,6 +220,7 @@ const Navbar = () => {
               setAdminOpen(!adminOpen)
               setImportsOpen(false)
               setReportsOpen(false)
+              setGestionOpen(false)
             }}
             className="flex items-center gap-1 hover:text-gray-300 transition-colors"
           >
