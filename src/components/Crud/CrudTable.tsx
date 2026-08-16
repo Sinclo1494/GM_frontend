@@ -34,6 +34,7 @@ interface CrudTableProps<T> {
     itemsPerPage: number;
     onItemsPerPageChange: (size: number) => void;
     onRetry: () => void;
+    totalItems?: number;
     emptyMessage?: string;
     title?: string;
     searchPlaceholder?: string;
@@ -74,6 +75,7 @@ function CrudTable<T>({
     itemsPerPage,
     onItemsPerPageChange,
     onRetry,
+    totalItems,
     emptyMessage = "Aucun résultat trouvé",
     title,
     searchPlaceholder = "Rechercher...",
@@ -94,10 +96,10 @@ function CrudTable<T>({
         return sorted;
     }, [data, sortField, sortOrder]);
 
-    const totalPages = Math.max(1, Math.ceil(sortedData.length / itemsPerPage));
+    const itemCount = totalItems ?? sortedData.length;
+    const totalPages = Math.max(1, Math.ceil(itemCount / itemsPerPage));
     const startIdx = (currentPage - 1) * itemsPerPage;
-    const endIdx = startIdx + itemsPerPage;
-    const paginatedData = sortedData.slice(startIdx, endIdx);
+    const endIdx = Math.min(startIdx + itemsPerPage, itemCount);
 
     const paginationItems = useMemo(() => {
         const items: (number | "...")[] = [];
@@ -159,9 +161,9 @@ function CrudTable<T>({
                     ) : (
                         <>
                             Affichage de <span className="font-semibold">{Math.max(1, startIdx + 1)}</span> à{" "}
-                            <span className="font-semibold">{Math.min(endIdx, sortedData.length)}</span> sur{" "}
-                            <span className="font-semibold">{sortedData.length}</span> résultat
-                            {sortedData.length !== 1 ? "s" : ""}
+                            <span className="font-semibold">{Math.min(endIdx, itemCount)}</span> sur{" "}
+                            <span className="font-semibold">{itemCount}</span> résultat
+                            {itemCount !== 1 ? "s" : ""}
                         </>
                     )}
                 </p>
@@ -224,8 +226,8 @@ function CrudTable<T>({
                                     </div>
                                 </td>
                             </tr>
-                        ) : paginatedData.length > 0 ? (
-                            paginatedData.map((row, idx) => (
+                        ) : data.length > 0 ? (
+                            data.map((row, idx) => (
                                 <tr
                                     key={(row as any).id ?? idx}
                                     className={`${components.table.row} ${idx % 2 === 0 ? "bg-white" : "bg-slate-50/50"

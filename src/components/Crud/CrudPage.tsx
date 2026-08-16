@@ -32,11 +32,13 @@ function CrudPage<T>({
     searchPlaceholder,
 }: CrudPageProps<T>) {
     const [data, setData] = useState<T[]>([]);
+    const [totalItems, setTotalItems] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [searchInput, setSearchInput] = useState("");
     const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const abortControllerRef = useRef<AbortController | null>(null);
     const [sortField, setSortField] = useState<SortField>(null);
     const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
     const [currentPage, setCurrentPage] = useState(1);
@@ -53,21 +55,35 @@ function CrudPage<T>({
     const [deleteError, setDeleteError] = useState<string | null>(null);
 
     const fetchData = useCallback(async () => {
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
+
         setLoading(true);
         setError(null);
         try {
             const params: Record<string, string | number> = {};
             if (searchTerm) params.search = searchTerm;
-            const raw = await crudList(endpoint, params);
-            const mapped = mapRow ? raw.map(mapRow) : (raw as T[]);
+            if (sortField) params.ordering = sortOrder === "desc" ? `-${sortField}` : sortField;
+            params.page = currentPage;
+            params.page_size = itemsPerPage;
+            const raw = await crudList(endpoint, params, { signal: controller.signal });
+            const mapped = mapRow ? raw.results.map(mapRow) : (raw.results as T[]);
             setData(mapped);
-            setCurrentPage(1);
+            setTotalItems(raw.count);
         } catch (err: any) {
-            setError(err?.response?.data?.message ?? err?.message ?? "Erreur lors du chargement.");
+            if (err.name !== "CanceledError") {
+                setError(err?.response?.data?.message ?? err?.message ?? "Erreur lors du chargement.");
+            }
         } finally {
+            if (abortControllerRef.current === controller) {
+                abortControllerRef.current = null;
+            }
             setLoading(false);
         }
-    }, [endpoint, searchTerm, mapRow]);
+    }, [endpoint, searchTerm, sortField, sortOrder, currentPage, itemsPerPage, mapRow]);
 
     useEffect(() => {
         fetchData();
@@ -77,6 +93,9 @@ function CrudPage<T>({
         return () => {
             if (searchTimerRef.current) {
                 clearTimeout(searchTimerRef.current);
+            }
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
             }
         };
     }, []);
@@ -88,6 +107,7 @@ function CrudPage<T>({
         }
         searchTimerRef.current = setTimeout(() => {
             setSearchTerm(value);
+            setCurrentPage(1);
         }, 400);
     }, []);
 
@@ -192,6 +212,7 @@ function CrudPage<T>({
                     itemsPerPage={itemsPerPage}
                     onItemsPerPageChange={setItemsPerPage}
                     onRetry={fetchData}
+                    totalItems={totalItems}
                     searchPlaceholder={searchPlaceholder || `Rechercher dans ${title}...`}
                     actions={(row) => (
                         <div className="flex items-center gap-2">

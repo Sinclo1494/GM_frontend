@@ -14,13 +14,22 @@ export interface CrudListParams {
     [key: string]: string | number | undefined;
 }
 
+export interface CrudListResponse<T> {
+    results: T[];
+    count: number;
+    next: string | null;
+    previous: string | null;
+}
+
 export async function crudList<T>(
     endpoint: string,
     params: CrudListParams = {},
-): Promise<T[]> {
-    const { data } = await axios.get<T[]>(`${API}/${endpoint}/`, {
+    options?: { signal?: AbortSignal },
+): Promise<CrudListResponse<T>> {
+    const { data } = await axios.get<CrudListResponse<T>>(`${API}/${endpoint}/`, {
         params,
         headers: authHeaders(),
+        signal: options?.signal,
     });
     return data;
 }
@@ -84,9 +93,9 @@ export async function crudOptions<T>(
     endpoint: string,
     params: Record<string, string> = {},
 ): Promise<T[]> {
-    const { data } = await axios.get<T[]>(`${API}/${endpoint}/`, {
-        params,
+    const { data } = await axios.get<CrudListResponse<T>>(`${API}/${endpoint}/`, {
+        params: { ...params, page_size: 1000 },
         headers: authHeaders(),
     });
-    return data;
+    return data.results;
 }
