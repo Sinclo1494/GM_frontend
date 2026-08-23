@@ -27,7 +27,7 @@ export default function Login() {
         try {
             const data = await loginUser(username, password);
 
-            login(data.access);
+            login(data.access, data.refresh);
             navigate("/");
         } catch {
             setError("Invalid username or password");
@@ -101,11 +101,11 @@ export default function Login() {
                             </button>
                         </div>
                     </div>
-                    {error && (
-                        <p className="text-md text-red-700 px-3 py-2 rounded-md bg-red-50 border border-red-200">
-                            {error}
-                        </p>
-                    )}
+                            {error && (
+                                <p className="text-md text-red-700 px-3 py-2 rounded-md bg-red-50 border border-red-200 dark:border-red-800">
+                                    {error}
+                                </p>
+                            )}
 
                     {/* Login Button */}
                     <button

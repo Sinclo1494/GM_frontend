@@ -53,11 +53,10 @@ const JournalisationFilters = ({
         </div>
 
         <div>
-          <label className={components.label}>Utilisateur (ID)</label>
+          <label className={components.label}>Utilisateur</label>
           <input
-            type="number"
-            min={1}
-            placeholder="ex: 3"
+            type="text"
+            placeholder="ex: admin"
             value={filters.user}
             onChange={(e) => setFilter("user", e.target.value)}
             className={components.input}

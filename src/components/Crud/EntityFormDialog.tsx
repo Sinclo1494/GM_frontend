@@ -98,19 +98,19 @@ const EntityFormDialog: React.FC<EntityFormDialogProps> = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
             <div className={components.modal}>
                 <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-dark-text-primary">{title}</h3>
                     <button
                         type="button"
                         onClick={onClose}
                         disabled={submitting}
-                        className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                        className="text-gray-400 hover:text-gray-600 dark:text-dark-text-secondary disabled:opacity-50"
                     >
                         <X className="h-5 w-5" />
                     </button>
                 </div>
 
                 {error && (
-                    <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                    <div className="mb-4 rounded-md border border-red-200 dark:border-red-800 dark:border-red-800 bg-red-50 px-3 py-2 text-sm text-red-700">
                         {error}
                     </div>
                 )}
@@ -194,19 +194,19 @@ const EntityFormDialog: React.FC<EntityFormDialogProps> = ({
                                             checked={Boolean(value)}
                                             disabled={submitting}
                                             onChange={(e) => handleChange(field.name, e.target.checked)}
-                                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                            className="h-4 w-4 rounded border-gray-300 dark:border-dark-border text-blue-600 focus:ring-blue-500"
                                         />
                                     ) : null}
 
                                     {fieldError && (
-                                        <p className="mt-1 text-xs text-red-600">{fieldError}</p>
+                                        <p className="mt-1 text-xs text-red-600 dark:text-red-400">{fieldError}</p>
                                     )}
                                 </div>
                             );
                         })}
                     </div>
 
-                    <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
+                    <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-dark-border">
                         <button
                             type="button"
                             onClick={onClose}

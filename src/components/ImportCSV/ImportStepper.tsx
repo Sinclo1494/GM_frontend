@@ -18,7 +18,7 @@ export default function ImportStepper({
     step,
 }: Props) {
     return (
-        <div className="flex justify-between border-b border-slate-200 bg-slate-50 px-8 py-5">
+        <div className="flex justify-between border-b dark:border-dark-border dark:bg-dark-bg-secondary px-8 py-5">
             {STEPS.map((label, index) => {
                 const stepNumber = index + 1;
                 const active = step === stepNumber;
@@ -49,7 +49,7 @@ export default function ImportStepper({
                             className={`font-medium ${
                                 active
                                     ? "text-blue-700"
-                                    : "text-gray-500"
+                                    : "dark:text-dark-text-secondary"
                             }`}
                         >
                             {label}

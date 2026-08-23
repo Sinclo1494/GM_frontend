@@ -51,8 +51,8 @@ const InfoRow = ({
   value: React.ReactNode;
 }) => (
   <div className="grid grid-cols-2 gap-2 py-1.5">
-    <dt className="text-xs font-medium text-gray-500">{label}</dt>
-    <dd className="text-sm text-gray-800 wrap-break-word">{value || "—"}</dd>
+    <dt className="text-xs font-medium text-gray-500 dark:text-dark-text-secondary">{label}</dt>
+    <dd className="text-sm text-gray-800 dark:text-dark-text-primary wrap-break-word">{value || "—"}</dd>
   </div>
 );
 
@@ -67,7 +67,7 @@ const ValueDiffTable: React.FC<{
 
   if (!oldDict && !newDict) {
     return (
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-gray-500 dark:text-dark-text-secondary">
         Aucune valeur d&eacute;tect&eacute;e.
       </p>
     );
@@ -79,17 +79,17 @@ const ValueDiffTable: React.FC<{
 
   return (
     <div className="space-y-3">
-      <div className="overflow-x-auto rounded-lg border border-slate-200">
+      <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-dark-border">
         <table className="min-w-full text-sm">
           <thead className={components.table.header}>
             <tr>
-              <th className="border border-slate-200 px-3 py-1.5 text-left text-xs font-bold uppercase tracking-wider text-slate-700">
+              <th className="border border-slate-200 dark:border-dark-border px-3 py-1.5 text-left text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-dark-text-primary">
                 Champ
               </th>
-              <th className="border border-slate-200 px-3 py-1.5 text-left text-xs font-bold uppercase tracking-wider text-slate-700">
+              <th className="border border-slate-200 dark:border-dark-border px-3 py-1.5 text-left text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-dark-text-primary">
                 Ancienne valeur
               </th>
-              <th className="border border-slate-200 px-3 py-1.5 text-left text-xs font-bold uppercase tracking-wider text-slate-700">
+              <th className="border border-slate-200 dark:border-dark-border px-3 py-1.5 text-left text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-dark-text-primary">
                 Nouvelle valeur
               </th>
             </tr>
@@ -102,7 +102,7 @@ const ValueDiffTable: React.FC<{
               const newV = hnew ? newDict![key] : undefined;
               const changed = renderValue(oldV) !== renderValue(newV);
 
-              let rowClass = "bg-white";
+              let rowClass = "bg-white dark:bg-dark-card";
               if (!had && hnew) {
                 rowClass = "bg-green-50";
               } else if (had && !hnew) {
@@ -113,11 +113,11 @@ const ValueDiffTable: React.FC<{
 
               return (
                 <tr key={key} className={rowClass}>
-                  <td className="border border-slate-200 px-3 py-1.5 font-medium text-gray-800">
+                  <td className="border border-slate-200 dark:border-dark-border px-3 py-1.5 font-medium text-gray-800 dark:text-dark-text-primary">
                     {key}
                   </td>
                   <td
-                    className="border border-slate-200 px-3 py-1.5 text-gray-600"
+                    className="border border-slate-200 dark:border-dark-border px-3 py-1.5 text-gray-600 dark:text-dark-text-secondary"
                     title={had ? renderValue(oldV) : undefined}
                   >
                     <span className="block max-w-55 truncate">
@@ -125,7 +125,7 @@ const ValueDiffTable: React.FC<{
                     </span>
                   </td>
                   <td
-                    className="border border-slate-200 px-3 py-1.5 text-gray-600"
+                    className="border border-slate-200 dark:border-dark-border px-3 py-1.5 text-gray-600 dark:text-dark-text-secondary"
                     title={hnew ? renderValue(newV) : undefined}
                   >
                     <span className="block max-w-55 truncate">
@@ -139,7 +139,7 @@ const ValueDiffTable: React.FC<{
         </table>
       </div>
 
-      <div className="flex items-center gap-4 text-xs text-gray-500">
+      <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-dark-text-secondary">
         <label className="flex items-center gap-1">
           <input
             type="checkbox"
@@ -199,14 +199,14 @@ const JournalDetailDialog: React.FC<Props> = ({ open, onClose, journal }) => {
         >
           <div className="flex items-start justify-between">
             <div>
-              <h2 className="text-lg font-bold text-gray-800">
+              <h2 className="text-lg font-bold text-gray-800 dark:text-dark-text-primary">
                 Détails de l'entrée de journal
               </h2>
-              <p className="text-xs text-gray-500">ID #{journal.id}</p>
+              <p className="text-xs text-gray-500 dark:text-dark-text-secondary">ID #{journal.id}</p>
             </div>
             <button
               onClick={onClose}
-              className="rounded p-1 text-gray-500 hover:bg-gray-100 transition-colors"
+              className="rounded p-1 text-gray-500 dark:text-dark-text-secondary hover:bg-gray-100 transition-colors"
               aria-label="Fermer"
             >
               <X className="h-5 w-5" />
@@ -215,7 +215,7 @@ const JournalDetailDialog: React.FC<Props> = ({ open, onClose, journal }) => {
 
           <div className="mt-4 space-y-1 divide-y divide-gray-200">
             <div>
-              <h3 className="mb-2 text-sm font-semibold text-gray-700">
+              <h3 className="mb-2 text-sm font-semibold text-gray-700 dark:text-dark-text-primary">
                 Informations générales
               </h3>
               <dl>
@@ -249,7 +249,7 @@ const JournalDetailDialog: React.FC<Props> = ({ open, onClose, journal }) => {
 
             {hasChanges && (
               <div className="pt-4">
-                <h3 className="mb-2 text-sm font-semibold text-gray-700">
+                <h3 className="mb-2 text-sm font-semibold text-gray-700 dark:text-dark-text-primary">
                   Modifications
                 </h3>
                 <ValueDiffTable

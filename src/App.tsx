@@ -1,15 +1,18 @@
 import './App.css'
 import { Outlet } from 'react-router-dom'
 import Navbar from './components/Navigation/NavBar'
+import { ThemeProvider } from './context/ThemeContext'
 
 function App() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-1 bg-gray-50/30">
-        <Outlet />
-      </main>
-    </div>
+    <ThemeProvider>
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-1 bg-gray-50/30 dark:bg-dark-bg-primary">
+          <Outlet />
+        </main>
+      </div>
+    </ThemeProvider>
   )
 }
 

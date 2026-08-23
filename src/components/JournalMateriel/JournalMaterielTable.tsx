@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
-import axios from "axios";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import {
   ChevronUp,
   ChevronDown,
@@ -12,9 +11,9 @@ import {
 import formatCurrency from "../../utils/FormatCurrency";
 import formatDate from "../../utils/FormatDate";
 import { components } from "../../theme/components";
+import { crudList } from "../../api/crudService";
 
-const API = import.meta.env.VITE_API_BASE_URL;
-const GM_URL = `${API}/grand-materiel/`
+const GM_URL = "grand-materiel";
 
 interface JournalMateriel {
     id: number;
@@ -57,9 +56,14 @@ interface SortIconProps {
     field: Exclude<SortField, null>;
     sortField: SortField;
     sortOrder: SortOrder;
+    sortable: boolean;
 }
 
-const SortIcon: React.FC<SortIconProps> = ({ field, sortField, sortOrder }) => {
+const SortIcon: React.FC<SortIconProps> = ({ field, sortField, sortOrder, sortable }) => {
+    if (!sortable) {
+        return <div className="h-4 w-4 text-gray-300" />;
+    }
+
     if (sortField !== field) {
         return <div className="h-4 w-4 text-gray-300" />;
     }
@@ -98,138 +102,228 @@ const FilterInput = ({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Filtrer..."
+        onClick={(e) => e.stopPropagation()}
         className={components.input}
     />
 );
 
 const JournalMaterielTable: React.FC = () => {
     const [data, setData] = useState<JournalMateriel[]>([]);
+    const [totalItems, setTotalItems] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [searchInput, setSearchInput] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
     const [sortField, setSortField] = useState<SortField>(null);
     const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
     const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+
+    const abortControllerRef = useRef<AbortController | null>(null);
+    const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const filterTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
     const columns = [
-        { key: "code_materiel", label: "Code Matériel", width: "min-w-[170px]" },
-        { key: "designation", label: "Désignation", width: "min-w-[250px]" },
-        { key: "num_serie", label: "N° Série", width: "min-w-[170px]" },
+        { key: "code_materiel", label: "Code Matériel", width: "min-w-[170px]", sortable: true },
+        { key: "designation", label: "Désignation", width: "min-w-[250px]", sortable: true },
+        { key: "num_serie", label: "N° Série", width: "min-w-[170px]", sortable: true },
         {
             key: "immatriculation",
             label: "Immatriculation",
             width: "min-w-[170px]",
+            sortable: true,
         },
-        { key: "code_filiale_g", label: "Filiale", width: "min-w-[130px]" },
-        { key: "code_sous_famille", label: "Sous Famille", width: "min-w-[180px]" },
-        { key: "code_type_marque", label: "Type Marque", width: "min-w-[180px]" },
+        { key: "code_filiale_g", label: "Filiale", width: "min-w-[130px]", sortable: true },
+        { key: "code_sous_famille", label: "Sous Famille", width: "min-w-[180px]", sortable: true },
+        { key: "code_type_marque", label: "Type Marque", width: "min-w-[180px]", sortable: true },
         {
             key: "date_acquisition",
             label: "Date Acquisition",
             width: "min-w-[170px]",
+            sortable: true,
         },
         {
             key: "valeur_acquisition",
             label: "Valeur Acquisition",
             width: "min-w-[180px]",
+            sortable: true,
         },
         {
             key: "valeur_remplacement",
             label: "Valeur Remp.",
             width: "min-w-[190px]",
+            sortable: true,
         },
-        { key: "taux_amortissement", label: "Taux Amort.", width: "min-w-[150px]" },
-        { key: "puissance_materiel", label: "Puissance", width: "min-w-[150px]" },
+        { key: "taux_amortissement", label: "Taux Amort.", width: "min-w-[150px]", sortable: true },
+        { key: "puissance_materiel", label: "Puissance", width: "min-w-[150px]", sortable: true },
     ] as const;
 
+    const [columnFiltersInput, setColumnFiltersInput] = useState({
+        code_materiel: "",
+        designation: "",
+        num_serie: "",
+        immatriculation: "",
+        code_sous_famille: "",
+        code_type_marque: "",
+        code_filiale_g: "",
+        est_bloque: "",
+    });
     const [columnFilters, setColumnFilters] = useState({
         code_materiel: "",
         designation: "",
         num_serie: "",
         immatriculation: "",
-        date_acquisition: "",
-        valeur_acquisition: "",
-        valeur_remplacement: "",
-        taux_amortissement: "",
-        puissance_materiel: "",
         code_sous_famille: "",
         code_type_marque: "",
         code_filiale_g: "",
         est_bloque: "",
     });
 
-    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const fetchData = useCallback(async () => {
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                setError(null);
-                const response = await axios.get<JournalMateriel[]>(
-                    GM_URL,
-                );
-                setData(response.data);
-            } catch (err) {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const params: Record<string, string | number> = {};
+
+            if (searchTerm) params.search = searchTerm;
+            if (sortField) {
+                const orderingField = sortField === "code_sous_famille" ? "code_sous_famille_materiel" : sortField;
+                const ordering = sortOrder === "desc" ? `-${orderingField}` : orderingField;
+                params.ordering = ordering;
+            }
+            params.page = currentPage;
+            params.page_size = itemsPerPage;
+
+            if (columnFilters.code_materiel) params.code_materiel = columnFilters.code_materiel;
+            if (columnFilters.designation) params.designation = columnFilters.designation;
+            if (columnFilters.num_serie) params.num_serie = columnFilters.num_serie;
+            if (columnFilters.immatriculation) params.immatriculation = columnFilters.immatriculation;
+            if (columnFilters.code_sous_famille) params.code_sous_famille = columnFilters.code_sous_famille;
+            if (columnFilters.code_type_marque) params.code_type_marque = columnFilters.code_type_marque;
+            if (columnFilters.code_filiale_g) params.code_filiale = columnFilters.code_filiale_g;
+            if (columnFilters.est_bloque !== "") params.est_bloque = columnFilters.est_bloque;
+
+            const response = await crudList<JournalMateriel>(GM_URL, params, { signal: controller.signal });
+            setData(response.results);
+            setTotalItems(response.count);
+            setIsInitialLoading(false);
+        } catch (err) {
+            const axiosError = err as { name?: string; message?: string; response?: { data?: { message?: string; detail?: string } } };
+            if (axiosError.name !== "CanceledError") {
                 const errorMessage =
-                    err instanceof Error
-                        ? err.message
+                    axiosError instanceof Error
+                        ? axiosError.message
                         : "Une erreur est survenue lors du chargement des données";
                 setError(errorMessage);
-                console.error("Error fetching data:", err);
-            } finally {
-                setLoading(false);
+                console.error("Error fetching data:", axiosError);
             }
-        };
+        } finally {
+            if (abortControllerRef.current === controller) {
+                abortControllerRef.current = null;
+            }
+            setLoading(false);
+        }
+    }, [searchTerm, sortField, sortOrder, currentPage, itemsPerPage, columnFilters]);
 
+    useEffect(() => {
         fetchData();
+    }, [fetchData]);
+
+    useEffect(() => {
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+            if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+            if (filterTimerRef.current) clearTimeout(filterTimerRef.current);
+        };
     }, []);
-    const contains = (value: string | null | undefined, filter: string) =>
-        (value ?? "").toLowerCase().includes(filter.toLowerCase());
-    const filteredData = useMemo(() => {
-        return data.filter((item) => {
-            const global =
-                contains(item.code_materiel, searchTerm) ||
-                contains(item.designation, searchTerm);
 
-            return (
-                global &&
-                contains(item.code_materiel, columnFilters.code_materiel) &&
-                contains(item.designation, columnFilters.designation) &&
-                contains(item.num_serie, columnFilters.num_serie) &&
-                contains(item.immatriculation, columnFilters.immatriculation) &&
-                contains(item.code_sous_famille, columnFilters.code_sous_famille) &&
-                contains(item.code_type_marque, columnFilters.code_type_marque) &&
-                contains(item.code_filiale_g, columnFilters.code_filiale_g) &&
-                contains(item.date_acquisition, columnFilters.date_acquisition) &&
-                contains(item.valeur_acquisition, columnFilters.valeur_acquisition) &&
-                contains(item.valeur_remplacement, columnFilters.valeur_remplacement) &&
-                contains(item.taux_amortissement, columnFilters.taux_amortissement) &&
-                contains(item.puissance_materiel, columnFilters.puissance_materiel) &&
-                (columnFilters.est_bloque === "" ||
-                    String(item.est_bloque) === columnFilters.est_bloque)
-            );
+    useEffect(() => {
+        if (filterTimerRef.current) clearTimeout(filterTimerRef.current);
+        filterTimerRef.current = setTimeout(() => {
+            setColumnFilters(columnFiltersInput);
+            setCurrentPage(1);
+        }, 300);
+        return () => {
+            if (filterTimerRef.current) clearTimeout(filterTimerRef.current);
+        };
+    }, [columnFiltersInput]);
+
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setSearchInput(value);
+        if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+        searchTimerRef.current = setTimeout(() => {
+            setSearchTerm(value);
+            setCurrentPage(1);
+        }, 400);
+    };
+
+    const handleColumnFilterChange = (key: keyof typeof columnFiltersInput) => (value: string) => {
+        setColumnFiltersInput((prev) => ({ ...prev, [key]: value }));
+    };
+
+    const handleSort = (field: SortField) => {
+        if (!field) return;
+
+        const column = columns.find(c => c.key === field);
+        if (column && !column.sortable) return;
+
+        if (sortField === field) {
+            setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+        } else {
+            setSortField(field);
+            setSortOrder("asc");
+        }
+        setCurrentPage(1);
+    };
+
+    const handleItemsPerPageChange = (value: number) => {
+        setItemsPerPage(value);
+        setCurrentPage(1);
+    };
+
+    const handleReset = () => {
+        setSearchInput("");
+        setSearchTerm("");
+        setColumnFiltersInput({
+            code_materiel: "",
+            designation: "",
+            num_serie: "",
+            immatriculation: "",
+            code_sous_famille: "",
+            code_type_marque: "",
+            code_filiale_g: "",
+            est_bloque: "",
         });
-    }, [data, searchTerm, columnFilters]);
-
-    const sortedData = useMemo(() => {
-        const sorted = [...filteredData];
-        if (!sortField) return sorted;
-
-        sorted.sort((a, b) => {
-            const aValue = a[sortField];
-            const bValue = b[sortField];
-
-            if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
-            if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
-            return 0;
+        setColumnFilters({
+            code_materiel: "",
+            designation: "",
+            num_serie: "",
+            immatriculation: "",
+            code_sous_famille: "",
+            code_type_marque: "",
+            code_filiale_g: "",
+            est_bloque: "",
         });
+        setSortField(null);
+        setSortOrder("asc");
+        setCurrentPage(1);
+    };
 
-        return sorted;
-    }, [filteredData, sortField, sortOrder]);
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const startIdx = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+    const endIdx = Math.min(currentPage * itemsPerPage, totalItems);
 
-    const totalPages = Math.ceil(sortedData.length / itemsPerPage);
-    const startIdx = (currentPage - 1) * itemsPerPage;
-    const endIdx = startIdx + itemsPerPage;
-    const paginatedData = sortedData.slice(startIdx, endIdx);
     const paginationItems = useMemo(() => {
         const items: (number | "...")[] = [];
 
@@ -259,35 +353,12 @@ const JournalMaterielTable: React.FC = () => {
         return items;
     }, [currentPage, totalPages]);
 
-    const handleSort = (field: SortField) => {
-        if (sortField === field) {
-            setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-        } else {
-            setSortField(field);
-            setSortOrder("asc");
-        }
-        setCurrentPage(1);
-    };
-
-    useEffect(() => {
-        const timeoutId = window.setTimeout(() => {
-            setCurrentPage(1);
-        }, 0);
-
-        return () => window.clearTimeout(timeoutId);
-    }, [searchTerm, columnFilters, itemsPerPage]);
-
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchTerm(e.target.value);
-        setCurrentPage(1);
-    };
-
-    if (loading) {
+    if (loading && isInitialLoading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
                 <div className="flex flex-col items-center gap-4">
                     <Loader2 className="h-10 w-10 text-blue-600 animate-spin" />
-                    <p className="text-gray-600">Chargement des données...</p>
+                    <p className="text-gray-600 dark:text-dark-text-secondary">Chargement des données...</p>
                 </div>
             </div>
         );
@@ -296,12 +367,12 @@ const JournalMaterielTable: React.FC = () => {
     if (error) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
-                <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full">
+                <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg p-8 max-w-md w-full">
                     <div className="flex items-center gap-4 mb-4">
-                        <AlertCircle className="h-8 w-8 text-red-600" />
-                        <h2 className="text-xl font-bold text-red-600">Erreur</h2>
+                        <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
+                        <h2 className="text-xl font-bold text-red-600 dark:text-red-400">Erreur</h2>
                     </div>
-                    <p className="text-gray-700 mb-4">{error}</p>
+                    <p className="text-gray-700 dark:text-dark-text-primary mb-4">{error}</p>
                     <button
                         onClick={() => window.location.reload()}
                         className={components.button.primary}
@@ -317,9 +388,9 @@ const JournalMaterielTable: React.FC = () => {
         <div className="space-y-6">
             <div className={components.table.wrapper}>
                 {/* Header */}
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-6 border-b border-slate-200">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-6 border-b border-slate-200 dark:border-dark-border">
                     <div>
-                        <h2 className="text-xl font-bold text-gray-900">
+                        <h2 className="text-xl font-bold text-gray-900 dark:text-dark-text-primary">
                             Consultation des équipements enregistrés.
                         </h2>
                     </div>
@@ -331,21 +402,18 @@ const JournalMaterielTable: React.FC = () => {
                             <input
                                 type="text"
                                 placeholder="Rechercher par code matériel ou désignation..."
-                                value={searchTerm}
+                                value={searchInput}
                                 onChange={handleSearchChange}
                                 className={components.input + " pl-10"}
                             />
                         </div>
 
                         <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-600">Lignes :</span>
+                            <span className="text-sm text-gray-600 dark:text-dark-text-secondary">Lignes :</span>
 
                             <select
                                 value={itemsPerPage}
-                                onChange={(e) => {
-                                    setItemsPerPage(Number(e.target.value));
-                                    setCurrentPage(1);
-                                }}
+                                onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
                                 className={components.select}
                             >
                                 <option value={10}>10</option>
@@ -356,24 +424,7 @@ const JournalMaterielTable: React.FC = () => {
                         </div>
 
                         <button
-                            onClick={() => {
-                                setSearchTerm("");
-                                setColumnFilters({
-                                    code_materiel: "",
-                                    designation: "",
-                                    num_serie: "",
-                                    immatriculation: "",
-                                    date_acquisition: "",
-                                    valeur_acquisition: "",
-                                    valeur_remplacement: "",
-                                    taux_amortissement: "",
-                                    puissance_materiel: "",
-                                    code_sous_famille: "",
-                                    code_type_marque: "",
-                                    code_filiale_g: "",
-                                    est_bloque: "",
-                                });
-                            }}
+                            onClick={handleReset}
                             className={components.button.secondary}
                         >
                             Réinitialiser
@@ -382,15 +433,12 @@ const JournalMaterielTable: React.FC = () => {
                 </div>
 
                 {/* Results info */}
-                <div className="px-6 py-3 bg-slate-50 border-b border-slate-200">
-                    <p className="text-sm text-gray-600">
-                        Affichage de <span className="font-semibold">{startIdx + 1}</span> à{" "}
-                        <span className="font-semibold">
-                            {Math.min(endIdx, sortedData.length)}
-                        </span>{" "}
-                        sur <span className="font-semibold">{sortedData.length}</span>{" "}
-                        résultat
-                        {sortedData.length !== 1 ? "s" : ""}
+                <div className="px-6 py-3 bg-slate-50 dark:bg-dark-bg-secondary border-b border-slate-200 dark:border-dark-border">
+                    <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
+                        Affichage de <span className="font-semibold">{startIdx}</span> à{" "}
+                        <span className="font-semibold">{endIdx}</span>{" "}
+                        sur <span className="font-semibold">{totalItems}</span>{" "}
+                        résultat{totalItems !== 1 ? "s" : ""}
                     </p>
                 </div>
 
@@ -409,13 +457,12 @@ const JournalMaterielTable: React.FC = () => {
                       py-3
                       align-top
                       transition-colors
-                      hover:bg-slate-200
-                      cursor-pointer
+                      ${column.sortable ? "hover:bg-slate-200 cursor-pointer" : ""}
                   `}
                                     >
                                         <div className="flex flex-col gap-2">
                                             <div className="flex items-center justify-between">
-                                                <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                                                <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-dark-text-primary">
                                                     {column.label}
                                                 </span>
 
@@ -423,17 +470,13 @@ const JournalMaterielTable: React.FC = () => {
                                                     field={column.key}
                                                     sortField={sortField}
                                                     sortOrder={sortOrder}
+                                                    sortable={column.sortable}
                                                 />
                                             </div>
 
                                             <FilterInput
-                                                value={columnFilters[column.key]}
-                                                onChange={(value) =>
-                                                    setColumnFilters((prev) => ({
-                                                        ...prev,
-                                                        [column.key]: value,
-                                                    }))
-                                                }
+                                                value={columnFiltersInput[column.key as keyof typeof columnFiltersInput]}
+                                                onChange={handleColumnFilterChange(column.key as keyof typeof columnFiltersInput)}
                                             />
                                         </div>
                                     </th>
@@ -445,7 +488,7 @@ const JournalMaterielTable: React.FC = () => {
                                 >
                                     <div className="flex flex-col gap-2">
                                         <div className="flex items-center justify-between">
-                                            <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                                            <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-dark-text-primary">
                                                 Statut
                                             </span>
 
@@ -453,6 +496,7 @@ const JournalMaterielTable: React.FC = () => {
                                                 field="est_bloque"
                                                 sortField={sortField}
                                                 sortOrder={sortOrder}
+                                                sortable={true}
                                             />
                                         </div>
 
@@ -464,6 +508,7 @@ const JournalMaterielTable: React.FC = () => {
                                                     est_bloque: e.target.value,
                                                 }))
                                             }
+                                            onClick={(e) => e.stopPropagation()}
                                             className={components.input}
                                         >
                                             <option value="">Tous</option>
@@ -475,47 +520,47 @@ const JournalMaterielTable: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {paginatedData.length > 0 ? (
-                                paginatedData.map((item, idx) => (
+                            {data.length > 0 ? (
+                                data.map((item, idx) => (
                                     <tr
                                         key={item.id}
-                                        className={`${components.table.row} ${idx % 2 === 0 ? "bg-white" : "bg-slate-50/50"
+                                        className={`${components.table.row} ${idx % 2 === 0 ? "bg-white dark:bg-dark-card" : "bg-slate-50/50 dark:bg-dark-bg-secondary/50"
                                             }`}
                                     >
-                                        <td className="px-4 py-3 text-sm text-gray-800 font-medium">
+                                        <td className="px-4 py-3 text-sm text-gray-800 dark:text-dark-text-primary font-medium">
                                             {item.code_materiel}
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-gray-800">
+                                        <td className="px-4 py-3 text-sm text-gray-800 dark:text-dark-text-primary">
                                             {item.designation}
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600">
+                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
                                             {item.num_serie}
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600">
+                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
                                             {item.immatriculation}
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600">
+                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
                                             {item.code_filiale_g}
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600">
+                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
                                             {item.code_sous_famille}
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600">
+                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
                                             {item.code_type_marque}
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600">
+                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
                                             {formatDate(item.date_acquisition)}
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-gray-800 text-right font-medium">
+                                        <td className="px-4 py-3 text-sm text-gray-800 dark:text-dark-text-primary text-right font-medium">
                                             {formatCurrency(item.valeur_acquisition)}
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-gray-800 text-right font-medium">
+                                        <td className="px-4 py-3 text-sm text-gray-800 dark:text-dark-text-primary text-right font-medium">
                                             {formatCurrency(item.valeur_remplacement)}
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600 text-right">
+                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary text-right">
                                             {item.taux_amortissement}%
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600 text-right">
+                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary text-right">
                                             {item.puissance_materiel}
                                         </td>
 
@@ -528,7 +573,7 @@ const JournalMaterielTable: React.FC = () => {
                                 <tr>
                                     <td
                                         colSpan={13}
-                                        className="px-4 py-8 text-center text-gray-500"
+                                        className="px-4 py-8 text-center text-gray-500 dark:text-dark-text-secondary"
                                     >
                                         Aucun résultat trouvé
                                     </td>
@@ -540,7 +585,7 @@ const JournalMaterielTable: React.FC = () => {
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                    <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="px-6 py-4 border-t border-slate-200 dark:border-dark-border bg-slate-50 dark:bg-dark-bg-secondary flex flex-col sm:flex-row items-center justify-between gap-4">
                         <button
                             onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                             disabled={currentPage === 1}
@@ -564,7 +609,7 @@ const JournalMaterielTable: React.FC = () => {
                                         onClick={() => setCurrentPage(item)}
                                         className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${currentPage === item
                                             ? "bg-blue-600 text-white"
-                                            : "bg-white text-gray-700 border border-slate-300 hover:border-blue-600"
+                                            : "bg-white dark:bg-dark-card text-gray-700 dark:text-dark-text-primary border border-slate-300 hover:border-blue-600"
                                             }`}
                                     >
                                         {item}

@@ -225,7 +225,7 @@ function CrudPage<T>({
                             </button>
                             <button
                                 onClick={() => openDelete(row)}
-                                className="text-red-600 hover:text-red-800 transition-colors"
+                                className="text-red-600 dark:text-red-400 hover:text-red-800 dark:text-red-400 transition-colors"
                                 title="Supprimer"
                             >
                                 <Trash2 className="h-4 w-4" />
@@ -248,20 +248,20 @@ function CrudPage<T>({
                 {deleteOpen && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
                         <div className={components.modal}>
-                            <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                            <h3 className="text-lg font-semibold text-gray-800 dark:text-dark-text-primary mb-2">
                                 Confirmer la suppression
                             </h3>
-                            <p className="text-sm text-gray-600 mb-4">
+                            <p className="text-sm text-gray-600 dark:text-dark-text-secondary mb-4">
                                 {deleteConfirmMessage
                                     ? deleteConfirmMessage(deletingItem!)
                                     : `Êtes-vous sûr de vouloir supprimer cet enregistrement de ${title} ?`}
                             </p>
                             {deleteError && (
-                                <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                                <div className="mb-4 rounded-md border border-red-200 dark:border-red-800 dark:border-red-800 bg-red-50 px-3 py-2 text-sm text-red-700">
                                     {deleteError}
                                 </div>
                             )}
-                            <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
+                            <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-dark-border">
                                 <button
                                     onClick={() => setDeleteOpen(false)}
                                     disabled={deleteLoading}

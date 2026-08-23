@@ -170,7 +170,7 @@ export default function AnalyseQuantitative() {
         <div className="space-y-8">
           {Object.entries(groupedByCategory).map(([codeCategorie, category]) => (
             <div key={codeCategorie}>
-              <h2 className="mb-4 text-xl font-semibold text-gray-800">
+              <h2 className="mb-4 text-xl font-semibold text-gray-800 dark:text-dark-text-primary">
                 {codeCategorie}: {category.title}
               </h2>
 

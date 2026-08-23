@@ -14,7 +14,7 @@ const columns: ColumnDef<TypeMarque>[] = [
     { key: "libelle_type_marque", label: "Libellé", width: "min-w-[200px]", sortable: true },
     { key: "code_marque", label: "Marque", width: "min-w-[150px]", sortable: true, render: (val: unknown) => <>{val ?? "—"}</> },
     { key: "est_bloque", label: "Statut", width: "min-w-[100px]", sortable: true, render: (val: unknown) => (
-        <span className={val ? "bg-red-100 text-red-800 px-2 py-0.5 rounded-full text-xs font-semibold" : "bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-semibold"}>
+        <span className={val ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 px-2 py-0.5 rounded-full text-xs font-semibold" : "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full text-xs font-semibold"}>
             {val ? "Bloqué" : "Actif"}
         </span>
     )},

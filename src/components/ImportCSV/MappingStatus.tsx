@@ -24,7 +24,7 @@ export default function MappingStatus({
             </div>
 
             {missingRequired.length === 0 ? (
-                <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-green-700">
+                <div className="rounded-lg border border-green-200 dark:border-green-800 dark:border-green-800 bg-green-50 p-4 text-green-700 dark:text-green-400">
                     ✓ Tous les champs obligatoires sont associés.
                 </div>
             ) : (
@@ -37,7 +37,7 @@ export default function MappingStatus({
                         </span>
                     </div>
 
-                    <div className="mt-2 text-sm text-yellow-700">
+                    <div className="mt-2 text-sm text-yellow-700 dark:text-yellow-400">
                         {missingRequired
                             .map((field) => field.label)
                             .join(", ")}

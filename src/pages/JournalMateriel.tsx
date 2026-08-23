@@ -6,8 +6,8 @@ const JournalMateriel: React.FC = () => {
     <div className="p-6">
       <div className="mx-auto max-w-7xl">
         <header className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Journal Matériel</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-dark-text-primary">Journal Matériel</h1>
+          <p className="text-sm text-gray-500 dark:text-dark-text-secondary mt-1">
             Consultation des équipements enregistrés.
           </p>
         </header>

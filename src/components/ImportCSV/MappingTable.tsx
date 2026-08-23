@@ -26,9 +26,9 @@ export default function MappingTable({
     const usedFields = Object.values(mapping);
 
     return (
-        <div className="overflow-hidden rounded-xl border border-slate-200">
+        <div className="overflow-hidden rounded-xl border dark:border-dark-border">
             <table className="w-full">
-                <thead className="sticky top-0 bg-slate-100 border-b-2 border-slate-300">
+                <thead className="sticky top-0 dark:bg-dark-bg-tertiary border-b-2 dark:border-dark-border">
                     <tr>
                         <th className="w-28 px-4 py-3 text-left">
                             Colonne

@@ -118,10 +118,10 @@ function CrudTable<T>({
 
     return (
         <div className={components.table.wrapper}>
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-6 border-b border-slate-200">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-6 border-b border-slate-200 dark:border-dark-border">
                 {title && (
                     <div>
-                        <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+                        <h2 className="text-xl font-bold text-gray-900 dark:text-dark-text-primary">{title}</h2>
                     </div>
                 )}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
@@ -136,7 +136,7 @@ function CrudTable<T>({
                         />
                     </div>
                     <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-600">Lignes :</span>
+                        <span className="text-sm text-gray-600 dark:text-dark-text-secondary">Lignes :</span>
                         <select
                             value={itemsPerPage}
                             onChange={(e) => {
@@ -154,8 +154,8 @@ function CrudTable<T>({
                 </div>
             </div>
 
-            <div className="px-6 py-3 bg-slate-50 border-b border-slate-200">
-                <p className="text-sm text-gray-600">
+            <div className="px-6 py-3 bg-slate-50 dark:bg-dark-bg-secondary border-b border-slate-200 dark:border-dark-border">
+                <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
                     {loading ? (
                         "Chargement..."
                     ) : (
@@ -182,7 +182,7 @@ function CrudTable<T>({
                                     }`}
                                 >
                                     <div className="flex items-center justify-between">
-                                        <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                                        <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-dark-text-primary">
                                             {column.label}
                                         </span>
                                         {column.sortable !== false && (
@@ -196,7 +196,7 @@ function CrudTable<T>({
                                 </th>
                             ))}
                             {actions && (
-                                <th className="min-w-[130px] px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-700">
+                                <th className="min-w-[130px] px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-dark-text-primary">
                                     Actions
                                 </th>
                             )}
@@ -206,7 +206,7 @@ function CrudTable<T>({
                         {error && !loading ? (
                             <tr>
                                 <td colSpan={columns.length + (actions ? 1 : 0)} className="px-4 py-8">
-                                    <div className="flex flex-col items-center justify-center gap-3 text-red-600">
+                                    <div className="flex flex-col items-center justify-center gap-3 text-red-600 dark:text-red-400">
                                         <div className="flex items-center gap-2">
                                             <AlertCircle className="h-5 w-5" />
                                             <span>{error}</span>
@@ -220,7 +220,7 @@ function CrudTable<T>({
                         ) : loading ? (
                             <tr>
                                 <td colSpan={columns.length + (actions ? 1 : 0)} className="px-4 py-8">
-                                    <div className="flex items-center justify-center gap-3 text-gray-500">
+                                    <div className="flex items-center justify-center gap-3 text-gray-500 dark:text-dark-text-secondary">
                                         <Loader2 className="h-5 w-5 animate-spin" />
                                         <span>Chargement des données...</span>
                                     </div>
@@ -230,13 +230,13 @@ function CrudTable<T>({
                             data.map((row, idx) => (
                                 <tr
                                     key={(row as any).id ?? idx}
-                                    className={`${components.table.row} ${idx % 2 === 0 ? "bg-white" : "bg-slate-50/50"
+                                    className={`${components.table.row} ${idx % 2 === 0 ? "bg-white dark:bg-dark-card" : "bg-slate-50/50 dark:bg-dark-bg-secondary/50"
                                         }`}
                                 >
                                     {columns.map((column) => (
                                         <td
                                             key={String(column.key)}
-                                            className="px-4 py-3 text-sm text-gray-800"
+                                            className="px-4 py-3 text-sm text-gray-800 dark:text-dark-text-primary"
                                         >
                                             {column.render
                                                 ? column.render(
@@ -256,7 +256,7 @@ function CrudTable<T>({
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={columns.length + (actions ? 1 : 0)} className="px-4 py-8 text-center text-gray-500">
+                                <td colSpan={columns.length + (actions ? 1 : 0)} className="px-4 py-8 text-center text-gray-500 dark:text-dark-text-secondary">
                                     {emptyMessage}
                                 </td>
                             </tr>
@@ -266,7 +266,7 @@ function CrudTable<T>({
             </div>
 
             {totalPages > 1 && !loading && (
-                <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="px-6 py-4 border-t border-slate-200 dark:border-dark-border bg-slate-50 dark:bg-dark-bg-secondary flex flex-col sm:flex-row items-center justify-between gap-4">
                     <button
                         onClick={() => onPageChange(Math.max(1, currentPage - 1))}
                         disabled={currentPage === 1}
@@ -286,7 +286,7 @@ function CrudTable<T>({
                                     onClick={() => onPageChange(item)}
                                     className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${currentPage === item
                                             ? "bg-blue-600 text-white"
-                                            : "bg-white text-gray-700 border border-slate-300 hover:border-blue-600"
+                                            : "bg-white dark:bg-dark-card text-gray-700 dark:text-dark-text-primary border border-slate-300 hover:border-blue-600"
                                         }`}
                                 >
                                     {item}

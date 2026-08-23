@@ -368,7 +368,7 @@ export default function RegularisationImportCsvPage() {
 
                     <div className={components.cardHeader}>
 
-                        <h1 className="text-xl font-bold text-gray-800">
+                        <h1 className="text-xl font-bold dark:text-dark-text-primary">
                             Régularisation GM - Import Des Données
                         </h1>
 
@@ -393,13 +393,13 @@ export default function RegularisationImportCsvPage() {
                                 <div className="grid gap-6 lg:grid-cols-2">
 
 
-                                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
+                                    <div className="rounded-xl border dark:border-dark-border dark:bg-dark-bg-secondary p-6">
 
-                                        <h2 className="text-lg font-semibold text-slate-800">
+                                        <h2 className="text-lg font-semibold dark:text-dark-text-primary">
                                             Format accepté
                                         </h2>
 
-                                        <p className="mt-1 text-sm text-slate-500">
+                                        <p className="mt-1 text-sm dark:text-dark-text-secondary">
                                             Votre fichier doit respecter
                                             les critères suivants.
                                         </p>
@@ -418,7 +418,7 @@ export default function RegularisationImportCsvPage() {
                                                     className="flex items-center gap-3 py-2"
                                                 >
 
-                                                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-100">
+                                                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
 
                                                         <CheckCircle2
                                                             size={18}
@@ -427,7 +427,7 @@ export default function RegularisationImportCsvPage() {
 
                                                     </div>
 
-                                                    <span className="text-sm font-medium text-slate-700">
+                                                    <span className="text-sm font-medium dark:text-dark-text-primary">
                                                         {item}
                                                     </span>
 
@@ -512,11 +512,11 @@ export default function RegularisationImportCsvPage() {
 
                                 <div className="mb-6">
 
-                                    <h2 className="text-xl font-semibold text-gray-800">
+                                    <h2 className="text-xl font-semibold dark:text-dark-text-primary">
                                         Correspondance des colonnes
                                     </h2>
 
-                                    <p className="mt-1 text-gray-500">
+                                    <p className="mt-1 dark:text-dark-text-secondary">
                                         Associez chaque colonne du fichier
                                         à un champ métier.
                                     </p>
@@ -609,11 +609,11 @@ export default function RegularisationImportCsvPage() {
 
                                     <div>
 
-                                        <h2 className="text-2xl font-semibold text-gray-800">
+                                        <h2 className="text-2xl font-semibold dark:text-dark-text-primary">
                                             Validation du fichier
                                         </h2>
 
-                                        <p className="mt-1 text-gray-500">
+                                        <p className="mt-1 dark:text-dark-text-secondary">
                                             Vous pouvez relancer la validation
                                             autant de fois que nécessaire.
                                         </p>
@@ -680,7 +680,7 @@ export default function RegularisationImportCsvPage() {
                                 )}
 
 
-                                <div className="flex justify-between border-t border-slate-200 pt-6">
+                                <div className="flex justify-between border-t dark:border-dark-border pt-6">
 
                                     <button
                                         onClick={() =>

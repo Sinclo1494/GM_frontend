@@ -20,6 +20,7 @@ import RegularisationImportCsv from './pages/ImportRegularisationCSV.tsx';
 
 
 import './index.css';
+import "./api/axios";
 import JournalMateriel from './pages/JournalMateriel.tsx';
 import Journalisation from './pages/Journalisation.tsx';
 import EntreprisePage from './pages/EntreprisePage.tsx';

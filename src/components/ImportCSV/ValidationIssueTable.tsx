@@ -44,7 +44,7 @@ export default function ValidationIssueTable({
                         className={`text-lg font-semibold ${
                             isError
                                 ? "text-red-700"
-                                : "text-yellow-700"
+                                : "text-yellow-700 dark:text-yellow-400"
                         }`}
                     >
                         {isError ? "Erreurs" : "Avertissements"} (
@@ -55,8 +55,8 @@ export default function ValidationIssueTable({
                 <span
                     className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${
                         isError
-                            ? "bg-red-100 text-red-700"
-                            : "bg-yellow-100 text-yellow-700"
+                            ? "bg-red-100 dark:bg-red-900/30 text-red-700"
+                            : "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400"
                     }`}
                 >
                     {isError ? "Bloquantes" : "Non bloquants"}
@@ -64,8 +64,8 @@ export default function ValidationIssueTable({
             </div>
 
             {issues.length > 0 && (
-                <div className="border-b bg-white p-4">
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
+                <div className="border-b dark:bg-dark-card p-4">
+                    <label className="mb-2 block text-sm font-medium dark:text-dark-text-primary">
                         Filtrer par message
                     </label>
 
@@ -94,13 +94,13 @@ export default function ValidationIssueTable({
                     ✓ Aucun problème.
                 </div>
             ) : filteredIssues.length === 0 ? (
-                <div className="p-10 text-center text-gray-500">
+                <div className="p-10 text-center dark:text-dark-text-secondary">
                     Aucun résultat pour ce filtre.
                 </div>
             ) : (
                 <div className="max-h-125 overflow-auto">
                     <table className="w-full">
-                        <thead className={components.table.header + " border-b-2 border-slate-300"}>
+                        <thead className={components.table.header + " border-b-2 dark:border-dark-border"}>
                             <tr>
                                 <th className="w-24 px-4 py-3 text-left">
                                     Ligne
@@ -121,7 +121,7 @@ export default function ValidationIssueTable({
                             {filteredIssues.map((issue, index) => (
                                 <tr
                                     key={index}
-                                    className={`border-b even:bg-slate-50 ${
+                                    className={`border-b dark:even:bg-dark-bg-secondary ${
                                         isError
                                             ? "hover:bg-red-50"
                                             : "hover:bg-yellow-50"
@@ -143,7 +143,7 @@ export default function ValidationIssueTable({
                                         className={`px-4 py-3 ${
                                             isError
                                                 ? "text-red-700"
-                                                : "text-yellow-700"
+                                                : "text-yellow-700 dark:text-yellow-400"
                                         }`}
                                     >
                                         {issue.message}

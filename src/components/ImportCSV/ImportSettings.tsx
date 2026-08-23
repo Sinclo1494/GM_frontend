@@ -13,12 +13,12 @@ export default function ImportSettings({
     onFilialeChange,
 }: Props) {
     return (
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
-            <h2 className="text-lg font-semibold text-slate-800">
+        <div className="rounded-xl border dark:border-dark-border dark:bg-dark-bg-secondary p-6">
+            <h2 className="text-lg font-semibold dark:text-dark-text-primary">
                 Paramètres d'import
             </h2>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm dark:text-dark-text-secondary">
                 Sélectionnez la filiale correspondant au fichier à importer.
             </p>
 

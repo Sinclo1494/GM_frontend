@@ -99,7 +99,7 @@ const JournalisationTable: React.FC<Props> = ({
 
   if (loading) {
     return (
-      <div className="py-12 flex flex-col items-center gap-3 text-gray-600">
+      <div className="py-12 flex flex-col items-center gap-3 text-gray-600 dark:text-dark-text-secondary">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
         <span>Chargement des entrées de journal…</span>
       </div>
@@ -108,12 +108,12 @@ const JournalisationTable: React.FC<Props> = ({
 
   if (error) {
     return (
-      <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
+      <div className="rounded-lg border border-red-200 dark:border-red-800 dark:border-red-800 bg-red-50 p-6 text-center">
         <div className="flex items-center justify-center gap-3 text-red-700">
           <AlertCircle className="h-6 w-6" />
           <span className="font-medium">Erreur de chargement</span>
         </div>
-        <p className="mt-2 text-sm text-gray-700">{error}</p>
+        <p className="mt-2 text-sm text-gray-700 dark:text-dark-text-primary">{error}</p>
         <button
           onClick={onRetry}
           className={components.button.primary}
@@ -215,7 +215,7 @@ const JournalisationTable: React.FC<Props> = ({
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
+                <td colSpan={8} className="px-4 py-8 text-center text-gray-500 dark:text-dark-text-secondary">
                   Aucune entrée de journal trouvée.
                 </td>
               </tr>
@@ -224,11 +224,11 @@ const JournalisationTable: React.FC<Props> = ({
                 <tr
                   key={entry.id}
                   onClick={() => onRowClick(entry)}
-                  className={`cursor-pointer ${components.table.row} ${idx % 2 === 0 ? "bg-white" : "bg-slate-50/50"
+                  className={`cursor-pointer ${components.table.row} ${idx % 2 === 0 ? "bg-white dark:bg-dark-card" : "bg-slate-50/50 dark:bg-dark-bg-secondary/50"
                     }`}
                 >
                   <td className="px-3 py-2.5 align-top">
-                    <span className="font-mono text-xs text-gray-600">
+                    <span className="font-mono text-xs text-gray-600 dark:text-dark-text-secondary">
                       {formatDateTime(entry.date_action)}
                     </span>
                   </td>
@@ -248,13 +248,13 @@ const JournalisationTable: React.FC<Props> = ({
                     </span>
                   </td>
                   <td
-                    className="px-3 py-2.5 align-top font-mono text-xs text-gray-800"
+                    className="px-3 py-2.5 align-top font-mono text-xs text-gray-800 dark:text-dark-text-primary"
                     title={`${entry.objet_type}: ${entry.objet_id}`}
                   >
                     <span className="block max-w-35 truncate">
                       {entry.objet_id || "—"}
                     </span>
-                    <span className="block text-xs text-gray-500">
+                    <span className="block text-xs text-gray-500 dark:text-dark-text-secondary">
                       {entry.objet_type}
                     </span>
                   </td>
@@ -265,7 +265,7 @@ const JournalisationTable: React.FC<Props> = ({
                     {entry.code_site ?? "—"}
                   </td>
                   <td
-                    className="px-3 py-2.5 align-top text-gray-600"
+                    className="px-3 py-2.5 align-top text-gray-600 dark:text-dark-text-secondary"
                     title={entry.description || ""}
                   >
                     <span className="block max-w-60 truncate text-xs">
@@ -280,8 +280,8 @@ const JournalisationTable: React.FC<Props> = ({
       </div>
 
       {totalRows > 0 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200 px-4 py-3 bg-slate-50">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200 dark:border-dark-border px-4 py-3 bg-slate-50 dark:bg-dark-bg-secondary">
+          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-dark-text-secondary">
             <span>Lignes :</span>
             <select
               value={itemsPerPage}
@@ -296,7 +296,7 @@ const JournalisationTable: React.FC<Props> = ({
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-gray-600 dark:text-dark-text-secondary">
               {totalRows === 0
                 ? "0 élément"
                 : `${startIdx}–${endIdx} sur ${totalRows}`}
@@ -320,7 +320,7 @@ const JournalisationTable: React.FC<Props> = ({
                     onClick={() => onPageChange(item)}
                     className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${currentPage === item
                         ? "bg-blue-600 text-white"
-                        : "bg-white text-gray-700 border border-slate-300 hover:border-blue-600"
+                        : "bg-white dark:bg-dark-card text-gray-700 dark:text-dark-text-primary border border-slate-300 hover:border-blue-600"
                       }`}
                   >
                     {item}

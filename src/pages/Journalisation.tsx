@@ -171,8 +171,8 @@ export default function Journalisation() {
     <div className="p-6">
       <div className="mx-auto max-w-7xl">
         <header className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Journalisation</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-dark-text-primary">Journalisation</h1>
+          <p className="text-sm text-gray-500 dark:text-dark-text-secondary mt-1">
             Historique des actions effectuées dans l'application.
           </p>
         </header>
@@ -187,7 +187,7 @@ export default function Journalisation() {
         />
 
         {!loading && !error && (
-          <p className="mb-3 text-sm text-gray-600">
+          <p className="mb-3 text-sm text-gray-600 dark:text-dark-text-secondary">
             {totalRows} entrée{totalRows !== 1 ? "s" : ""} trouvée
             {totalRows !== 1 ? "s" : ""}
           </p>
