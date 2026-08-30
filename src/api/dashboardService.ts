@@ -34,6 +34,12 @@ export const getDashboard = async (filters: DashboardFilters = {}): Promise<Dash
   if (filters.mode) {
     params.mode = filters.mode;
   }
+  if (filters.niveau) {
+    params.niveau = filters.niveau;
+  }
+  if (filters.annee) {
+    params.annee = filters.annee;
+  }
 
   const { data } = await axios.get<DashboardData>(`${API}/dashboard/`, {
     params,

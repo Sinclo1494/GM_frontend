@@ -137,6 +137,8 @@ export interface DashboardFilters {
   code_famille?: string;
   periode?: string;
   mode?: string;
+  niveau?: string;
+  annee?: string;
 }
 
 export const getDashboard = async (filters: DashboardFilters = {}): Promise<any> => {
@@ -148,6 +150,8 @@ export const getDashboard = async (filters: DashboardFilters = {}): Promise<any>
   if (filters.code_famille) params.code_famille = filters.code_famille;
   if (filters.periode) params.periode = filters.periode;
   if (filters.mode) params.mode = filters.mode;
+  if (filters.niveau) params.niveau = filters.niveau;
+  if (filters.annee) params.annee = filters.annee;
 
   const { data } = await axios.get(`${API}/dashboard/`, {
     params,
