@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -13,6 +13,7 @@ import {
 import type { DashboardData, DashboardFilters, CaLocationInterneEvolutionPoint, CaLocationInterneBreakdownItem } from "../../../types/dashboard";
 import { components } from "../../../theme/components";
 import formatCurrency from "../../../utils/FormatCurrency";
+import PaginationControls from "../../../components/common/PaginationControls";
 
 ChartJS.register(
   CategoryScale,
@@ -139,6 +140,22 @@ const CaLocationInterneTab = ({ data, filters }: CaLocationInterneTabProps) => {
     }));
   }, [breakdown, totalCa]);
 
+  const [breakdownPage, setBreakdownPage] = useState(1);
+  const [breakdownPageSize, setBreakdownPageSize] = useState(10);
+
+  const paginatedBreakdown = useMemo(() => {
+    const start = (breakdownPage - 1) * breakdownPageSize;
+    return breakdownWithPct.slice(start, start + breakdownPageSize);
+  }, [breakdownWithPct, breakdownPage, breakdownPageSize]);
+
+  const prevBreakdownLengthRef = React.useRef(breakdownWithPct.length);
+  React.useEffect(() => {
+    if (prevBreakdownLengthRef.current !== breakdownWithPct.length) {
+      prevBreakdownLengthRef.current = breakdownWithPct.length;
+      setBreakdownPage(1);
+    }
+  }, [breakdownWithPct.length]);
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
@@ -216,49 +233,60 @@ const CaLocationInterneTab = ({ data, filters }: CaLocationInterneTabProps) => {
             Aucune donnée disponible pour le niveau sélectionné.
           </p>
         ) : (
-          <div className="mt-4 overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className={components.table.header}>
-                  <th className="px-4 py-3">{niveauHeader}</th>
-                  <th className="px-4 py-3 text-right">CA location interne</th>
-                  <th className="px-4 py-3 text-right">Nb avec montant</th>
-                  <th className="px-4 py-3 text-right">Nb sans montant</th>
-                  <th className="px-4 py-3 text-right">% contribution</th>
-                </tr>
-              </thead>
-              <tbody>
-                {breakdownWithPct.map((row, idx) => (
-                  <tr
-                    key={row.code}
-                    className={`${components.table.row} ${
-                      idx % 2 === 0
-                        ? "bg-white dark:bg-dark-card"
-                        : "bg-slate-50/50 dark:bg-dark-bg-secondary/50"
-                    }`}
-                  >
-                    <td className="px-4 py-3 font-medium text-gray-800 dark:text-dark-text-primary">
-                      {row.libelle || row.code}
-                    </td>
-                    <td className="px-4 py-3 text-right text-gray-800 dark:text-dark-text-primary">
-                      {formatCurrency(row.ca_total)}
-                    </td>
-                    <td className="px-4 py-3 text-right text-gray-800 dark:text-dark-text-primary">
-                      {formatNumber(row.records_with_montant)}
-                    </td>
-                    <td className="px-4 py-3 text-right text-gray-800 dark:text-dark-text-primary">
-                      {formatNumber(row.records_without_montant)}
-                    </td>
-                    <td className="px-4 py-3 text-right font-medium text-gray-800 dark:text-dark-text-primary">
-                      {row.pct.toFixed(1)}%
-                    </td>
+          <>
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className={components.table.header}>
+                    <th className="px-4 py-3">{niveauHeader}</th>
+                    <th className="px-4 py-3 text-right">CA location interne</th>
+                    <th className="px-4 py-3 text-right">Nb avec montant</th>
+                    <th className="px-4 py-3 text-right">Nb sans montant</th>
+                    <th className="px-4 py-3 text-right">% contribution</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {paginatedBreakdown.map((row, idx) => (
+                    <tr
+                      key={row.code}
+                      className={`${components.table.row} ${
+                        idx % 2 === 0
+                          ? "bg-white dark:bg-dark-card"
+                          : "bg-slate-50/50 dark:bg-dark-bg-secondary/50"
+                      }`}
+                    >
+                      <td className="px-4 py-3 font-medium text-gray-800 dark:text-dark-text-primary">
+                        {row.libelle || row.code}
+                      </td>
+                      <td className="px-4 py-3 text-right text-gray-800 dark:text-dark-text-primary">
+                        {formatCurrency(row.ca_total)}
+                      </td>
+                      <td className="px-4 py-3 text-right text-gray-800 dark:text-dark-text-primary">
+                        {formatNumber(row.records_with_montant)}
+                      </td>
+                      <td className="px-4 py-3 text-right text-gray-800 dark:text-dark-text-primary">
+                        {formatNumber(row.records_without_montant)}
+                      </td>
+                      <td className="px-4 py-3 text-right font-medium text-gray-800 dark:text-dark-text-primary">
+                        {row.pct.toFixed(1)}%
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <PaginationControls
+              currentPage={breakdownPage}
+              totalPages={Math.max(1, Math.ceil(breakdownWithPct.length / breakdownPageSize))}
+              totalItems={breakdownWithPct.length}
+              itemsPerPage={breakdownPageSize}
+              onPageChange={setBreakdownPage}
+              onItemsPerPageChange={setBreakdownPageSize}
+              showItemCount={true}
+            />
+          </>
         )}
-      </div>
+       </div>
     </div>
   );
 };

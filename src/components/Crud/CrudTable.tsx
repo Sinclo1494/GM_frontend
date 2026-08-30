@@ -156,7 +156,7 @@ function CrudTable<T>({
 
             <div className="px-6 py-3 bg-slate-50 dark:bg-dark-bg-secondary border-b border-slate-200 dark:border-dark-border">
                 <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
-                    {loading ? (
+                    {loading && data.length === 0 ? (
                         "Chargement..."
                     ) : (
                         <>
@@ -217,7 +217,7 @@ function CrudTable<T>({
                                     </div>
                                 </td>
                             </tr>
-                        ) : loading ? (
+                        ) : loading && data.length === 0 ? (
                             <tr>
                                 <td colSpan={columns.length + (actions ? 1 : 0)} className="px-4 py-8">
                                     <div className="flex items-center justify-center gap-3 text-gray-500 dark:text-dark-text-secondary">
@@ -265,12 +265,13 @@ function CrudTable<T>({
                 </table>
             </div>
 
-            {totalPages > 1 && !loading && (
+            {totalPages > 1 && (
                 <div className="px-6 py-4 border-t border-slate-200 dark:border-dark-border bg-slate-50 dark:bg-dark-bg-secondary flex flex-col sm:flex-row items-center justify-between gap-4">
                     <button
                         onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-                        disabled={currentPage === 1}
+                        disabled={currentPage === 1 || loading}
                         className={components.button.primary}
+                        type="button"
                     >
                         Précédent
                     </button>
@@ -288,6 +289,7 @@ function CrudTable<T>({
                                             ? "bg-blue-600 text-white"
                                             : "bg-white dark:bg-dark-card text-gray-700 dark:text-dark-text-primary border border-slate-300 hover:border-blue-600"
                                         }`}
+                                    type="button"
                                 >
                                     {item}
                                 </button>
@@ -296,8 +298,9 @@ function CrudTable<T>({
                     </div>
                     <button
                         onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-                        disabled={currentPage === totalPages}
+                        disabled={currentPage === totalPages || loading}
                         className={components.button.primary}
+                        type="button"
                     >
                         Suivant
                     </button>

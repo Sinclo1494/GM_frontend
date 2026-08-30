@@ -17,6 +17,7 @@ import CaLocationInterneTab from "../components/dashboard/kpi/CaLocationInterneT
 import CoutPanneTab from "../components/dashboard/kpi/CoutPanneTab";
 import RendementTab from "../components/dashboard/kpi/RendementTab";
 import RentabiliteTab from "../components/dashboard/kpi/RentabiliteTab";
+import PaginationControls from "../components/common/PaginationControls";
 import type {
   DashboardData,
   DashboardFilters,
@@ -853,41 +854,72 @@ export default function Dashboard() {
   );
   };
 
-  const renderGroupeTab = () => (
-    <div className="space-y-6">
-      <div className={components.card}>
-        <h2 className={components.sectionTitle}>Vue par groupe / filiale</h2>
-        {filialeStats.length === 0 ? (
-          <EmptyState message="Aucune filiale disponible." />
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className={components.table.header}>
-                  <th className="px-4 py-3">Filiale</th>
-                  <th className="px-4 py-3">Total Materiel</th>
-                  <th className="px-4 py-3">Total Affectations</th>
-                  <th className="px-4 py-3">Heures Service</th>
-                  <th className="px-4 py-3">Total Pointages</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filialeStats.map((f, idx) => (
-                  <tr key={f.code_filiale} className={`${components.table.row} ${idx % 2 === 0 ? "bg-white dark:bg-dark-card" : "bg-slate-50/50 dark:bg-dark-bg-secondary/50"}`}>
-                    <td className="px-4 py-3 font-medium text-gray-800 dark:text-dark-text-primary">{f.libelle_filiale}</td>
-                    <td className="px-4 py-3 text-gray-800 dark:text-dark-text-primary">{formatNumber(f.totalMateriel)}</td>
-                    <td className="px-4 py-3 text-gray-800 dark:text-dark-text-primary">{formatNumber(f.totalAffectations)}</td>
-                    <td className="px-4 py-3 text-gray-800 dark:text-dark-text-primary">{formatNumber(f.totalHeuresService, 1)}</td>
-                    <td className="px-4 py-3 text-gray-800 dark:text-dark-text-primary">{formatNumber(f.totalPointages)}</td>
+  const GroupeTab = () => {
+    const [groupePage, setGroupePage] = useState(1);
+    const [groupePageSize, setGroupePageSize] = useState(10);
+
+    const paginatedFilialeStats = useMemo(() => {
+      const start = (groupePage - 1) * groupePageSize;
+      return filialeStats.slice(start, start + groupePageSize);
+    }, [filialeStats, groupePage, groupePageSize]);
+
+    const prevGroupeStatsLengthRef = useRef(filialeStats.length);
+    useEffect(() => {
+      if (prevGroupeStatsLengthRef.current !== filialeStats.length) {
+        prevGroupeStatsLengthRef.current = filialeStats.length;
+        setGroupePage(1);
+      }
+    }, [filialeStats.length]);
+
+    return (
+      <div className="space-y-6">
+        <div className={components.card}>
+          <h2 className={components.sectionTitle}>Vue par groupe / filiale</h2>
+          {filialeStats.length === 0 ? (
+            <EmptyState message="Aucune filiale disponible." />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className={components.table.header}>
+                    <th className="px-4 py-3">Filiale</th>
+                    <th className="px-4 py-3">Total Materiel</th>
+                    <th className="px-4 py-3">Total Affectations</th>
+                    <th className="px-4 py-3">Heures Service</th>
+                    <th className="px-4 py-3">Total Pointages</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {paginatedFilialeStats.map((f, idx) => (
+                    <tr key={f.code_filiale} className={`${components.table.row} ${idx % 2 === 0 ? "bg-white dark:bg-dark-card" : "bg-slate-50/50 dark:bg-dark-bg-secondary/50"}`}>
+                      <td className="px-4 py-3 font-medium text-gray-800 dark:text-dark-text-primary">{f.libelle_filiale}</td>
+                      <td className="px-4 py-3 text-gray-800 dark:text-dark-text-primary">{formatNumber(f.totalMateriel)}</td>
+                      <td className="px-4 py-3 text-gray-800 dark:text-dark-text-primary">{formatNumber(f.totalAffectations)}</td>
+                      <td className="px-4 py-3 text-gray-800 dark:text-dark-text-primary">{formatNumber(f.totalHeuresService, 1)}</td>
+                      <td className="px-4 py-3 text-gray-800 dark:text-dark-text-primary">{formatNumber(f.totalPointages)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+        {filialeStats.length > 0 && (
+          <PaginationControls
+            currentPage={groupePage}
+            totalPages={Math.max(1, Math.ceil(filialeStats.length / groupePageSize))}
+            totalItems={filialeStats.length}
+            itemsPerPage={groupePageSize}
+            onPageChange={setGroupePage}
+            onItemsPerPageChange={setGroupePageSize}
+            showItemCount={true}
+          />
         )}
       </div>
-    </div>
-  );
+    );
+  };
+
+  const renderGroupeTab = () => <GroupeTab />;
 
   const renderJournalTab = () => <JournalMateriel />;
 

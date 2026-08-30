@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -12,6 +12,7 @@ import {
 } from "chart.js";
 import type { DashboardData, DashboardFilters, PanneEvolutionPoint, PanneBreakdownItem } from "../../../types/dashboard";
 import { components } from "../../../theme/components";
+import PaginationControls from "../../../components/common/PaginationControls";
 
 ChartJS.register(
   CategoryScale,
@@ -50,6 +51,22 @@ const PanneTab = ({ data, filters }: PanneTabProps) => {
   const breakdown = useMemo<PanneBreakdownItem[]>(() => {
     return data.panneBreakdown ?? [];
   }, [data.panneBreakdown]);
+
+  const [breakdownPage, setBreakdownPage] = useState(1);
+  const [breakdownPageSize, setBreakdownPageSize] = useState(10);
+
+  const paginatedBreakdown = useMemo(() => {
+    const start = (breakdownPage - 1) * breakdownPageSize;
+    return breakdown.slice(start, start + breakdownPageSize);
+  }, [breakdown, breakdownPage, breakdownPageSize]);
+
+  const prevBreakdownLengthRef = React.useRef(breakdown.length);
+  React.useEffect(() => {
+    if (prevBreakdownLengthRef.current !== breakdown.length) {
+      prevBreakdownLengthRef.current = breakdown.length;
+      setBreakdownPage(1);
+    }
+  }, [breakdown.length]);
 
   const totalPotentiel = useMemo<number>(() => {
     return evolution.reduce((sum, p) => sum + (p.potentiel || 0), 0);
@@ -225,58 +242,69 @@ const PanneTab = ({ data, filters }: PanneTabProps) => {
             Aucune donnée disponible pour le niveau sélectionné.
           </p>
         ) : (
-          <div className="mt-4 overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className={components.table.header}>
-                  <th className="px-4 py-3">{niveauHeader}</th>
-                  <th className="px-4 py-3 text-right">Potentiel (H)</th>
-                  <th className="px-4 py-3 text-right">Heures panne (H)</th>
-                  <th className="px-4 py-3 text-right">Taux de panne</th>
-                  <th className="px-4 py-3 text-center">Statut</th>
-                </tr>
-              </thead>
-              <tbody>
-                {breakdown.map((row, idx) => {
-                  const itemStatus = row.taux_panne > 10 ? "danger" : "success";
-                  return (
-                    <tr
-                      key={row.code}
-                      className={`${components.table.row} ${
-                        idx % 2 === 0
-                          ? "bg-white dark:bg-dark-card"
-                          : "bg-slate-50/50 dark:bg-dark-bg-secondary/50"
-                      }`}
-                    >
-                      <td className="px-4 py-3 font-medium text-gray-800 dark:text-dark-text-primary">
-                        {row.libelle || row.code}
-                      </td>
-                      <td className="px-4 py-3 text-right text-gray-800 dark:text-dark-text-primary">
-                        {formatNumber(row.potentiel, 1)}
-                      </td>
-                      <td className="px-4 py-3 text-right text-gray-800 dark:text-dark-text-primary">
-                        {formatNumber(row.heures_panne, 1)}
-                      </td>
-                      <td className="px-4 py-3 text-right font-medium text-gray-800 dark:text-dark-text-primary">
-                        {row.potentiel > 0 ? `${row.taux_panne.toFixed(1)}%` : "—"}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <span
-                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${
-                            itemStatus === "success"
-                              ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                              : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                          }`}
-                        >
-                          {row.taux_panne > 10 ? "Alerte" : "Normal"}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <>
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className={components.table.header}>
+                    <th className="px-4 py-3">{niveauHeader}</th>
+                    <th className="px-4 py-3 text-right">Potentiel (H)</th>
+                    <th className="px-4 py-3 text-right">Heures panne (H)</th>
+                    <th className="px-4 py-3 text-right">Taux de panne</th>
+                    <th className="px-4 py-3 text-center">Statut</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedBreakdown.map((row, idx) => {
+                    const itemStatus = row.taux_panne > 10 ? "danger" : "success";
+                    return (
+                      <tr
+                        key={row.code}
+                        className={`${components.table.row} ${
+                          idx % 2 === 0
+                            ? "bg-white dark:bg-dark-card"
+                            : "bg-slate-50/50 dark:bg-dark-bg-secondary/50"
+                        }`}
+                      >
+                        <td className="px-4 py-3 font-medium text-gray-800 dark:text-dark-text-primary">
+                          {row.libelle || row.code}
+                        </td>
+                        <td className="px-4 py-3 text-right text-gray-800 dark:text-dark-text-primary">
+                          {formatNumber(row.potentiel, 1)}
+                        </td>
+                        <td className="px-4 py-3 text-right text-gray-800 dark:text-dark-text-primary">
+                          {formatNumber(row.heures_panne, 1)}
+                        </td>
+                        <td className="px-4 py-3 text-right font-medium text-gray-800 dark:text-dark-text-primary">
+                          {row.potentiel > 0 ? `${row.taux_panne.toFixed(1)}%` : "—"}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <span
+                            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${
+                              itemStatus === "success"
+                                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                            }`}
+                          >
+                            {row.taux_panne > 10 ? "Alerte" : "Normal"}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <PaginationControls
+              currentPage={breakdownPage}
+              totalPages={Math.max(1, Math.ceil(breakdown.length / breakdownPageSize))}
+              totalItems={breakdown.length}
+              itemsPerPage={breakdownPageSize}
+              onPageChange={setBreakdownPage}
+              onItemsPerPageChange={setBreakdownPageSize}
+              showItemCount={true}
+            />
+          </>
         )}
       </div>
     </div>

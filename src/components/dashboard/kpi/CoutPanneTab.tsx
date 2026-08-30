@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -14,6 +14,7 @@ import type { DashboardData, DashboardFilters, CoutPanneEvolutionPoint, CoutPann
 import type { TooltipItem } from "chart.js";
 import { components } from "../../../theme/components";
 import formatCurrency from "../../../utils/FormatCurrency";
+import PaginationControls from "../../../components/common/PaginationControls";
 
 ChartJS.register(
   CategoryScale,
@@ -52,6 +53,22 @@ const CoutPanneTab = ({ data, filters }: CoutPanneTabProps) => {
   const breakdown = useMemo<CoutPanneBreakdownItem[]>(() => {
     return data.coutPanneBreakdown ?? [];
   }, [data.coutPanneBreakdown]);
+
+  const [breakdownPage, setBreakdownPage] = useState(1);
+  const [breakdownPageSize, setBreakdownPageSize] = useState(10);
+
+  const paginatedBreakdown = useMemo(() => {
+    const start = (breakdownPage - 1) * breakdownPageSize;
+    return breakdown.slice(start, start + breakdownPageSize);
+  }, [breakdown, breakdownPage, breakdownPageSize]);
+
+  const prevBreakdownLengthRef = React.useRef(breakdown.length);
+  React.useEffect(() => {
+    if (prevBreakdownLengthRef.current !== breakdown.length) {
+      prevBreakdownLengthRef.current = breakdown.length;
+      setBreakdownPage(1);
+    }
+  }, [breakdown.length]);
 
   const totalCoutPanne = useMemo<number>(() => {
     return evolution.reduce((sum, p) => sum + (p.cout_panne || 0), 0);
@@ -259,62 +276,73 @@ const CoutPanneTab = ({ data, filters }: CoutPanneTabProps) => {
             Aucune donnée disponible pour le niveau sélectionné.
           </p>
         ) : (
-          <div className="mt-4 overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className={components.table.header}>
-                  <th className="px-4 py-3">{niveauHeader}</th>
-                  <th className="px-4 py-3 text-right">Heures panne (H)</th>
-                  <th className="px-4 py-3 text-right">Coût de la panne</th>
-                  <th className="px-4 py-3 text-center">Avec tarif</th>
-                  <th className="px-4 py-3 text-center">Sans tarif</th>
-                  <th className="px-4 py-3 text-right">Part du total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {breakdown.map((row, idx) => {
-                  const pct = totalCoutPanne > 0 ? (row.cout_panne / totalCoutPanne) * 100 : 0;
-                  return (
-                    <tr
-                      key={row.code}
-                      className={`${components.table.row} ${
-                        idx % 2 === 0
-                          ? "bg-white dark:bg-dark-card"
-                          : "bg-slate-50/50 dark:bg-dark-bg-secondary/50"
-                      }`}
-                    >
-                      <td className="px-4 py-3 font-medium text-gray-800 dark:text-dark-text-primary">
-                        {row.libelle || row.code}
-                      </td>
-                      <td className="px-4 py-3 text-right text-gray-800 dark:text-dark-text-primary">
-                        {formatNumber(row.heures_panne, 1)}
-                      </td>
-                      <td className="px-4 py-3 text-right font-medium text-gray-800 dark:text-dark-text-primary">
-                        {formatCurrency(row.cout_panne)}
-                      </td>
-                      <td className="px-4 py-3 text-center text-gray-800 dark:text-dark-text-primary">
-                        {formatNumber(row.records_with_tarif)}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        {row.records_without_tarif > 0 ? (
-                          <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                            {formatNumber(row.records_without_tarif)}
-                          </span>
-                        ) : (
-                          <span className="text-gray-800 dark:text-dark-text-primary">0</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-right text-gray-800 dark:text-dark-text-primary">
-                        {totalCoutPanne > 0 ? `${pct.toFixed(1)}%` : "—"}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <>
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className={components.table.header}>
+                    <th className="px-4 py-3">{niveauHeader}</th>
+                    <th className="px-4 py-3 text-right">Heures panne (H)</th>
+                    <th className="px-4 py-3 text-right">Coût de la panne</th>
+                    <th className="px-4 py-3 text-center">Avec tarif</th>
+                    <th className="px-4 py-3 text-center">Sans tarif</th>
+                    <th className="px-4 py-3 text-right">Part du total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedBreakdown.map((row, idx) => {
+                    const pct = totalCoutPanne > 0 ? (row.cout_panne / totalCoutPanne) * 100 : 0;
+                    return (
+                      <tr
+                        key={row.code}
+                        className={`${components.table.row} ${
+                          idx % 2 === 0
+                            ? "bg-white dark:bg-dark-card"
+                            : "bg-slate-50/50 dark:bg-dark-bg-secondary/50"
+                        }`}
+                      >
+                        <td className="px-4 py-3 font-medium text-gray-800 dark:text-dark-text-primary">
+                          {row.libelle || row.code}
+                        </td>
+                        <td className="px-4 py-3 text-right text-gray-800 dark:text-dark-text-primary">
+                          {formatNumber(row.heures_panne, 1)}
+                        </td>
+                        <td className="px-4 py-3 text-right font-medium text-gray-800 dark:text-dark-text-primary">
+                          {formatCurrency(row.cout_panne)}
+                        </td>
+                        <td className="px-4 py-3 text-center text-gray-800 dark:text-dark-text-primary">
+                          {formatNumber(row.records_with_tarif)}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          {row.records_without_tarif > 0 ? (
+                            <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                              {formatNumber(row.records_without_tarif)}
+                            </span>
+                          ) : (
+                            <span className="text-gray-800 dark:text-dark-text-primary">0</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-right text-gray-800 dark:text-dark-text-primary">
+                          {totalCoutPanne > 0 ? `${pct.toFixed(1)}%` : "—"}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <PaginationControls
+              currentPage={breakdownPage}
+              totalPages={Math.max(1, Math.ceil(breakdown.length / breakdownPageSize))}
+              totalItems={breakdown.length}
+              itemsPerPage={breakdownPageSize}
+              onPageChange={setBreakdownPage}
+              onItemsPerPageChange={setBreakdownPageSize}
+              showItemCount={true}
+            />
+          </>
         )}
-      </div>
+       </div>
     </div>
   );
 };

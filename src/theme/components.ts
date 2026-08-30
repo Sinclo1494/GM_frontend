@@ -39,7 +39,7 @@ export const components = {
 
   table: {
     wrapper:
-      "overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-dark-border dark:bg-dark-card",
+      "overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-dark-border dark:bg-dark-card",
 
     header:
       "bg-slate-100 text-slate-700 text-xs font-bold uppercase tracking-wider dark:bg-dark-bg-tertiary dark:text-dark-text-secondary",

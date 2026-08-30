@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -14,6 +14,7 @@ import type { DashboardData, RentabiliteEvolutionPoint, RentabiliteRankingItem }
 import type { TooltipItem } from "chart.js";
 import { components } from "../../../theme/components";
 import formatCurrency from "../../../utils/FormatCurrency";
+import PaginationControls from "../../../components/common/PaginationControls";
 
 ChartJS.register(
   CategoryScale,
@@ -54,6 +55,22 @@ const RentabiliteTab = ({ data }: RentabiliteTabProps) => {
   const ranking = useMemo<RentabiliteRankingItem[]>(() => {
     return data.rentabiliteRanking ?? [];
   }, [data.rentabiliteRanking]);
+
+  const [breakdownPage, setBreakdownPage] = useState(1);
+  const [breakdownPageSize, setBreakdownPageSize] = useState(10);
+
+  const paginatedBreakdown = useMemo(() => {
+    const start = (breakdownPage - 1) * breakdownPageSize;
+    return ranking.slice(start, start + breakdownPageSize);
+  }, [ranking, breakdownPage, breakdownPageSize]);
+
+  const prevBreakdownLengthRef = React.useRef(ranking.length);
+  React.useEffect(() => {
+    if (prevBreakdownLengthRef.current !== ranking.length) {
+      prevBreakdownLengthRef.current = ranking.length;
+      setBreakdownPage(1);
+    }
+  }, [ranking.length]);
 
   const totalCa = useMemo<number>(() => {
     return ranking.reduce((sum, item) => sum + (item.chiffre_affaires || 0), 0);
@@ -208,97 +225,108 @@ const RentabiliteTab = ({ data }: RentabiliteTabProps) => {
             Aucune donnée disponible pour la période sélectionnée.
           </p>
         ) : (
-          <div className="mt-4 overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className={components.table.header}>
-                  <th className="px-4 py-3 text-center">Rang</th>
-                  <th className="px-4 py-3">Engin</th>
-                  <th className="px-4 py-3">Famille</th>
-                  <th className="px-4 py-3">Filiale</th>
-                  <th className="px-4 py-3 text-right">Chiffre d'affaires</th>
-                  <th className="px-4 py-3 text-right">Regularisation</th>
-                  <th className="px-4 py-3 text-right">Marge</th>
-                  <th className="px-4 py-3 text-center">Statut</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ranking.map((row, idx) => {
-                  const rank = idx + 1;
-                  const margeStatus = row.marge >= 0 ? "success" : "danger";
-                  const topThree = rank <= 3;
-                  return (
-                    <tr
-                      key={row.code_materiel}
-                      className={`${components.table.row} ${
-                        idx % 2 === 0
-                          ? "bg-white dark:bg-dark-card"
-                          : "bg-slate-50/50 dark:bg-dark-bg-secondary/50"
-                      } ${topThree ? "font-medium" : ""}`}
-                    >
-                      <td className="px-4 py-3 text-center">
-                        <span
-                          className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${
-                            rank === 1
-                              ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
-                              : rank === 2
-                                ? "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
-                                : rank === 3
-                                  ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
-                                  : "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
-                          }`}
-                        >
-                          {rank}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 font-medium text-gray-800 dark:text-dark-text-primary">
-                        {row.code_materiel}
-                        <span className="block text-xs text-gray-500 dark:text-dark-text-secondary">
-                          {row.designation}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-gray-800 dark:text-dark-text-primary">
-                        {row.libelle_famille || row.code_famille}
-                      </td>
-                      <td className="px-4 py-3 text-gray-800 dark:text-dark-text-primary">
-                        {row.libelle_filiale || row.code_filiale}
-                      </td>
-                      <td className="px-4 py-3 text-right text-gray-800 dark:text-dark-text-primary">
-                        {formatCurrency(row.chiffre_affaires)}
-                      </td>
-                      <td className="px-4 py-3 text-right text-gray-800 dark:text-dark-text-primary">
-                        {formatCurrency(row.regularisation)}
-                      </td>
-                      <td className="px-4 py-3 text-right font-medium">
-                        <span
-                          className={
-                            row.marge >= 0
-                              ? "text-green-700 dark:text-green-400"
-                              : "text-red-700 dark:text-red-400"
-                          }
-                        >
-                          {formatCurrency(row.marge)}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <span
-                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${
-                            margeStatus === "success"
-                              ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                              : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                          }`}
-                        >
-                          {row.marge >= 0 ? "Positif" : "Négatif"}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <>
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className={components.table.header}>
+                    <th className="px-4 py-3 text-center">Rang</th>
+                    <th className="px-4 py-3">Engin</th>
+                    <th className="px-4 py-3">Famille</th>
+                    <th className="px-4 py-3">Filiale</th>
+                    <th className="px-4 py-3 text-right">Chiffre d'affaires</th>
+                    <th className="px-4 py-3 text-right">Regularisation</th>
+                    <th className="px-4 py-3 text-right">Marge</th>
+                    <th className="px-4 py-3 text-center">Statut</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedBreakdown.map((row, idx) => {
+                    const rank = idx + 1;
+                    const margeStatus = row.marge >= 0 ? "success" : "danger";
+                    const topThree = rank <= 3;
+                    return (
+                      <tr
+                        key={row.code_materiel}
+                        className={`${components.table.row} ${
+                          idx % 2 === 0
+                            ? "bg-white dark:bg-dark-card"
+                            : "bg-slate-50/50 dark:bg-dark-bg-secondary/50"
+                        } ${topThree ? "font-medium" : ""}`}
+                      >
+                        <td className="px-4 py-3 text-center">
+                          <span
+                            className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${
+                              rank === 1
+                                ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+                                : rank === 2
+                                  ? "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                                  : rank === 3
+                                    ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
+                                    : "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
+                            }`}
+                          >
+                            {rank}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 font-medium text-gray-800 dark:text-dark-text-primary">
+                          {row.code_materiel}
+                          <span className="block text-xs text-gray-500 dark:text-dark-text-secondary">
+                            {row.designation}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-gray-800 dark:text-dark-text-primary">
+                          {row.libelle_famille || row.code_famille}
+                        </td>
+                        <td className="px-4 py-3 text-gray-800 dark:text-dark-text-primary">
+                          {row.libelle_filiale || row.code_filiale}
+                        </td>
+                        <td className="px-4 py-3 text-right text-gray-800 dark:text-dark-text-primary">
+                          {formatCurrency(row.chiffre_affaires)}
+                        </td>
+                        <td className="px-4 py-3 text-right text-gray-800 dark:text-dark-text-primary">
+                          {formatCurrency(row.regularisation)}
+                        </td>
+                        <td className="px-4 py-3 text-right font-medium">
+                          <span
+                            className={
+                              row.marge >= 0
+                                ? "text-green-700 dark:text-green-400"
+                                : "text-red-700 dark:text-red-400"
+                            }
+                          >
+                            {formatCurrency(row.marge)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <span
+                            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${
+                              margeStatus === "success"
+                                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                            }`}
+                          >
+                            {row.marge >= 0 ? "Positif" : "Négatif"}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <PaginationControls
+              currentPage={breakdownPage}
+              totalPages={Math.max(1, Math.ceil(ranking.length / breakdownPageSize))}
+              totalItems={ranking.length}
+              itemsPerPage={breakdownPageSize}
+              onPageChange={setBreakdownPage}
+              onItemsPerPageChange={setBreakdownPageSize}
+              showItemCount={true}
+            />
+          </>
         )}
-      </div>
+       </div>
     </div>
   );
 };

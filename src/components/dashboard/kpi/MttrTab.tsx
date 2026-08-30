@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -12,6 +12,7 @@ import {
 } from "chart.js";
 import type { DashboardData, DashboardFilters, MttrEvolutionPoint, MttrBreakdownItem } from "../../../types/dashboard";
 import { components } from "../../../theme/components";
+import PaginationControls from "../../../components/common/PaginationControls";
 
 ChartJS.register(
   CategoryScale,
@@ -50,6 +51,22 @@ const MttrTab = ({ data, filters }: MttrTabProps) => {
   const breakdown = useMemo<MttrBreakdownItem[]>(() => {
     return data.mttrBreakdown ?? [];
   }, [data.mttrBreakdown]);
+
+  const [breakdownPage, setBreakdownPage] = useState(1);
+  const [breakdownPageSize, setBreakdownPageSize] = useState(10);
+
+  const paginatedBreakdown = useMemo(() => {
+    const start = (breakdownPage - 1) * breakdownPageSize;
+    return breakdown.slice(start, start + breakdownPageSize);
+  }, [breakdown, breakdownPage, breakdownPageSize]);
+
+  const prevBreakdownLengthRef = React.useRef(breakdown.length);
+  React.useEffect(() => {
+    if (prevBreakdownLengthRef.current !== breakdown.length) {
+      prevBreakdownLengthRef.current = breakdown.length;
+      setBreakdownPage(1);
+    }
+  }, [breakdown.length]);
 
   const totalHeuresPanne = useMemo<number>(() => {
     return evolution.reduce((sum, p) => sum + (p.heures_panne || 0), 0);
@@ -199,43 +216,54 @@ const MttrTab = ({ data, filters }: MttrTabProps) => {
             Aucune donnée disponible pour le niveau sélectionné.
           </p>
         ) : (
-          <div className="mt-4 overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className={components.table.header}>
-                  <th className="px-4 py-3">{niveauHeader}</th>
-                  <th className="px-4 py-3 text-right">Heures panne (H)</th>
-                  <th className="px-4 py-3 text-right">Interventions correctives</th>
-                  <th className="px-4 py-3 text-right">MTTR</th>
-                </tr>
-              </thead>
-              <tbody>
-                {breakdown.map((row, idx) => (
-                  <tr
-                    key={row.code}
-                    className={`${components.table.row} ${
-                      idx % 2 === 0
-                        ? "bg-white dark:bg-dark-card"
-                        : "bg-slate-50/50 dark:bg-dark-bg-secondary/50"
-                    }`}
-                  >
-                    <td className="px-4 py-3 font-medium text-gray-800 dark:text-dark-text-primary">
-                      {row.libelle || row.code}
-                    </td>
-                    <td className="px-4 py-3 text-right text-gray-800 dark:text-dark-text-primary">
-                      {formatNumber(row.heures_panne, 1)}
-                    </td>
-                    <td className="px-4 py-3 text-right text-gray-800 dark:text-dark-text-primary">
-                      {formatNumber(row.interventions_correctives, 0)}
-                    </td>
-                    <td className="px-4 py-3 text-right font-medium text-gray-800 dark:text-dark-text-primary">
-                      {row.mttr !== null ? `${formatNumber(row.mttr, 1)} h` : "—"}
-                    </td>
+          <>
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className={components.table.header}>
+                    <th className="px-4 py-3">{niveauHeader}</th>
+                    <th className="px-4 py-3 text-right">Heures panne (H)</th>
+                    <th className="px-4 py-3 text-right">Interventions correctives</th>
+                    <th className="px-4 py-3 text-right">MTTR</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {paginatedBreakdown.map((row, idx) => (
+                    <tr
+                      key={row.code}
+                      className={`${components.table.row} ${
+                        idx % 2 === 0
+                          ? "bg-white dark:bg-dark-card"
+                          : "bg-slate-50/50 dark:bg-dark-bg-secondary/50"
+                      }`}
+                    >
+                      <td className="px-4 py-3 font-medium text-gray-800 dark:text-dark-text-primary">
+                        {row.libelle || row.code}
+                      </td>
+                      <td className="px-4 py-3 text-right text-gray-800 dark:text-dark-text-primary">
+                        {formatNumber(row.heures_panne, 1)}
+                      </td>
+                      <td className="px-4 py-3 text-right text-gray-800 dark:text-dark-text-primary">
+                        {formatNumber(row.interventions_correctives, 0)}
+                      </td>
+                      <td className="px-4 py-3 text-right font-medium text-gray-800 dark:text-dark-text-primary">
+                        {row.mttr !== null ? `${formatNumber(row.mttr, 1)} h` : "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <PaginationControls
+              currentPage={breakdownPage}
+              totalPages={Math.max(1, Math.ceil(breakdown.length / breakdownPageSize))}
+              totalItems={breakdown.length}
+              itemsPerPage={breakdownPageSize}
+              onPageChange={setBreakdownPage}
+              onItemsPerPageChange={setBreakdownPageSize}
+              showItemCount={true}
+            />
+          </>
         )}
       </div>
     </div>

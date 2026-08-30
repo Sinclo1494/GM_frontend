@@ -191,7 +191,7 @@ function CrudPage<T>({
                             Gérez les enregistrements de cette section.
                         </p>
                     </div>
-                    <button onClick={openCreate} className={components.button.primary}>
+                    <button onClick={openCreate} type="button" className={components.button.primary}>
                         <Plus className="h-4 w-4" />
                         Nouvel enregistrement
                     </button>
@@ -225,7 +225,7 @@ function CrudPage<T>({
                             </button>
                             <button
                                 onClick={() => openDelete(row)}
-                                className="text-red-600 dark:text-red-400 hover:text-red-800 dark:text-red-400 transition-colors"
+                                className="text-red-600 dark:text-red-400 hover:text-red-800  transition-colors"
                                 title="Supprimer"
                             >
                                 <Trash2 className="h-4 w-4" />
@@ -257,7 +257,7 @@ function CrudPage<T>({
                                     : `Êtes-vous sûr de vouloir supprimer cet enregistrement de ${title} ?`}
                             </p>
                             {deleteError && (
-                                <div className="mb-4 rounded-md border border-red-200 dark:border-red-800 dark:border-red-800 bg-red-50 px-3 py-2 text-sm text-red-700">
+                                <div className="mb-4 rounded-md border border-red-200 dark:border-red-800 bg-red-50 px-3 py-2 text-sm text-red-700">
                                     {deleteError}
                                 </div>
                             )}

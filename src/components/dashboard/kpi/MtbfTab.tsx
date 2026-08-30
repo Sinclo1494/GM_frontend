@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -12,6 +12,7 @@ import {
 } from "chart.js";
 import type { DashboardData, DashboardFilters, MtbfEvolutionPoint, MtbfBreakdownItem } from "../../../types/dashboard";
 import { components } from "../../../theme/components";
+import PaginationControls from "../../../components/common/PaginationControls";
 
 ChartJS.register(
   CategoryScale,
@@ -50,6 +51,22 @@ const MtbfTab = ({ data, filters }: MtbfTabProps) => {
   const breakdown = useMemo<MtbfBreakdownItem[]>(() => {
     return data.mtbfBreakdown ?? [];
   }, [data.mtbfBreakdown]);
+
+  const [breakdownPage, setBreakdownPage] = useState(1);
+  const [breakdownPageSize, setBreakdownPageSize] = useState(10);
+
+  const paginatedBreakdown = useMemo(() => {
+    const start = (breakdownPage - 1) * breakdownPageSize;
+    return breakdown.slice(start, start + breakdownPageSize);
+  }, [breakdown, breakdownPage, breakdownPageSize]);
+
+  const prevBreakdownLengthRef = React.useRef(breakdown.length);
+  React.useEffect(() => {
+    if (prevBreakdownLengthRef.current !== breakdown.length) {
+      prevBreakdownLengthRef.current = breakdown.length;
+      setBreakdownPage(1);
+    }
+  }, [breakdown.length]);
 
   const totalHeuresService = useMemo<number>(() => {
     return evolution.reduce((sum, p) => sum + (p.heures_service || 0), 0);
@@ -199,46 +216,57 @@ const MtbfTab = ({ data, filters }: MtbfTabProps) => {
             Aucune donnée disponible pour le niveau sélectionné.
           </p>
         ) : (
-          <div className="mt-4 overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className={components.table.header}>
-                  <th className="px-4 py-3">{niveauHeader}</th>
-                  <th className="px-4 py-3 text-right">Heures service (H)</th>
-                  <th className="px-4 py-3 text-right">Nombre de pannes</th>
-                  <th className="px-4 py-3 text-right">MTBF</th>
-                </tr>
-              </thead>
-              <tbody>
-                {breakdown.map((row, idx) => {
-                  const itemMtbf = row.nombre_pannes > 0 ? row.heures_service / row.nombre_pannes : null;
-                  return (
-                    <tr
-                      key={row.code}
-                      className={`${components.table.row} ${
-                        idx % 2 === 0
-                          ? "bg-white dark:bg-dark-card"
-                          : "bg-slate-50/50 dark:bg-dark-bg-secondary/50"
-                      }`}
-                    >
-                      <td className="px-4 py-3 font-medium text-gray-800 dark:text-dark-text-primary">
-                        {row.libelle || row.code}
-                      </td>
-                      <td className="px-4 py-3 text-right text-gray-800 dark:text-dark-text-primary">
-                        {formatNumber(row.heures_service, 1)}
-                      </td>
-                      <td className="px-4 py-3 text-right text-gray-800 dark:text-dark-text-primary">
-                        {formatNumber(row.nombre_pannes, 0)}
-                      </td>
-                      <td className="px-4 py-3 text-right font-medium text-gray-800 dark:text-dark-text-primary">
-                        {itemMtbf !== null ? `${formatNumber(itemMtbf, 1)} h` : "—"}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <>
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className={components.table.header}>
+                    <th className="px-4 py-3">{niveauHeader}</th>
+                    <th className="px-4 py-3 text-right">Heures service (H)</th>
+                    <th className="px-4 py-3 text-right">Nombre de pannes</th>
+                    <th className="px-4 py-3 text-right">MTBF</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedBreakdown.map((row, idx) => {
+                    const itemMtbf = row.nombre_pannes > 0 ? row.heures_service / row.nombre_pannes : null;
+                    return (
+                      <tr
+                        key={row.code}
+                        className={`${components.table.row} ${
+                          idx % 2 === 0
+                            ? "bg-white dark:bg-dark-card"
+                            : "bg-slate-50/50 dark:bg-dark-bg-secondary/50"
+                        }`}
+                      >
+                        <td className="px-4 py-3 font-medium text-gray-800 dark:text-dark-text-primary">
+                          {row.libelle || row.code}
+                        </td>
+                        <td className="px-4 py-3 text-right text-gray-800 dark:text-dark-text-primary">
+                          {formatNumber(row.heures_service, 1)}
+                        </td>
+                        <td className="px-4 py-3 text-right text-gray-800 dark:text-dark-text-primary">
+                          {formatNumber(row.nombre_pannes, 0)}
+                        </td>
+                        <td className="px-4 py-3 text-right font-medium text-gray-800 dark:text-dark-text-primary">
+                          {itemMtbf !== null ? `${formatNumber(itemMtbf, 1)} h` : "—"}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <PaginationControls
+              currentPage={breakdownPage}
+              totalPages={Math.max(1, Math.ceil(breakdown.length / breakdownPageSize))}
+              totalItems={breakdown.length}
+              itemsPerPage={breakdownPageSize}
+              onPageChange={setBreakdownPage}
+              onItemsPerPageChange={setBreakdownPageSize}
+              showItemCount={true}
+            />
+          </>
         )}
       </div>
     </div>

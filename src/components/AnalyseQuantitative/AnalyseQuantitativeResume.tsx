@@ -14,7 +14,7 @@ const StatCard = ({
 }) => (
   <div className={components.card}>
     <p className="text-sm dark:text-dark-text-secondary">{title}</p>
-    <p className="mt-2 text-3xl font-bold text-blue-600">{value}</p>
+    <p className="mt-2 text-3xl font-bold text-blue-600 dark:text-blue-400">{value}</p>
   </div>
 );
 
@@ -36,7 +36,7 @@ const Section = ({
         >
           <span className="dark:text-dark-text-secondary">{item.label}</span>
 
-          <span className="font-semibold">{item.value}</span>
+          <span className="font-semibold text-gray-800 dark:text-dark-text-primary">{item.value}</span>
         </div>
       ))}
     </div>

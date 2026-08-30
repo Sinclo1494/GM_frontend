@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useMemo, useEffect, useRef, useState } from "react";
 import type { ValidationIssue } from "../../types/importCsv";
 import { components } from "../../theme/components";
+import PaginationControls from "../../components/common/PaginationControls";
 
 interface Props {
     issues: ValidationIssue[];
@@ -27,13 +28,30 @@ export default function ValidationIssueTable({
         );
     }, [issues, messageFilter]);
 
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+
+    const paginatedIssues = useMemo(() => {
+        const start = (page - 1) * pageSize;
+        return filteredIssues.slice(start, start + pageSize);
+    }, [filteredIssues, page, pageSize]);
+
+    const prevFilteredLengthRef = useRef(filteredIssues.length);
+    useEffect(() => {
+        if (prevFilteredLengthRef.current !== filteredIssues.length) {
+            prevFilteredLengthRef.current = filteredIssues.length;
+            setPage(1);
+        }
+    }, [filteredIssues.length]);
+
     const uniqueMessages = useMemo(
         () => [...new Set(issues.map((issue) => issue.message))],
         [issues]
     );
 
     return (
-        <div className={components.table.wrapper}>
+        <>
+            <div className={components.table.wrapper}>
             <div
                 className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b px-5 py-4 ${
                     isError ? "bg-red-50" : "bg-yellow-50"
@@ -118,7 +136,7 @@ export default function ValidationIssueTable({
                         </thead>
 
                         <tbody>
-                            {filteredIssues.map((issue, index) => (
+                            {paginatedIssues.map((issue, index) => (
                                 <tr
                                     key={index}
                                     className={`border-b dark:even:bg-dark-bg-secondary ${
@@ -155,5 +173,17 @@ export default function ValidationIssueTable({
                 </div>
             )}
         </div>
+        {filteredIssues.length > 0 && (
+            <PaginationControls
+                currentPage={page}
+                totalPages={Math.max(1, Math.ceil(filteredIssues.length / pageSize))}
+                totalItems={filteredIssues.length}
+                itemsPerPage={pageSize}
+                onPageChange={setPage}
+                onItemsPerPageChange={setPageSize}
+                showItemCount={true}
+            />
+        )}
+    </>
     );
 }
