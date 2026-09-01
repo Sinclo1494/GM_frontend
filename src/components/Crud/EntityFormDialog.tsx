@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { components } from "../../theme/components";
 
-export type FieldType = "text" | "number" | "date" | "datetime-local" | "select" | "textarea" | "checkbox" | "readonly";
+export type FieldType = "text" | "number" | "date" | "datetime-local" | "select" | "textarea" | "checkbox" | "readonly" | "password";
 
 export interface FieldConfig {
     name: string;
@@ -74,8 +74,9 @@ const EntityFormDialog: React.FC<EntityFormDialogProps> = ({
         setFieldErrors({});
         try {
             await onSubmit(values);
-        } catch (err: any) {
-            const data = err?.response?.data;
+        } catch (err: unknown) {
+            const axiosError = err as { response?: { data?: unknown } };
+            const data = axiosError.response?.data;
             if (data) {
                 const errors: Record<string, string[]> = {};
                 Object.entries(data).forEach(([key, val]) => {
@@ -187,6 +188,15 @@ const EntityFormDialog: React.FC<EntityFormDialogProps> = ({
                                             placeholder={field.placeholder}
                                             onChange={(e) => handleChange(field.name, e.target.value)}
                                             className={components.input + " min-h-[80px]" + (fieldError ? " border-red-300 focus:border-red-500 focus:ring-red-100" : "")}
+                                        />
+                                    ) : field.type === "password" ? (
+                                        <input
+                                            type="password"
+                                            value={String(value ?? "")}
+                                            disabled={submitting}
+                                            placeholder={field.placeholder}
+                                            onChange={(e) => handleChange(field.name, e.target.value)}
+                                            className={components.input + (fieldError ? " border-red-300 focus:border-red-500 focus:ring-red-100" : "")}
                                         />
                                     ) : field.type === "checkbox" ? (
                                         <input

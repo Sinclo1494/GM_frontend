@@ -5,6 +5,7 @@ import { AuthProvider } from './context/AuthProvider.tsx';
 import Login from './pages/Login.tsx';
 import ProtectedRoute from './routes/ProtectedRoute.tsx';
 import App from './App.tsx';
+import PermissionProvider from './auth/PermissionProvider';
 import Dashboard from './pages/Dashboard.tsx';
 import AnalyseQuantitative from './pages/AnalyseQuantitative.tsx';
 import AnalyseExploitation from './pages/AnalyseExploitation.tsx';
@@ -16,11 +17,6 @@ import SousFamilleImportCsv from './pages/ImportSousFamilleCSV.tsx';
 import SituationAffectationImportCsv from './pages/ImportSituationAffectationCSV.tsx';
 import SiteImportCsv from './pages/ImportSiteCSV.tsx';
 import RegularisationImportCsv from './pages/ImportRegularisationCSV.tsx';
-
-
-
-import './index.css';
-import "./api/axios";
 import JournalMateriel from './pages/JournalMateriel.tsx';
 import Journalisation from './pages/Journalisation.tsx';
 import EntreprisePage from './pages/EntreprisePage.tsx';
@@ -42,123 +38,55 @@ import SituationMaterielPage from './pages/SituationMaterielPage.tsx';
 import PointagePage from './pages/PointagePage.tsx';
 import RegularisationGMPage from './pages/RegularisationGMPage.tsx';
 import RegularisationMoisGM2Page from './pages/RegularisationMoisGM2Page.tsx';
+import UsersPage from './pages/UsersPage.tsx';
+import './index.css';
+import "./api/axios";
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AuthProvider>
       <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route element={<App />}>
-            <Route
-              path="/reports/journal-materiel"
-              element={<ProtectedRoute><JournalMateriel /></ProtectedRoute>}
-            />
-            <Route
-              path="/admin/journalisation"
-              element={<ProtectedRoute><Journalisation /></ProtectedRoute>}
-            />
-            <Route
-              path="/reports/analyse-quantitative"
-              element={<ProtectedRoute><AnalyseQuantitative /></ProtectedRoute>}
-            />
-            <Route
-              path="/reports/analyse-exploitation"
-              element={<ProtectedRoute><AnalyseExploitation /></ProtectedRoute>}
-            />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>}
-            />
-            <Route
-              path="/Dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>}
-            />
-            <Route
-              path="/imports/pointage-csv"
-              element={
-                <ProtectedRoute>
-                  <PointageImportCsv />
-                </ProtectedRoute>}
-            />
-            <Route
-              path="/imports/gm-csv"
-              element={
-                <ProtectedRoute>
-                  <GMImportCsv />
-                </ProtectedRoute>}
-            />
-            <Route
-              path="/imports/marque-csv"
-              element={
-                <ProtectedRoute>
-                  <MarqueImportCsv />
-                </ProtectedRoute>}
-            />
-            <Route
-              path="/imports/type-marque-csv"
-              element={
-                <ProtectedRoute>
-                  <TypeMarqueImportCsv />
-                </ProtectedRoute>}
-            />
-            <Route
-              path="/imports/sous-famille-csv"
-              element={
-                <ProtectedRoute>
-                  <SousFamilleImportCsv />
-                </ProtectedRoute>}
-            />
-            <Route
-              path="/imports/situation-affectation-csv"
-              element={
-                <ProtectedRoute>
-                  <SituationAffectationImportCsv />
-                </ProtectedRoute>}
-            />
-            <Route
-              path="/imports/site-csv"
-              element={
-                <ProtectedRoute>
-                  <SiteImportCsv />
-                </ProtectedRoute>}
-            />
-            <Route
-              path="/imports/regularisation-gm-csv"
-              element={
-                <ProtectedRoute>
-                  <RegularisationImportCsv />
-                </ProtectedRoute>}
-            />
-
-            <Route path="/gestion/entreprises" element={<ProtectedRoute><EntreprisePage /></ProtectedRoute>} />
-            <Route path="/gestion/filiales" element={<ProtectedRoute><FilialePage /></ProtectedRoute>} />
-            <Route path="/gestion/divisions" element={<ProtectedRoute><DivisionPage /></ProtectedRoute>} />
-            <Route path="/gestion/familles-structures" element={<ProtectedRoute><FamilleStructuresPage /></ProtectedRoute>} />
-            <Route path="/gestion/categories-gm" element={<ProtectedRoute><CategorieGMPage /></ProtectedRoute>} />
-            <Route path="/gestion/familles-materiel" element={<ProtectedRoute><FamilleMaterielPage /></ProtectedRoute>} />
-            <Route path="/gestion/sous-familles-materiel" element={<ProtectedRoute><SousFamilleMaterielPage /></ProtectedRoute>} />
-            <Route path="/gestion/marques-materiel" element={<ProtectedRoute><MarqueMaterielPage /></ProtectedRoute>} />
-            <Route path="/gestion/types-marque" element={<ProtectedRoute><TypeMarquePage /></ProtectedRoute>} />
-            <Route path="/gestion/types-affectation" element={<ProtectedRoute><TypeAffectationPage /></ProtectedRoute>} />
-            <Route path="/gestion/types-situation" element={<ProtectedRoute><TypeSituationPage /></ProtectedRoute>} />
-            <Route path="/gestion/types-etat-materiel" element={<ProtectedRoute><TypeEtatMaterielPage /></ProtectedRoute>} />
-            <Route path="/gestion/sites" element={<ProtectedRoute><SitePage /></ProtectedRoute>} />
-            <Route path="/gestion/grand-materiel" element={<ProtectedRoute><GrandMaterielPage /></ProtectedRoute>} />
-            <Route path="/gestion/affectations" element={<ProtectedRoute><AffectationMaterielPage /></ProtectedRoute>} />
-            <Route path="/gestion/situations" element={<ProtectedRoute><SituationMaterielPage /></ProtectedRoute>} />
-            <Route path="/gestion/pointages" element={<ProtectedRoute><PointagePage /></ProtectedRoute>} />
-            <Route path="/gestion/regularisations-gm" element={<ProtectedRoute><RegularisationGMPage /></ProtectedRoute>} />
-            <Route path="/gestion/regularisations-mois" element={<ProtectedRoute><RegularisationMoisGM2Page /></ProtectedRoute>} />
-
-          </Route>
-        </Routes>
+        <PermissionProvider>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route element={<App />}>
+              <Route path="/admin/users" element={<ProtectedRoute permission="administration.users"><UsersPage /></ProtectedRoute>} />
+              <Route path="/admin/journalisation" element={<ProtectedRoute permission="administration.journalisation"><Journalisation /></ProtectedRoute>} />
+              <Route path="/reports/journal-materiel" element={<ProtectedRoute permission="analyse.journal_materiel"><JournalMateriel /></ProtectedRoute>} />
+              <Route path="/reports/analyse-quantitative" element={<ProtectedRoute permission="analyse.quantitative"><AnalyseQuantitative /></ProtectedRoute>} />
+              <Route path="/reports/analyse-exploitation" element={<ProtectedRoute permission="analyse.exploitation"><AnalyseExploitation /></ProtectedRoute>} />
+              <Route path="/" element={<ProtectedRoute permission="analyse.dashboard"><Dashboard /></ProtectedRoute>} />
+              <Route path="/Dashboard" element={<ProtectedRoute permission="analyse.dashboard"><Dashboard /></ProtectedRoute>} />
+              <Route path="/imports/pointage-csv" element={<ProtectedRoute permission="import.pointage"><PointageImportCsv /></ProtectedRoute>} />
+              <Route path="/imports/gm-csv" element={<ProtectedRoute permission="import.grand_materiel"><GMImportCsv /></ProtectedRoute>} />
+              <Route path="/imports/marque-csv" element={<ProtectedRoute permission="import.marque"><MarqueImportCsv /></ProtectedRoute>} />
+              <Route path="/imports/type-marque-csv" element={<ProtectedRoute permission="import.type_marque"><TypeMarqueImportCsv /></ProtectedRoute>} />
+              <Route path="/imports/sous-famille-csv" element={<ProtectedRoute permission="import.sous_famille"><SousFamilleImportCsv /></ProtectedRoute>} />
+              <Route path="/imports/situation-affectation-csv" element={<ProtectedRoute permission="import.situation_affectation"><SituationAffectationImportCsv /></ProtectedRoute>} />
+              <Route path="/imports/site-csv" element={<ProtectedRoute permission="import.site"><SiteImportCsv /></ProtectedRoute>} />
+              <Route path="/imports/regularisation-gm-csv" element={<ProtectedRoute permission="import.regularisation"><RegularisationImportCsv /></ProtectedRoute>} />
+              <Route path="/gestion/entreprises" element={<ProtectedRoute permission="gestion.entreprises"><EntreprisePage /></ProtectedRoute>} />
+              <Route path="/gestion/filiales" element={<ProtectedRoute permission="gestion.filiales"><FilialePage /></ProtectedRoute>} />
+              <Route path="/gestion/divisions" element={<ProtectedRoute permission="gestion.divisions"><DivisionPage /></ProtectedRoute>} />
+              <Route path="/gestion/familles-structures" element={<ProtectedRoute permission="gestion.familles_structures"><FamilleStructuresPage /></ProtectedRoute>} />
+              <Route path="/gestion/categories-gm" element={<ProtectedRoute permission="gestion.categories_gm"><CategorieGMPage /></ProtectedRoute>} />
+              <Route path="/gestion/familles-materiel" element={<ProtectedRoute permission="gestion.familles_materiel"><FamilleMaterielPage /></ProtectedRoute>} />
+              <Route path="/gestion/sous-familles-materiel" element={<ProtectedRoute permission="gestion.sous_familles_materiel"><SousFamilleMaterielPage /></ProtectedRoute>} />
+              <Route path="/gestion/marques-materiel" element={<ProtectedRoute permission="gestion.marques_materiel"><MarqueMaterielPage /></ProtectedRoute>} />
+              <Route path="/gestion/types-marque" element={<ProtectedRoute permission="gestion.types_marque"><TypeMarquePage /></ProtectedRoute>} />
+              <Route path="/gestion/types-affectation" element={<ProtectedRoute permission="gestion.types_affectation"><TypeAffectationPage /></ProtectedRoute>} />
+              <Route path="/gestion/types-situation" element={<ProtectedRoute permission="gestion.types_situation"><TypeSituationPage /></ProtectedRoute>} />
+              <Route path="/gestion/types-etat-materiel" element={<ProtectedRoute permission="gestion.types_etat_materiel"><TypeEtatMaterielPage /></ProtectedRoute>} />
+              <Route path="/gestion/sites" element={<ProtectedRoute permission="gestion.sites"><SitePage /></ProtectedRoute>} />
+              <Route path="/gestion/grand-materiel" element={<ProtectedRoute permission="gestion.grand_materiel"><GrandMaterielPage /></ProtectedRoute>} />
+              <Route path="/gestion/affectations" element={<ProtectedRoute permission="gestion.affectations"><AffectationMaterielPage /></ProtectedRoute>} />
+              <Route path="/gestion/situations" element={<ProtectedRoute permission="gestion.situations"><SituationMaterielPage /></ProtectedRoute>} />
+              <Route path="/gestion/pointages" element={<ProtectedRoute permission="gestion.pointages"><PointagePage /></ProtectedRoute>} />
+              <Route path="/gestion/regularisations-gm" element={<ProtectedRoute permission="gestion.regularisations_gm"><RegularisationGMPage /></ProtectedRoute>} />
+              <Route path="/gestion/regularisations-mois" element={<ProtectedRoute permission="gestion.regularisations_mois"><RegularisationMoisGM2Page /></ProtectedRoute>} />
+            </Route>
+          </Routes>
+        </PermissionProvider>
       </BrowserRouter>
     </AuthProvider>
   </StrictMode>,
