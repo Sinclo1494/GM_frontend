@@ -6,6 +6,7 @@ import EntityFormDialog, { type FieldConfig } from "../components/Crud/EntityFor
 import { getUsers, createUser, updateUser, deleteUser, getUser, getUserPermissions, updateUserPermissions, setUserPassword } from "../api/userService";
 import type { UserInfo } from "../types/user";
 import UserPermissionsDialog from "../components/administration/users/UserPermissionsDialog";
+import { usePermissions } from "../auth/PermissionContext";
 
 const fields: FieldConfig[] = [
   { name: "username", label: "Nom d'utilisateur", type: "text", required: true },
@@ -54,6 +55,11 @@ const columns: ColumnDef<UserInfo>[] = [
 ];
 
 export default function UsersPage() {
+  const { user: currentUser, permissions: currentPermissions } = usePermissions();
+  const canManageUsers = currentUser?.is_superuser
+    || currentPermissions.includes("administration.users")
+    || currentPermissions.includes("administration.users.write");
+
   const [data, setData] = useState<UserInfo[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -190,17 +196,30 @@ export default function UsersPage() {
   };
 
   const handleSubmit = async (values: Record<string, unknown>) => {
-    if (editingUser) {
-      const { password, ...rest } = values;
-      await updateUser(editingUser.id, rest as { first_name?: string; last_name?: string; email?: string; is_active?: boolean });
-      if (password && typeof password === "string" && password.trim() !== "") {
-        await setUserPassword(editingUser.id, password);
+    try {
+      if (editingUser) {
+        const { password, ...rest } = values;
+        await updateUser(editingUser.id, rest as { first_name?: string; last_name?: string; email?: string; is_active?: boolean });
+        if (password && typeof password === "string" && password.trim() !== "") {
+          await setUserPassword(editingUser.id, password);
+        }
+      } else {
+        await createUser(values as { username: string; first_name: string; last_name: string; email: string; password: string; is_active?: boolean });
       }
-    } else {
-      await createUser(values as { username: string; first_name: string; last_name: string; email: string; password: string; is_active?: boolean });
+      setDialogOpen(false);
+      fetchData();
+    } catch (err: unknown) {
+      const axiosError = err as { response?: { status?: number; data?: { detail?: string; message?: string } }; message?: string };
+      const data = axiosError.response?.data;
+      let message: string | undefined;
+      if (axiosError.response?.status === 403) {
+        message = "Vous n'avez pas les droits nécessaires pour modifier un utilisateur.";
+      } else {
+        message = data?.detail ?? data?.message ?? axiosError.message ?? "Erreur lors de l'enregistrement.";
+      }
+      setFormError(message);
+      throw err;
     }
-    setDialogOpen(false);
-    fetchData();
   };
 
   const openDelete = (user: UserInfo) => {
@@ -274,7 +293,7 @@ export default function UsersPage() {
               Gérez les comptes utilisateurs et leurs droits d'accès.
             </p>
           </div>
-          <button onClick={openCreate} type="button" className={components.button.primary}>
+          <button onClick={openCreate} type="button" disabled={!canManageUsers} className={components.button.primary}>
             <Plus className="h-4 w-4" />
             Nouvel utilisateur
           </button>
@@ -301,22 +320,25 @@ export default function UsersPage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => openEdit(row)}
-                className="text-blue-600 hover:text-blue-800 transition-colors"
-                title="Modifier"
+                disabled={!canManageUsers}
+                className="text-blue-600 hover:text-blue-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:text-blue-600"
+                title={canManageUsers ? "Modifier" : "Modification non autorisée"}
               >
                 <Edit className="h-4 w-4" />
               </button>
               <button
                 onClick={() => openPermissions(row)}
-                className="text-purple-600 hover:text-purple-800 transition-colors"
-                title="Droits d'accès"
+                disabled={!canManageUsers}
+                className="text-purple-600 hover:text-purple-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:text-purple-600"
+                title={canManageUsers ? "Droits d'accès" : "Modification non autorisée"}
               >
                 <Shield className="h-4 w-4" />
               </button>
               <button
                 onClick={() => openDelete(row)}
-                className="text-red-600 dark:text-red-400 hover:text-red-800 transition-colors"
-                title="Supprimer"
+                disabled={!canManageUsers}
+                className="text-red-600 dark:text-red-400 hover:text-red-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:text-red-600 dark:disabled:hover:text-red-400"
+                title={canManageUsers ? "Supprimer" : "Suppression non autorisée"}
               >
                 <Trash2 className="h-4 w-4" />
               </button>

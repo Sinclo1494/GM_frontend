@@ -3,6 +3,84 @@ import { useNavigate } from "react-router-dom";
 import { loginUser } from "../api/auth";
 import { useAuth } from "../context/useAuth";
 import { components } from "../theme/components";
+import { getUserPreferences, getCurrentUser } from "../api/userService";
+
+const EXCLUDED_LOGIN_PATHS = new Set(["/login", "/profile"]);
+
+async function getPostLoginRedirect(): Promise<string> {
+  try {
+    const [prefs, current] = await Promise.all([getUserPreferences(), getCurrentUser()]);
+    const userPerms = new Set(current.permissions || []);
+    const isSuperuser = current.is_superuser;
+
+    const canAccess = (_route: string, permissionKey?: string) => {
+      if (isSuperuser) return true;
+      if (!permissionKey) return true;
+      if (userPerms.has(permissionKey)) return true;
+      return userPerms.has(`${permissionKey}.read`) || userPerms.has(`${permissionKey}.write`);
+    };
+
+    if (prefs.default_landing_page) {
+      const perm = routePermission(prefs.default_landing_page);
+      if (canAccess(prefs.default_landing_page, perm)) {
+        return prefs.default_landing_page;
+      }
+    }
+    if (prefs.remember_last_visited_page) {
+      const last = localStorage.getItem("last_visited_page");
+      if (last && !EXCLUDED_LOGIN_PATHS.has(last)) {
+        const perm = routePermission(last);
+        if (canAccess(last, perm)) {
+          return last;
+        }
+        localStorage.removeItem("last_visited_page");
+      }
+    }
+  } catch {
+    // ignore preference load errors and fall back to default
+  }
+  return "/";
+}
+
+function routePermission(route: string): string | undefined {
+  const map: Record<string, string> = {
+    "/": "analyse.dashboard",
+    "/Dashboard": "analyse.dashboard",
+    "/reports/journal-materiel": "analyse.journal_materiel",
+    "/reports/analyse-quantitative": "analyse.quantitative",
+    "/reports/analyse-exploitation": "analyse.exploitation",
+    "/admin/journalisation": "administration.journalisation",
+    "/admin/users": "administration.users",
+    "/gestion/entreprises": "gestion.entreprises",
+    "/gestion/filiales": "gestion.filiales",
+    "/gestion/divisions": "gestion.divisions",
+    "/gestion/familles-structures": "gestion.familles_structures",
+    "/gestion/categories-gm": "gestion.categories_gm",
+    "/gestion/familles-materiel": "gestion.familles_materiel",
+    "/gestion/sous-familles-materiel": "gestion.sous_familles_materiel",
+    "/gestion/marques-materiel": "gestion.marques_materiel",
+    "/gestion/types-marque": "gestion.types_marque",
+    "/gestion/types-affectation": "gestion.types_affectation",
+    "/gestion/types-situation": "gestion.types_situation",
+    "/gestion/types-etat-materiel": "gestion.types_etat_materiel",
+    "/gestion/sites": "gestion.sites",
+    "/gestion/grand-materiel": "gestion.grand_materiel",
+    "/gestion/affectations": "gestion.affectations",
+    "/gestion/situations": "gestion.situations",
+    "/gestion/pointages": "gestion.pointages",
+    "/gestion/regularisations-gm": "gestion.regularisations_gm",
+    "/gestion/regularisations-mois": "gestion.regularisations_mois",
+    "/imports/pointage-csv": "import.pointage",
+    "/imports/gm-csv": "import.grand_materiel",
+    "/imports/marque-csv": "import.marque",
+    "/imports/type-marque-csv": "import.type_marque",
+    "/imports/sous-famille-csv": "import.sous_famille",
+    "/imports/situation-affectation-csv": "import.situation_affectation",
+    "/imports/site-csv": "import.site",
+    "/imports/regularisation-gm-csv": "import.regularisation",
+  };
+  return map[route];
+}
 
 export default function Login() {
     const [username, setUsername] = useState("");
@@ -27,8 +105,9 @@ export default function Login() {
         try {
             const data = await loginUser(username, password);
 
-            login(data.access, data.refresh);
-            navigate("/");
+            await login(data.access, data.refresh);
+            const redirect = await getPostLoginRedirect();
+            navigate(redirect);
         } catch {
             setError("Invalid username or password");
         } finally {

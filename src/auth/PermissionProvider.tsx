@@ -42,7 +42,8 @@ export default function PermissionProvider({ children }: PermissionProviderProps
     (permission: string) => {
       if (!user) return false;
       if (user.is_superuser) return true;
-      return permissions.includes(permission);
+      if (permissions.includes(permission)) return true;
+      return permissions.includes(`${permission}.read`) || permissions.includes(`${permission}.write`);
     },
     [user, permissions],
   );
@@ -51,7 +52,10 @@ export default function PermissionProvider({ children }: PermissionProviderProps
     (perms: string[]) => {
       if (!user) return false;
       if (user.is_superuser) return true;
-      return perms.some((p) => permissions.includes(p));
+      return perms.some((p) => {
+        if (permissions.includes(p)) return true;
+        return permissions.includes(`${p}.read`) || permissions.includes(`${p}.write`);
+      });
     },
     [user, permissions],
   );
@@ -60,7 +64,10 @@ export default function PermissionProvider({ children }: PermissionProviderProps
     (perms: string[]) => {
       if (!user) return false;
       if (user.is_superuser) return true;
-      return perms.every((p) => permissions.includes(p));
+      return perms.every((p) => {
+        if (permissions.includes(p)) return true;
+        return permissions.includes(`${p}.read`) || permissions.includes(`${p}.write`);
+      });
     },
     [user, permissions],
   );

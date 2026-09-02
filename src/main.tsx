@@ -39,6 +39,7 @@ import PointagePage from './pages/PointagePage.tsx';
 import RegularisationGMPage from './pages/RegularisationGMPage.tsx';
 import RegularisationMoisGM2Page from './pages/RegularisationMoisGM2Page.tsx';
 import UsersPage from './pages/UsersPage.tsx';
+import ProfilePage from './pages/ProfilePage.tsx';
 import './index.css';
 import "./api/axios";
 
@@ -57,6 +58,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/reports/analyse-exploitation" element={<ProtectedRoute permission="analyse.exploitation"><AnalyseExploitation /></ProtectedRoute>} />
               <Route path="/" element={<ProtectedRoute permission="analyse.dashboard"><Dashboard /></ProtectedRoute>} />
               <Route path="/Dashboard" element={<ProtectedRoute permission="analyse.dashboard"><Dashboard /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
               <Route path="/imports/pointage-csv" element={<ProtectedRoute permission="import.pointage"><PointageImportCsv /></ProtectedRoute>} />
               <Route path="/imports/gm-csv" element={<ProtectedRoute permission="import.grand_materiel"><GMImportCsv /></ProtectedRoute>} />
               <Route path="/imports/marque-csv" element={<ProtectedRoute permission="import.marque"><MarqueImportCsv /></ProtectedRoute>} />

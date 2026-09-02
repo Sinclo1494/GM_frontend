@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { UserInfo } from "../types/user";
+import type { UserInfo, UserPreferences, CurrentUserResponse } from "../types/user";
 
 const API = import.meta.env.VITE_API_BASE_URL;
 
@@ -10,17 +10,6 @@ const authHeaders = (): Record<string, string> => {
 
 export interface UserProfilePayload {
   permissions?: string[];
-}
-
-export interface CurrentUserResponse {
-  id: number;
-  username: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  is_active: boolean;
-  is_superuser: boolean;
-  permissions: string[];
 }
 
 export const getCurrentUser = async (): Promise<CurrentUserResponse> => {
@@ -100,4 +89,28 @@ export const updateUserPermissions = async (id: number | string, permissions: st
     headers: authHeaders(),
   });
   return data.permissions || [];
+};
+
+export const getUserPreferences = async (): Promise<UserPreferences> => {
+  const { data } = await axios.get<UserPreferences>(`${API}/users/preferences/`, {
+    headers: authHeaders(),
+  });
+  return data;
+};
+
+export const updateUserPreferences = async (payload: Partial<UserPreferences>): Promise<UserPreferences> => {
+  const { data } = await axios.patch<UserPreferences>(`${API}/users/preferences/`, payload, {
+    headers: authHeaders(),
+  });
+  return data;
+};
+
+export const changePassword = async (current_password: string, new_password: string) => {
+  const { data } = await axios.post<{ detail: string }>(`${API}/users/change-password/`, {
+    current_password,
+    new_password,
+  }, {
+    headers: authHeaders(),
+  });
+  return data;
 };

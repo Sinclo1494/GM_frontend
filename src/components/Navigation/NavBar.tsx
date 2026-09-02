@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/useAuth";
 import { useTheme } from "../../context/ThemeContext";
 import { usePermissions } from "../../auth/PermissionContext";
-import { ChevronDown, LogOut, Settings, Sun, Moon } from "lucide-react";
+import { ChevronDown, LogOut, Settings, Sun, Moon, User } from "lucide-react";
 
 const Navbar = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -377,6 +377,15 @@ const Navbar = () => {
               <div className="px-4 py-2 text-sm text-gray-500 dark:text-dark-text-secondary border-b border-slate-100 dark:border-dark-border">
                 {displayName}
               </div>
+
+              <Link
+                to="/profile"
+                onClick={() => setUserMenuOpen(false)}
+                className={dropdownItemClass}
+              >
+                <User className="h-4 w-4" />
+                Profil
+              </Link>
 
               <button
                 onClick={handleLogout}
