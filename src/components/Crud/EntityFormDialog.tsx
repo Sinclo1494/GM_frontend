@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { components } from "../../theme/components";
+import SearchableSelect from "../common/SearchableSelect";
 
 export type FieldType = "text" | "number" | "date" | "datetime-local" | "select" | "textarea" | "checkbox" | "readonly" | "password";
 
@@ -168,19 +169,14 @@ const EntityFormDialog: React.FC<EntityFormDialogProps> = ({
                                             className={components.input + (fieldError ? " border-red-300 focus:border-red-500 focus:ring-red-100" : "")}
                                         />
                                     ) : field.type === "select" ? (
-                                        <select
+                                        <SearchableSelect
                                             value={String(value ?? "")}
+                                            onChange={(val) => handleChange(field.name, val)}
+                                            options={field.options ?? []}
+                                            placeholder="Sélectionner..."
                                             disabled={submitting}
-                                            onChange={(e) => handleChange(field.name, e.target.value)}
-                                            className={components.select + (fieldError ? " border-red-300 focus:border-red-500 focus:ring-red-100" : "")}
-                                        >
-                                            <option value="">Sélectionner...</option>
-                                            {field.options?.map((opt) => (
-                                                <option key={opt.value} value={opt.value}>
-                                                    {opt.label}
-                                                </option>
-                                            ))}
-                                        </select>
+                                            error={!!fieldError}
+                                        />
                                     ) : field.type === "textarea" ? (
                                         <textarea
                                             value={String(value ?? "")}

@@ -7,6 +7,7 @@ import { getUserPreferences, updateUserPreferences, changePassword } from "../ap
 import { PERMISSIONS } from "../auth/permissions";
 import type { UserPreferences } from "../types/user";
 import { Save, Lock } from "lucide-react";
+import SearchableSelect from "../components/common/SearchableSelect";
 
 export default function ProfilePage() {
   const { logout } = useAuth();
@@ -133,20 +134,14 @@ export default function ProfilePage() {
         <div className="p-6 space-y-6">
           <div>
             <label className={components.label}>Page d'accueil par défaut</label>
-            <select
+            <SearchableSelect
               value={preferences.default_landing_page}
-              onChange={(e) =>
-                setPreferences({ ...preferences, default_landing_page: e.target.value })
+              onChange={(val) =>
+                setPreferences({ ...preferences, default_landing_page: val })
               }
-              className={components.select}
-            >
-              <option value="">— Par défaut —</option>
-              {accessiblePages.map((p) => (
-                <option key={p.route} value={p.route}>
-                  {p.label}
-                </option>
-              ))}
-            </select>
+              options={accessiblePages.map((p) => ({ value: p.route, label: p.label }))}
+              placeholder="— Par défaut —"
+            />
             <p className="text-xs text-gray-500 mt-1 dark:text-dark-text-secondary">
               Seules les pages auxquelles vous avez accès sont affichées.
             </p>
