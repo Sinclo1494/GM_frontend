@@ -226,8 +226,8 @@ function CrudTable<T>({
                                     </div>
                                 </td>
                             </tr>
-                        ) : data.length > 0 ? (
-                            data.map((row, idx) => (
+                        ) : sortedData.length > 0 ? (
+                            sortedData.map((row, idx) => (
                                 <tr
                                     key={(row as any).id ?? idx}
                                     className={`${components.table.row} ${idx % 2 === 0 ? "bg-white dark:bg-dark-card" : "bg-slate-50/50 dark:bg-dark-bg-secondary/50"

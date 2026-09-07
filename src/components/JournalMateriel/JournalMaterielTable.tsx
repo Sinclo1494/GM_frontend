@@ -28,6 +28,9 @@ interface JournalMateriel {
     puissance_materiel: string;
     code_sous_famille: string;
     code_type_marque: string;
+    libelle_famille: string | null;
+    libelle_categorie: string | null;
+    libelle_marque: string | null;
     est_bloque: boolean;
     user_id: number;
     code_filiale_g: string;
@@ -47,6 +50,9 @@ type SortField =
     | "puissance_materiel"
     | "code_sous_famille"
     | "code_type_marque"
+    | "libelle_famille"
+    | "libelle_categorie"
+    | "libelle_marque"
     | "code_filiale_g"
     | "est_bloque"
     | null;
@@ -136,7 +142,10 @@ const JournalMaterielTable: React.FC = () => {
         },
         { key: "code_filiale_g", label: "Filiale", width: "min-w-[130px]", sortable: true },
         { key: "code_sous_famille", label: "Sous Famille", width: "min-w-[180px]", sortable: true },
+        { key: "libelle_famille", label: "Famille Matériel", width: "min-w-[180px]", sortable: true },
+        { key: "libelle_categorie", label: "Catégorie", width: "min-w-[180px]", sortable: true },
         { key: "code_type_marque", label: "Type Marque", width: "min-w-[180px]", sortable: true },
+        { key: "libelle_marque", label: "Marque Matériel", width: "min-w-[180px]", sortable: true },
         {
             key: "date_acquisition",
             label: "Date Acquisition",
@@ -166,6 +175,9 @@ const JournalMaterielTable: React.FC = () => {
         immatriculation: "",
         code_sous_famille: "",
         code_type_marque: "",
+        libelle_famille: "",
+        libelle_categorie: "",
+        libelle_marque: "",
         code_filiale_g: "",
         est_bloque: "",
     });
@@ -176,6 +188,9 @@ const JournalMaterielTable: React.FC = () => {
         immatriculation: "",
         code_sous_famille: "",
         code_type_marque: "",
+        libelle_famille: "",
+        libelle_categorie: "",
+        libelle_marque: "",
         code_filiale_g: "",
         est_bloque: "",
     });
@@ -208,6 +223,9 @@ const JournalMaterielTable: React.FC = () => {
             if (columnFilters.immatriculation) params.immatriculation = columnFilters.immatriculation;
             if (columnFilters.code_sous_famille) params.code_sous_famille = columnFilters.code_sous_famille;
             if (columnFilters.code_type_marque) params.code_type_marque = columnFilters.code_type_marque;
+            if (columnFilters.libelle_famille) params.libelle_famille = columnFilters.libelle_famille;
+            if (columnFilters.libelle_categorie) params.libelle_categorie = columnFilters.libelle_categorie;
+            if (columnFilters.libelle_marque) params.libelle_marque = columnFilters.libelle_marque;
             if (columnFilters.code_filiale_g) params.code_filiale = columnFilters.code_filiale_g;
             if (columnFilters.est_bloque !== "") params.est_bloque = columnFilters.est_bloque;
 
@@ -302,6 +320,9 @@ const JournalMaterielTable: React.FC = () => {
             immatriculation: "",
             code_sous_famille: "",
             code_type_marque: "",
+            libelle_famille: "",
+            libelle_categorie: "",
+            libelle_marque: "",
             code_filiale_g: "",
             est_bloque: "",
         });
@@ -312,6 +333,9 @@ const JournalMaterielTable: React.FC = () => {
             immatriculation: "",
             code_sous_famille: "",
             code_type_marque: "",
+            libelle_famille: "",
+            libelle_categorie: "",
+            libelle_marque: "",
             code_filiale_g: "",
             est_bloque: "",
         });
@@ -546,7 +570,16 @@ const JournalMaterielTable: React.FC = () => {
                                             {item.code_sous_famille}
                                         </td>
                                         <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
+                                            {item.libelle_famille || ""}
+                                        </td>
+                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
+                                            {item.libelle_categorie || ""}
+                                        </td>
+                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
                                             {item.code_type_marque}
+                                        </td>
+                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
+                                            {item.libelle_marque || ""}
                                         </td>
                                         <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
                                             {formatDate(item.date_acquisition)}
@@ -572,7 +605,7 @@ const JournalMaterielTable: React.FC = () => {
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={13}
+                                        colSpan={16}
                                         className="px-4 py-8 text-center text-gray-500 dark:text-dark-text-secondary"
                                     >
                                         Aucun résultat trouvé

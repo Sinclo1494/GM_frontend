@@ -14,6 +14,7 @@ export interface FieldConfig {
     placeholder?: string;
     readOnly?: boolean;
     colSpan?: number;
+    section?: string;
 }
 
 interface EntityFormDialogProps {
@@ -98,7 +99,7 @@ const EntityFormDialog: React.FC<EntityFormDialogProps> = ({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className={components.modal}>
+            <div className={`${components.modal} max-h-[90vh] overflow-y-auto`}>
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold text-gray-800 dark:text-dark-text-primary">{title}</h3>
                     <button
@@ -119,15 +120,25 @@ const EntityFormDialog: React.FC<EntityFormDialogProps> = ({
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {fields.map((field) => {
+                        {fields.map((field, index) => {
                             const value = values[field.name];
                             const fieldError = getFieldError(fieldErrors, field.name);
+                            const prevSection = index > 0 ? fields[index - 1].section : undefined;
+                            const showSectionHeader = Boolean(field.section) && field.section !== prevSection;
 
                             return (
-                                <div
-                                    key={field.name}
-                                    className={field.colSpan === 2 ? "md:col-span-2" : ""}
-                                >
+                                <React.Fragment key={field.name}>
+                                    {showSectionHeader && (
+                                        <div className="md:col-span-2 mb-2">
+                                            <h4 className="text-sm font-semibold text-gray-700 dark:text-dark-text-primary">
+                                                {field.section}
+                                            </h4>
+                                            <div className="mt-1 h-px bg-gray-200 dark:border-dark-border"></div>
+                                        </div>
+                                    )}
+                                    <div
+                                        className={field.colSpan === 2 ? "md:col-span-2" : ""}
+                                    >
                                     <label className={components.label}>
                                         {field.label}
                                         {field.required && <span className="text-red-500 ml-1">*</span>}
@@ -208,8 +219,9 @@ const EntityFormDialog: React.FC<EntityFormDialogProps> = ({
                                         <p className="mt-1 text-xs text-red-600 dark:text-red-400">{fieldError}</p>
                                     )}
                                 </div>
-                            );
-                        })}
+                            </React.Fragment>
+                        );
+                    })}
                     </div>
 
                     <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-dark-border">
