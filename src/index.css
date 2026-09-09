@@ -1,1 +1,120 @@
 @import "tailwindcss";
+@import '@fontsource/roboto/300.css';
+@import '@fontsource/roboto/400.css';
+@import '@fontsource/roboto/500.css';
+@import '@fontsource/roboto/700.css';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* COSIDER red — primary application accent (replaces blue) */
+  --color-blue-50: #fff1f2;
+  --color-blue-100: #ffe3e5;
+  --color-blue-200: #ffd1d4;
+  --color-blue-300: #ff6b6b;
+  --color-blue-400: #EF3B43;
+  --color-blue-500: #D71920;
+  --color-blue-600: #C8101E;
+  --color-blue-700: #B50E18;
+  --color-blue-800: #a00e14;
+  --color-blue-900: #451d20;
+
+  /* COSIDER error red — semantic error/danger */
+  --color-red-50: #fef2f2;
+  --color-red-100: #fee2e2;
+  --color-red-200: #fecaca;
+  --color-red-300: #fca5a5;
+  --color-red-400: #EF5350;
+  --color-red-500: #C62828;
+  --color-red-600: #C62828;
+  --color-red-700: #C62828;
+  --color-red-800: #8A0000;
+  --color-red-900: #8A0000;
+
+  /* COSIDER success green — semantic success */
+  --color-green-50: #e8f5e9;
+  --color-green-100: #c8e6c9;
+  --color-green-200: #a5d6a7;
+  --color-green-300: #81c784;
+  --color-green-400: #66bb6a;
+  --color-green-500: #2E7D32;
+  --color-green-600: #2E7D32;
+  --color-green-700: #2E7D32;
+  --color-green-800: #1b5e20;
+  --color-green-900: #1b5e20;
+
+  /* COSIDER warning orange — semantic warning */
+  --color-amber-50: #fff3e0;
+  --color-amber-100: #ffe0b2;
+  --color-amber-200: #ffcc80;
+  --color-amber-300: #ffb74d;
+  --color-amber-400: #ffb74d;
+  --color-amber-500: #ED8B00;
+  --color-amber-600: #ED8B00;
+  --color-amber-700: #ED8B00;
+  --color-amber-800: #e65100;
+  --color-amber-900: #e65100;
+
+  /* Neutral gray palette (light mode) */
+  --color-gray-50: #F7F7F7;
+  --color-gray-100: #F0F0F0;
+  --color-gray-200: #E2E2E2;
+  --color-gray-300: #D0D0D0;
+  --color-gray-400: #B8B8B8;
+  --color-gray-500: #888888;
+  --color-gray-600: #666666;
+  --color-gray-700: #666666;
+  --color-gray-800: #181818;
+  --color-gray-900: #111111;
+
+  /* Neutral slate palette (light mode — charcoal navbar) */
+  --color-slate-50: #F7F7F7;
+  --color-slate-100: #F0F0F0;
+  --color-slate-200: #E2E2E2;
+  --color-slate-300: #D0D0D0;
+  --color-slate-400: #B8B8B8;
+  --color-slate-500: #888888;
+  --color-slate-600: #666666;
+  --color-slate-700: #374155;
+  --color-slate-800: #1a1a1a;
+  --color-slate-900: #111111;
+
+  /* Emerald harmonized with success green */
+  --color-emerald-500: #2E7D32;
+  --color-emerald-400: #66bb6a;
+
+  /* Dark mode theme variables */
+  --color-dark-bg-primary: #111111;
+  --color-dark-bg-secondary: #1A1A1A;
+  --color-dark-bg-tertiary: #222222;
+  --color-dark-text-primary: #F5F5F5;
+  --color-dark-text-secondary: #A8A8A8;
+  --color-dark-text-muted: #858585;
+  --color-dark-border: #353535;
+  --color-dark-card: #1A1A1A;
+  --color-dark-input: #222222;
+  --color-dark-bg-subtle: #252525;
+  --color-dark-chart-neutral: #404040;
+}
+
+body {
+  margin: 0;
+  background-color: #F7F7F7;
+  background-image: url("./assets/img/bg.PNG");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.dark body {
+  background-color: #111111;
+  background-image: url("./assets/img/bg.PNG");
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.dark #root {
+  background-color: #111111;
+}
