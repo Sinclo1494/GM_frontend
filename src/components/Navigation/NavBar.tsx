@@ -57,7 +57,7 @@ const Navbar = () => {
   if (loading) {
     return (
       <nav className="w-full bg-slate-900 text-white px-6 h-16 flex items-center justify-between">
-        <div className="text-lg font-bold">Grand Matériel</div>
+        <div className="text-lg font-bold text-blue-400">Grand Matériel</div>
         <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
       </nav>
     );
@@ -76,6 +76,8 @@ const Navbar = () => {
     "import.marque",
     "import.type_marque",
     "import.sous_famille",
+    "import.famille",
+    "import.categorie_gm",
     "import.situation_affectation",
     "import.site",
     "import.regularisation",
@@ -111,7 +113,7 @@ const Navbar = () => {
 
   return (
     <nav ref={navRef} className="w-full bg-slate-900 text-white px-6 h-16 flex items-center justify-between">
-      <Link to="/" className="text-lg font-bold">
+      <Link to="/" className="text-lg font-bold text-blue-400">
         Grand Matériel
       </Link>
 
@@ -158,6 +160,12 @@ const Navbar = () => {
                 )}
                 {hasPermission("import.sous_famille") && (
                   <Link to="/imports/sous-famille-csv" onClick={() => setImportsOpen(false)} className={dropdownItemClass}>Sous Familles Materiel</Link>
+                )}
+                {hasPermission("import.famille") && (
+                  <Link to="/imports/famille-csv" onClick={() => setImportsOpen(false)} className={dropdownItemClass}>Familles Matériel</Link>
+                )}
+                {hasPermission("import.categorie_gm") && (
+                  <Link to="/imports/categorie-gm-csv" onClick={() => setImportsOpen(false)} className={dropdownItemClass}>Catégories GM</Link>
                 )}
                 {hasPermission("import.situation_affectation") && (
                   <Link to="/imports/situation-affectation-csv" onClick={() => setImportsOpen(false)} className={dropdownItemClass}>Situations-Affectations</Link>

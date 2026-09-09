@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { getFiliales } from "../api/dataServices";
 import { getJournal } from "../api/journalService";
+import { components } from "../theme/components";
 import JournalisationFilters from "../components/Journalisation/JournalisationFilters";
 import JournalisationTable from "../components/Journalisation/JournalisationTable";
 import JournalDetailDialog from "../components/Journalisation/JournalDetailDialog";
@@ -171,8 +172,8 @@ export default function Journalisation() {
     <div className="p-6">
       <div className="mx-auto max-w-7xl">
         <header className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-dark-text-primary">Journalisation</h1>
-          <p className="text-sm text-gray-500 dark:text-dark-text-secondary mt-1">
+          <h1 className={components.pageTitle}>Journalisation</h1>
+          <p className={components.pageDescription}>
             Historique des actions effectuées dans l'application.
           </p>
         </header>

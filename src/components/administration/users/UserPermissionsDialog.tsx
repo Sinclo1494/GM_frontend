@@ -274,7 +274,7 @@ export default function UserPermissionsDialog({
         </p>
 
         {isSuperuser && (
-          <div className="mb-4 rounded-md border border-blue-200 dark:border-blue-800 bg-blue-50 px-3 py-2 text-sm text-blue-700">
+          <div className="mb-4 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 px-3 py-2 text-sm text-gray-700">
             Ce compte est administrateur. Il dispose automatiquement de tous les droits.
           </div>
         )}
@@ -312,7 +312,7 @@ export default function UserPermissionsDialog({
                       }}
                       onChange={() => toggleCategoryRead(category)}
                       disabled={isSuperuser}
-                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
+                      className="h-4 w-4 rounded border-gray-300 text-gray-600 focus:ring-gray-500 disabled:opacity-50"
                     />
                     <span className="font-semibold text-gray-800 dark:text-dark-text-primary">
                       {CATEGORY_LABELS[category]}
@@ -358,7 +358,7 @@ export default function UserPermissionsDialog({
                                 checked={isReadChecked}
                                 onChange={() => togglePermissionRead(perm.key)}
                                 disabled={disabled}
-                                className="h-3.5 w-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
+                                className="h-3.5 w-3.5 rounded border-gray-300 text-gray-600 focus:ring-gray-500 disabled:opacity-50"
                               />
                               <span className="text-xs text-gray-500">L</span>
                             </label>

@@ -14,7 +14,7 @@ const StatCard = ({
 }) => (
   <div className={components.card}>
     <p className="text-sm dark:text-dark-text-secondary">{title}</p>
-    <p className="mt-2 text-3xl font-bold text-blue-600 dark:text-blue-400">{value}</p>
+    <p className="mt-2 text-3xl font-bold text-gray-600 dark:text-gray-400">{value}</p>
   </div>
 );
 

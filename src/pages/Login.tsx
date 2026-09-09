@@ -125,11 +125,11 @@ export default function Login() {
                 >
                     {/* Logo / Title */}
                     <div className="text-center">
-                        <h1 className="text-3xl font-bold text-gray-200">
+                        <h1 className="text-3xl font-bold text-blue-400">
                             GM Groupe
                         </h1>
 
-                        <p className="text-white mt-2">
+                        <p className="text-blue-300 mt-2">
                             Sign in to continue
                         </p>
                     </div>

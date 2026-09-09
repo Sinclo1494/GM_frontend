@@ -63,7 +63,7 @@ export default function AnalyseQuantitativeTable({
               Immobilisé
             </th>
 
-            <th colSpan={2} className="border dark:border-dark-border px-3 py-2 bg-blue-700 text-white dark:bg-blue-800 text-center">
+            <th colSpan={2} className="border dark:border-dark-border px-3 py-2 bg-gray-700 text-white dark:bg-gray-800 text-center">
               Réparation Externe
             </th>
           </tr>

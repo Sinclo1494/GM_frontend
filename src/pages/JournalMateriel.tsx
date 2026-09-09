@@ -1,4 +1,5 @@
 import React from 'react'
+import { components } from "../theme/components";
 import JournalMaterielTable from '../components/JournalMateriel/JournalMaterielTable'
 
 const JournalMateriel: React.FC = () => {
@@ -6,8 +7,8 @@ const JournalMateriel: React.FC = () => {
     <div className="p-6">
       <div className="mx-auto max-w-7xl">
         <header className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-dark-text-primary">Journal Matériel</h1>
-          <p className="text-sm text-gray-500 dark:text-dark-text-secondary mt-1">
+          <h1 className={components.pageTitle}>Journal Matériel</h1>
+          <p className={components.pageDescription}>
             Consultation des équipements enregistrés.
           </p>
         </header>

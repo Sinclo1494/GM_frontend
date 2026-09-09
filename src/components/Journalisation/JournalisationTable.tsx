@@ -28,9 +28,9 @@ const SortIcon: React.FC<SortIconProps> = ({ field, sortField, sortOrder }) => {
     return <div className="h-3 w-3 text-gray-300" />;
   }
   return sortOrder === "asc" ? (
-    <ChevronUp className="h-3 w-3 text-blue-600" />
+    <ChevronUp className="h-3 w-3 text-gray-600" />
   ) : (
-    <ChevronDown className="h-3 w-3 text-blue-600" />
+    <ChevronDown className="h-3 w-3 text-gray-600" />
   );
 };
 
@@ -100,7 +100,7 @@ const JournalisationTable: React.FC<Props> = ({
   if (loading) {
     return (
       <div className="py-12 flex flex-col items-center gap-3 text-gray-600 dark:text-dark-text-secondary">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-gray-600" />
         <span>Chargement des entrées de journal…</span>
       </div>
     );
@@ -233,10 +233,15 @@ const JournalisationTable: React.FC<Props> = ({
                     </span>
                   </td>
                   <td className="px-3 py-2.5 align-top">
-                    {entry.user?.username ?? "—"}
+                    <span className="font-mono text-xs text-gray-600 dark:text-dark-text-secondary">
+                      {entry.user?.username ?? "—"}
+                    </span>
                   </td>
                   <td className="px-3 py-2.5 align-top">
-                    {formatModuleLabel(entry.module)}
+                    <span className="font-mono text-xs text-gray-600 dark:text-dark-text-secondary">
+                      {formatModuleLabel(entry.module)}
+                    </span>
+
                   </td>
                   <td className="px-3 py-2.5 align-top">
                     <span
@@ -259,10 +264,16 @@ const JournalisationTable: React.FC<Props> = ({
                     </span>
                   </td>
                   <td className="px-3 py-2.5 align-top">
-                    {entry.code_filiale ?? "—"}
+                    <span className="font-mono text-xs text-gray-600 dark:text-dark-text-secondary">
+
+                      {entry.code_filiale ?? "—"}
+                    </span>
                   </td>
                   <td className="px-3 py-2.5 align-top">
-                    {entry.code_site ?? "—"}
+                    <span className="font-mono text-xs text-gray-600 dark:text-dark-text-secondary">
+
+                      {entry.code_site ?? "—"}
+                    </span>
                   </td>
                   <td
                     className="px-3 py-2.5 align-top text-gray-600 dark:text-dark-text-secondary"
@@ -319,8 +330,8 @@ const JournalisationTable: React.FC<Props> = ({
                     key={item}
                     onClick={() => onPageChange(item)}
                     className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${currentPage === item
-                        ? "bg-blue-600 text-white"
-                        : "bg-white dark:bg-dark-card text-gray-700 dark:text-dark-text-primary border border-slate-300 hover:border-blue-600"
+                      ? "bg-blue-600 text-white"
+                      : "bg-white dark:bg-dark-card text-gray-700 dark:text-dark-text-primary border border-slate-300 hover:border-blue-600"
                       }`}
                   >
                     {item}

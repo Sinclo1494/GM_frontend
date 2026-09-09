@@ -93,8 +93,8 @@ const DisponibiliteTab = ({ data, filters }: DisponibiliteTabProps) => {
             ? ((p.potentiel - p.heures_panne) / p.potentiel) * 100
             : 0
         ),
-        borderColor: "#3b82f6",
-        backgroundColor: "rgba(59, 130, 246, 0.1)",
+        borderColor: "#6b7280",
+        backgroundColor: "rgba(107, 114, 128, 0.1)",
         fill: true,
         tension: 0.3,
       },

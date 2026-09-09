@@ -16,6 +16,12 @@ const TYPE_MARQUE_IMPORT_URL = `${API}/type-marque-import/`;
 const SOUS_FAMILLE_VALIDATE_URL = `${API}/sous-famille-validate/`;
 const SOUS_FAMILLE_IMPORT_URL = `${API}/sous-famille-import/`;
 
+const FAMILLE_VALIDATE_URL = `${API}/famille-validate/`;
+const FAMILLE_IMPORT_URL = `${API}/famille-import/`;
+
+const CATEGORIE_GM_VALIDATE_URL = `${API}/categorie-gm-validate/`;
+const CATEGORIE_GM_IMPORT_URL = `${API}/categorie-gm-import/`;
+
 const SITUATION_AFFECTATION_VALIDATE_URL = `${API}/situation-affectation-validate/`;
 const SITUATION_AFFECTATION_IMPORT_URL = `${API}/situation-affectation-import/`;
 
@@ -182,6 +188,64 @@ export async function validateSousFamille(
 
 export async function importSousFamille(validationId: string) {
   const response = await axios.post(SOUS_FAMILLE_IMPORT_URL, {
+    validation_id: validationId,
+  });
+
+  return response.data;
+}
+
+// ---------------------------------------------------------
+// Validate Famille CSV
+// ---------------------------------------------------------
+
+export async function validateFamille(
+  file: File,
+  mapping: Record<number, string>,
+  filiale: string,
+) {
+  const response = await axios.post(
+    FAMILLE_VALIDATE_URL,
+    buildValidationFormData(file, mapping, filiale),
+  );
+
+  return response.data;
+}
+
+// ---------------------------------------------------------
+// Import already validated Famille data
+// ---------------------------------------------------------
+
+export async function importFamille(validationId: string) {
+  const response = await axios.post(FAMILLE_IMPORT_URL, {
+    validation_id: validationId,
+  });
+
+  return response.data;
+}
+
+// ---------------------------------------------------------
+// Validate Categorie GM CSV
+// ---------------------------------------------------------
+
+export async function validateCategorieGM(
+  file: File,
+  mapping: Record<number, string>,
+  filiale: string,
+) {
+  const response = await axios.post(
+    CATEGORIE_GM_VALIDATE_URL,
+    buildValidationFormData(file, mapping, filiale),
+  );
+
+  return response.data;
+}
+
+// ---------------------------------------------------------
+// Import already validated Categorie GM data
+// ---------------------------------------------------------
+
+export async function importCategorieGM(validationId: string) {
+  const response = await axios.post(CATEGORIE_GM_IMPORT_URL, {
     validation_id: validationId,
   });
 

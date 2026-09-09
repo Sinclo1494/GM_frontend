@@ -61,7 +61,7 @@ const SITUATION_COLORS: Record<string, string> = {
   "01": "#22c55e",
   "02": "#f59e0b",
   "03": "#ef4444",
-  "04": "#3b82f6",
+  "04": "#6b7280",
   "05": "#6b7280",
   "06": "#8b5cf6",
   "ALREM": "#ec4899",
@@ -427,12 +427,12 @@ export default function Dashboard() {
     }, [textValue]);
 
     return (
-      <div className={`${components.card} p-4`}>
-        <p className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-text-secondary">{title}</p>
+      <div className={`${components.card} p-4 min-w-0`}>
+        <p className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-text-secondary whitespace-nowrap overflow-hidden text-ellipsis">{title}</p>
         <p ref={valueRef} className="mt-1 text-2xl font-bold text-gray-800 dark:text-dark-text-primary whitespace-nowrap overflow-hidden text-ellipsis" title={textValue}>
           {textValue}
         </p>
-        {subtext && <p className="mt-1 text-xs text-gray-500 dark:text-dark-text-secondary">{subtext}</p>}
+        {subtext && <p className="mt-1 text-xs text-gray-500 dark:text-dark-text-secondary whitespace-nowrap overflow-hidden text-ellipsis">{subtext}</p>}
       </div>
     );
   };
@@ -483,13 +483,15 @@ export default function Dashboard() {
     const ecartCibleMag = financialKpis?.ecartCibleMag ?? 0;
 
     const KpiCard = ({ title, value, subtext, status }: { title: string; value: string | number; subtext?: React.ReactNode; status?: "success" | "warning" | "danger" | "info" }) => (
-      <div className={`${components.card} p-4 relative overflow-hidden`}>
+      <div className={`${components.card} p-4 relative overflow-hidden min-w-0`}>
         {status && (
-          <div className={`absolute top-0 left-0 right-0 h-1 ${status === "success" ? "bg-green-500" : status === "warning" ? "bg-amber-500" : status === "danger" ? "bg-red-500" : "bg-blue-500"}`} />
+          <div className={`absolute top-0 left-0 right-0 h-1 ${status === "success" ? "bg-green-500" : status === "warning" ? "bg-amber-500" : status === "danger" ? "bg-red-500" : "bg-gray-500"}`} />
         )}
-        <p className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-text-secondary">{title}</p>
-        <p className="mt-2 text-2xl font-bold text-gray-800 dark:text-dark-text-primary">{value}</p>
-        {subtext && <p className="mt-1 text-xs text-gray-500 dark:text-dark-text-secondary">{subtext}</p>}
+        <p className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-text-secondary whitespace-nowrap overflow-hidden text-ellipsis">{title}</p>
+        <p className="mt-2 text-2xl font-bold text-gray-800 dark:text-dark-text-primary whitespace-nowrap overflow-hidden text-ellipsis" title={String(value)}>
+          {value}
+        </p>
+        {subtext && <p className="mt-1 text-xs text-gray-500 dark:text-dark-text-secondary whitespace-nowrap overflow-hidden text-ellipsis">{subtext}</p>}
       </div>
     );
 
@@ -504,7 +506,7 @@ export default function Dashboard() {
 
     const Section = ({ title, children, accent = "blue" }: { title: string; children: React.ReactNode; accent?: string }) => {
       const accentColors: Record<string, string> = {
-        blue: "bg-blue-600",
+        blue: "bg-gray-600",
         green: "bg-green-600",
         amber: "bg-amber-600",
         purple: "bg-purple-600",
@@ -523,7 +525,7 @@ export default function Dashboard() {
     return (
       <div className="space-y-6">
         <Section title="PARC — QUANTITATIF" accent="blue">
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-7">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-7 min-w-0">
             <KpiCard title="Parc total" value={parcTotal} />
             <KpiCard title="En service" value={enServiceCount} subtext={`${parcTotal > 0 ? ((enServiceCount / parcTotal) * 100).toFixed(1) : 0}% du parc`} status="success" />
             <KpiCard title="En chômage" value={enChomageCount} subtext={`${parcTotal > 0 ? ((enChomageCount / parcTotal) * 100).toFixed(1) : 0}%`} status="warning" />
@@ -535,7 +537,7 @@ export default function Dashboard() {
         </Section>
 
         <Section title="RENDEMENT HORAIRE" accent="green">
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-7">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-7 min-w-0">
             <KpiCard title="Potentiel (H)" value={Math.round(potentielTotal).toLocaleString("fr-FR")} subtext="H" />
             <KpiCard title="Taux service (H)" value={`${tauxService.toFixed(1)}%`} subtext={`${Math.round(exploitationResume?.heures_service ?? maintenanceKpis?.heures_service ?? 0).toLocaleString("fr-FR")} h`} status={tauxService >= 42 ? "success" : "warning"} />
             <KpiCard title="Taux chômage (H)" value={`${tauxChomage.toFixed(1)}%`} subtext={`${Math.round(exploitationResume?.heures_chomage ?? maintenanceKpis?.heures_chomage ?? 0).toLocaleString("fr-FR")} h`} status={tauxChomage <= 32 ? "success" : "warning"} />
@@ -546,7 +548,7 @@ export default function Dashboard() {
         </Section>
 
         <Section title="MAINTENANCE — TMAD · TIP · TAM" accent="amber">
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-7">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-7 min-w-0">
             <KpiCard title="TMAD" value={`${tmad.toFixed(1)}%`} subtext={<TargetBadge value={tmad} target={80} higherIsBetter={true} />} status={tmad >= 80 ? "success" : "danger"} />
             <KpiCard title="TIP" value={`${tip.toFixed(1)}%`} subtext={<TargetBadge value={tip} target={15} higherIsBetter={false} />} status={tip <= 15 ? "success" : "danger"} />
             <KpiCard title="TAM" value={`${tam.toFixed(1)}%`} subtext={<TargetBadge value={tam} target={65} higherIsBetter={true} />} status={tam >= 65 ? "success" : "danger"} />
@@ -557,7 +559,7 @@ export default function Dashboard() {
         </Section>
 
         <Section title="FINANCIERS" accent="purple">
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-7">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-7 min-w-0">
             <KpiCard title="Total facturé" value={`${formatNumber(totalFacture, 1)} M`} subtext="M DA" />
             <KpiCard title="Facturation service" value={`${formatNumber(factService, 1)} M`} subtext={`${totalFacture > 0 ? ((factService / totalFacture) * 100).toFixed(0) : 0}%`} status="success" />
             <KpiCard title="Facturation chômage" value={`${formatNumber(factChomage, 1)} M`} subtext={`${totalFacture > 0 ? ((factChomage / totalFacture) * 100).toFixed(0) : 0}%`} status="warning" />
@@ -611,7 +613,7 @@ export default function Dashboard() {
     <div className="space-y-6">
       <div className={components.card}>
         <h2 className={components.sectionTitle}>Vue synthetique du parc</h2>
-        <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-4">
+        <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-4 min-w-0">
           <StatCard title="Parc Total" value={parcTotal} />
           <StatCard title="En Service" value={enService} />
           <StatCard title="En Chomage" value={enChomage} />
@@ -648,7 +650,7 @@ export default function Dashboard() {
       <div className={components.card}>
         <h2 className={components.sectionTitle}>Finance</h2>
         {overview ? (
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 min-w-0">
             <StatCard title="Total Facture" value={formatCurrencyValue(overview.totalMontantService + overview.totalMontantChomage + overview.totalMontantPanne)} />
             <StatCard title="Fact. Service" value={formatCurrencyValue(overview.totalMontantService)} />
             <StatCard title="Total Regularisation" value={formatCurrencyValue(overview.totalRegularisation)} />
@@ -811,7 +813,7 @@ export default function Dashboard() {
             actions={(row) => (
               <button
                 onClick={() => toggleRow(row.code_materiel)}
-                className="text-blue-600 hover:text-blue-800 text-xs font-medium"
+                className="text-gray-600 hover:text-gray-800 dark:text-dark-text-primary text-xs font-medium"
               >
                 {expandedRows.has(row.code_materiel) ? "Masquer" : "Details"}
               </button>
@@ -1167,7 +1169,7 @@ export default function Dashboard() {
               onClick={() => setActiveTab(tab.id)}
               className={`px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors border-b-2 ${
                 activeTab === tab.id
-                  ? "border-blue-600 text-blue-600"
+                  ? "border-red-600 text-red-600"
                   : "border-transparent text-gray-600 dark:text-dark-text-secondary hover:text-gray-800 dark:text-dark-text-primary hover:border-gray-300 dark:border-dark-border"
               }`}
             >

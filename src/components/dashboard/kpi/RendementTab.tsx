@@ -118,8 +118,8 @@ const RendementTab = ({ data, filters }: RendementTabProps) => {
       {
         label: "Taux de disponibilité (%)",
         data: evolution.map((p) => (p.potentiel > 0 ? p.disponibilite : null)),
-        borderColor: "#3b82f6",
-        backgroundColor: "rgba(59, 130, 246, 0.05)",
+        borderColor: "#6b7280",
+        backgroundColor: "rgba(107, 114, 128, 0.05)",
         fill: false,
         tension: 0.3,
         spanGaps: true,

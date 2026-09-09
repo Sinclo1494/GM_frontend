@@ -235,6 +235,54 @@ export const SOUS_FAMILLE_EXPECTED_FIELDS = [
 
 ];
 
+export const FAMILLE_EXPECTED_FIELDS = [
+  {
+    value: "code_famille",
+    label: "Code famille",
+    required: true,
+  },
+
+  {
+    value: "libelle_famille",
+    label: "Libellé famille",
+    required: true,
+  },
+
+  {
+    value: "code_categorie_gm",
+    label: "Code catégorie GM",
+    required: true,
+  },
+
+  {
+    value: "est_bloque",
+    label: "Bloqué",
+    required: false,
+  },
+
+];
+
+export const CATEGORIE_GM_EXPECTED_FIELDS = [
+  {
+    value: "code_categorie",
+    label: "Code catégorie",
+    required: true,
+  },
+
+  {
+    value: "libelle_categorie",
+    label: "Libellé catégorie",
+    required: true,
+  },
+
+  {
+    value: "est_bloque",
+    label: "Bloqué",
+    required: false,
+  },
+
+];
+
 export const SITUATION_AFFECTATION_EXPECTED_FIELDS = [
   {
     value: "code_materiel",

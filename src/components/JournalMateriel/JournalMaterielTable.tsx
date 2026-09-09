@@ -75,9 +75,9 @@ const SortIcon: React.FC<SortIconProps> = ({ field, sortField, sortOrder, sortab
     }
 
     return sortOrder === "asc" ? (
-        <ChevronUp className="h-4 w-4 text-blue-600" />
+        <ChevronUp className="h-4 w-4 text-gray-600" />
     ) : (
-        <ChevronDown className="h-4 w-4 text-blue-600" />
+        <ChevronDown className="h-4 w-4 text-gray-600" />
     );
 };
 
@@ -381,7 +381,7 @@ const JournalMaterielTable: React.FC = () => {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
                 <div className="flex flex-col items-center gap-4">
-                    <Loader2 className="h-10 w-10 text-blue-600 animate-spin" />
+                    <Loader2 className="h-10 w-10 text-gray-600 animate-spin" />
                     <p className="text-gray-600 dark:text-dark-text-secondary">Chargement des données...</p>
                 </div>
             </div>

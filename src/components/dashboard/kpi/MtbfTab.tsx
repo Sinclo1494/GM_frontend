@@ -91,8 +91,8 @@ const MtbfTab = ({ data, filters }: MtbfTabProps) => {
         data: evolution.map((p) =>
           p.nombre_pannes > 0 ? p.heures_service / p.nombre_pannes : null
         ),
-        borderColor: "#3b82f6",
-        backgroundColor: "rgba(59, 130, 246, 0.1)",
+        borderColor: "#6b7280",
+        backgroundColor: "rgba(107, 114, 128, 0.1)",
         fill: true,
         tension: 0.3,
         spanGaps: true,
@@ -149,7 +149,7 @@ const MtbfTab = ({ data, filters }: MtbfTabProps) => {
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <div className={`${components.card} p-4 relative overflow-hidden`}>
-          <div className="absolute top-0 left-0 right-0 h-1 bg-blue-500" />
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gray-500" />
           <p className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-dark-text-secondary">
             MTBF
           </p>

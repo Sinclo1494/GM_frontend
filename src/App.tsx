@@ -48,6 +48,8 @@ function AppContent() {
       "/imports/marque-csv": "import.marque",
       "/imports/type-marque-csv": "import.type_marque",
       "/imports/sous-famille-csv": "import.sous_famille",
+      "/imports/famille-csv": "import.famille",
+      "/imports/categorie-gm-csv": "import.categorie_gm",
       "/imports/situation-affectation-csv": "import.situation_affectation",
       "/imports/site-csv": "import.site",
       "/imports/regularisation-gm-csv": "import.regularisation",
@@ -62,7 +64,7 @@ function AppContent() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="h-8 w-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <div className="h-8 w-8 border-4 border-gray-600 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }

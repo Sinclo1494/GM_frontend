@@ -39,6 +39,7 @@ export const getAQTP = async ({
       date_debut,
       date_fin,
     },
+    headers: getAuthHeaders(),
   });
 
   return response.data;
@@ -55,6 +56,7 @@ export const getAQTPR = async ({
       date_debut,
       date_fin,
     },
+    headers: getAuthHeaders(),
   });
 
   return response.data;
@@ -73,6 +75,7 @@ export const getAETP = async ({
         date_debut,
         date_fin,
       },
+      headers: getAuthHeaders(),
     }
   );
 
@@ -92,6 +95,7 @@ export const getAETPR = async ({
         date_debut,
         date_fin,
       },
+      headers: getAuthHeaders(),
     }
   );
 

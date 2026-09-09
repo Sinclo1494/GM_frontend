@@ -54,9 +54,9 @@ const SortIcon = ({
         return <div className="h-4 w-4 text-gray-300" />;
     }
     return sortOrder === "asc" ? (
-        <ChevronUp className="h-4 w-4 text-blue-600" />
+        <ChevronUp className="h-4 w-4 text-gray-600" />
     ) : (
-        <ChevronDown className="h-4 w-4 text-blue-600" />
+        <ChevronDown className="h-4 w-4 text-gray-600" />
     );
 };
 

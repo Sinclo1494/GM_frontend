@@ -14,6 +14,8 @@ import GMImportCsv from './pages/ImportGrandMaterielCSV.tsx';
 import MarqueImportCsv from './pages/ImportMarqueCSV.tsx';
 import TypeMarqueImportCsv from './pages/ImportTypeMarqueCSV.tsx';
 import SousFamilleImportCsv from './pages/ImportSousFamilleCSV.tsx';
+import FamilleImportCsv from './pages/ImportFamilleCSV.tsx';
+import CategorieGMImportCsv from './pages/ImportCategorieGMCSV.tsx';
 import SituationAffectationImportCsv from './pages/ImportSituationAffectationCSV.tsx';
 import SiteImportCsv from './pages/ImportSiteCSV.tsx';
 import RegularisationImportCsv from './pages/ImportRegularisationCSV.tsx';
@@ -64,6 +66,8 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/imports/marque-csv" element={<ProtectedRoute permission="import.marque"><MarqueImportCsv /></ProtectedRoute>} />
               <Route path="/imports/type-marque-csv" element={<ProtectedRoute permission="import.type_marque"><TypeMarqueImportCsv /></ProtectedRoute>} />
               <Route path="/imports/sous-famille-csv" element={<ProtectedRoute permission="import.sous_famille"><SousFamilleImportCsv /></ProtectedRoute>} />
+              <Route path="/imports/famille-csv" element={<ProtectedRoute permission="import.famille"><FamilleImportCsv /></ProtectedRoute>} />
+              <Route path="/imports/categorie-gm-csv" element={<ProtectedRoute permission="import.categorie_gm"><CategorieGMImportCsv /></ProtectedRoute>} />
               <Route path="/imports/situation-affectation-csv" element={<ProtectedRoute permission="import.situation_affectation"><SituationAffectationImportCsv /></ProtectedRoute>} />
               <Route path="/imports/site-csv" element={<ProtectedRoute permission="import.site"><SiteImportCsv /></ProtectedRoute>} />
               <Route path="/imports/regularisation-gm-csv" element={<ProtectedRoute permission="import.regularisation"><RegularisationImportCsv /></ProtectedRoute>} />
