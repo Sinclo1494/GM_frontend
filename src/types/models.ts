@@ -154,6 +154,8 @@ export interface GrandMateriel {
     puissance_materiel: string | null;
     code_sous_famille_materiel: string;
     code_type_marque: string | null;
+    libelle_sous_famille: string | null;
+    libelle_type_marque: string | null;
     est_bloque: boolean;
     user_id: number;
     code_filiale_g: string;
