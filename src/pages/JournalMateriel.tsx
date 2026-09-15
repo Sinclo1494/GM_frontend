@@ -5,7 +5,7 @@ import JournalMaterielTable from '../components/JournalMateriel/JournalMaterielT
 const JournalMateriel: React.FC = () => {
   return (
     <div className="p-6">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto w-full">
         <header className="mb-6">
           <h1 className={components.pageTitle}>Journal Matériel</h1>
           <p className={components.pageDescription}>

@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import {
-  ChevronUp,
-  ChevronDown,
-  Search,
-  Loader2,
-  AlertCircle,
+    ChevronUp,
+    ChevronDown,
+    Search,
+    Loader2,
+    AlertCircle,
 } from "lucide-react";
 import formatCurrency from "../../utils/FormatCurrency";
 import formatDate from "../../utils/FormatDate";
@@ -26,11 +26,14 @@ interface JournalMateriel {
     valeur_remplacement: string;
     taux_amortissement: string;
     puissance_materiel: string;
-    code_sous_famille: string;
+    code_sous_famille_materiel: string;
     code_type_marque: string;
     libelle_famille: string | null;
     libelle_categorie: string | null;
     libelle_marque: string | null;
+    libelle_filiale: string | null;
+    libelle_sous_famille: string | null;
+    libelle_type_marque: string | null;
     est_bloque: boolean;
     user_id: number;
     code_filiale_g: string;
@@ -48,12 +51,12 @@ type SortField =
     | "valeur_remplacement"
     | "taux_amortissement"
     | "puissance_materiel"
-    | "code_sous_famille"
-    | "code_type_marque"
+    | "libelle_sous_famille"
+    | "libelle_type_marque"
     | "libelle_famille"
     | "libelle_categorie"
     | "libelle_marque"
-    | "code_filiale_g"
+    | "libelle_filiale"
     | "est_bloque"
     | null;
 type SortOrder = "asc" | "desc";
@@ -130,7 +133,22 @@ const JournalMaterielTable: React.FC = () => {
     const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const filterTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const columns = [
+    const tableScrollRef = useRef<HTMLDivElement>(null);
+    const topScrollbarRef = useRef<HTMLDivElement>(null);
+
+    const handleTableScroll = useCallback(() => {
+        if (tableScrollRef.current && topScrollbarRef.current) {
+            topScrollbarRef.current.scrollLeft = tableScrollRef.current.scrollLeft;
+        }
+    }, []);
+
+    const handleTopScroll = useCallback(() => {
+        if (tableScrollRef.current && topScrollbarRef.current) {
+            tableScrollRef.current.scrollLeft = topScrollbarRef.current.scrollLeft;
+        }
+    }, []);
+
+const columns = [
         { key: "code_materiel", label: "Code Matériel", width: "min-w-[170px]", sortable: true },
         { key: "designation", label: "Désignation", width: "min-w-[250px]", sortable: true },
         { key: "num_serie", label: "N° Série", width: "min-w-[170px]", sortable: true },
@@ -140,12 +158,12 @@ const JournalMaterielTable: React.FC = () => {
             width: "min-w-[170px]",
             sortable: true,
         },
-        { key: "code_filiale_g", label: "Filiale", width: "min-w-[130px]", sortable: true },
-        { key: "code_sous_famille", label: "Sous Famille", width: "min-w-[180px]", sortable: true },
-        { key: "libelle_famille", label: "Famille Matériel", width: "min-w-[180px]", sortable: true },
+        { key: "libelle_filiale", label: "Filiale", width: "min-w-[130px]", sortable: true },
         { key: "libelle_categorie", label: "Catégorie", width: "min-w-[180px]", sortable: true },
-        { key: "code_type_marque", label: "Type Marque", width: "min-w-[180px]", sortable: true },
+        { key: "libelle_famille", label: "Famille Matériel", width: "min-w-[180px]", sortable: true },
+        { key: "libelle_sous_famille", label: "Sous Famille", width: "min-w-[180px]", sortable: true },
         { key: "libelle_marque", label: "Marque Matériel", width: "min-w-[180px]", sortable: true },
+        { key: "libelle_type_marque", label: "Type Marque", width: "min-w-[180px]", sortable: true },
         {
             key: "date_acquisition",
             label: "Date Acquisition",
@@ -168,17 +186,35 @@ const JournalMaterielTable: React.FC = () => {
         { key: "puissance_materiel", label: "Puissance", width: "min-w-[150px]", sortable: true },
     ] as const;
 
+    const computedTableWidth = (() => {
+        let total = 0;
+        columns.forEach((col) => {
+            const match = (col as { width: string }).width.match(/min-w-\[(\d+)px\]/);
+            if (match) total += parseInt(match[1], 10);
+        });
+        total += 130;
+        total += 8 * (columns.length + 1);
+        return total;
+    })();
+
+    
+
     const [columnFiltersInput, setColumnFiltersInput] = useState({
         code_materiel: "",
         designation: "",
         num_serie: "",
         immatriculation: "",
-        code_sous_famille: "",
-        code_type_marque: "",
+        libelle_sous_famille: "",
+        libelle_type_marque: "",
         libelle_famille: "",
         libelle_categorie: "",
         libelle_marque: "",
-        code_filiale_g: "",
+        libelle_filiale: "",
+        date_acquisition: "",
+        valeur_acquisition: "",
+        valeur_remplacement: "",
+        taux_amortissement: "",
+        puissance_materiel: "",
         est_bloque: "",
     });
     const [columnFilters, setColumnFilters] = useState({
@@ -186,12 +222,17 @@ const JournalMaterielTable: React.FC = () => {
         designation: "",
         num_serie: "",
         immatriculation: "",
-        code_sous_famille: "",
-        code_type_marque: "",
+        libelle_sous_famille: "",
+        libelle_type_marque: "",
         libelle_famille: "",
         libelle_categorie: "",
         libelle_marque: "",
-        code_filiale_g: "",
+        libelle_filiale: "",
+        date_acquisition: "",
+        valeur_acquisition: "",
+        valeur_remplacement: "",
+        taux_amortissement: "",
+        puissance_materiel: "",
         est_bloque: "",
     });
 
@@ -210,8 +251,7 @@ const JournalMaterielTable: React.FC = () => {
 
             if (searchTerm) params.search = searchTerm;
             if (sortField) {
-                const orderingField = sortField === "code_sous_famille" ? "code_sous_famille_materiel" : sortField;
-                const ordering = sortOrder === "desc" ? `-${orderingField}` : orderingField;
+                const ordering = sortOrder === "desc" ? `-${sortField}` : sortField;
                 params.ordering = ordering;
             }
             params.page = currentPage;
@@ -221,12 +261,17 @@ const JournalMaterielTable: React.FC = () => {
             if (columnFilters.designation) params.designation = columnFilters.designation;
             if (columnFilters.num_serie) params.num_serie = columnFilters.num_serie;
             if (columnFilters.immatriculation) params.immatriculation = columnFilters.immatriculation;
-            if (columnFilters.code_sous_famille) params.code_sous_famille = columnFilters.code_sous_famille;
-            if (columnFilters.code_type_marque) params.code_type_marque = columnFilters.code_type_marque;
+            if (columnFilters.libelle_sous_famille) params.libelle_sous_famille = columnFilters.libelle_sous_famille;
+            if (columnFilters.libelle_type_marque) params.libelle_type_marque = columnFilters.libelle_type_marque;
             if (columnFilters.libelle_famille) params.libelle_famille = columnFilters.libelle_famille;
             if (columnFilters.libelle_categorie) params.libelle_categorie = columnFilters.libelle_categorie;
             if (columnFilters.libelle_marque) params.libelle_marque = columnFilters.libelle_marque;
-            if (columnFilters.code_filiale_g) params.code_filiale = columnFilters.code_filiale_g;
+            if (columnFilters.libelle_filiale) params.libelle_filiale = columnFilters.libelle_filiale;
+            if (columnFilters.date_acquisition) params.date_acquisition = columnFilters.date_acquisition;
+            if (columnFilters.valeur_acquisition) params.valeur_acquisition = columnFilters.valeur_acquisition;
+            if (columnFilters.valeur_remplacement) params.valeur_remplacement = columnFilters.valeur_remplacement;
+            if (columnFilters.taux_amortissement) params.taux_amortissement = columnFilters.taux_amortissement;
+            if (columnFilters.puissance_materiel) params.puissance_materiel = columnFilters.puissance_materiel;
             if (columnFilters.est_bloque !== "") params.est_bloque = columnFilters.est_bloque;
 
             const response = await crudList<JournalMateriel>(GM_URL, params, { signal: controller.signal });
@@ -318,12 +363,17 @@ const JournalMaterielTable: React.FC = () => {
             designation: "",
             num_serie: "",
             immatriculation: "",
-            code_sous_famille: "",
-            code_type_marque: "",
+            libelle_sous_famille: "",
+            libelle_type_marque: "",
             libelle_famille: "",
             libelle_categorie: "",
             libelle_marque: "",
-            code_filiale_g: "",
+            libelle_filiale: "",
+            date_acquisition: "",
+            valeur_acquisition: "",
+            valeur_remplacement: "",
+            taux_amortissement: "",
+            puissance_materiel: "",
             est_bloque: "",
         });
         setColumnFilters({
@@ -331,12 +381,17 @@ const JournalMaterielTable: React.FC = () => {
             designation: "",
             num_serie: "",
             immatriculation: "",
-            code_sous_famille: "",
-            code_type_marque: "",
+            libelle_sous_famille: "",
+            libelle_type_marque: "",
             libelle_famille: "",
             libelle_categorie: "",
             libelle_marque: "",
-            code_filiale_g: "",
+            libelle_filiale: "",
+            date_acquisition: "",
+            valeur_acquisition: "",
+            valeur_remplacement: "",
+            taux_amortissement: "",
+            puissance_materiel: "",
             est_bloque: "",
         });
         setSortField(null);
@@ -410,7 +465,7 @@ const JournalMaterielTable: React.FC = () => {
 
     return (
         <div className="space-y-6">
-            <div className={components.table.wrapper}>
+            <div className={components.table.wrapper + " overflow-x-visible"}>
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-6 border-b border-slate-200 dark:border-dark-border">
                     <div>
@@ -466,9 +521,24 @@ const JournalMaterielTable: React.FC = () => {
                     </p>
                 </div>
 
+                {/* Top scrollbar */}
+                <div
+                    ref={topScrollbarRef}
+                    className="h-5 overflow-x-auto bg-slate-100 dark:bg-dark-bg-secondary border-b border-slate-200"
+                    onScroll={handleTopScroll}
+                >
+                    <div className="h-px"
+                        style={{ width: `${computedTableWidth}px` }} />
+                </div>
+
                 {/* Table */}
-                <div className="overflow-x-auto">
-                    <table className="w-full">
+                <div
+                    ref={tableScrollRef}
+                    className="overflow-x-auto"
+                    onScroll={handleTableScroll}
+                >
+                    <table className="table-fixed"
+                        style={{ width: `${computedTableWidth}px` }}>
                         <thead className={components.table.header + " border-b-2 border-slate-300"}>
                             <tr>
                                 {columns.map((column) => (
@@ -564,22 +634,22 @@ const JournalMaterielTable: React.FC = () => {
                                             {item.immatriculation}
                                         </td>
                                         <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
-                                            {item.code_filiale_g}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
-                                            {item.code_sous_famille}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
-                                            {item.libelle_famille || ""}
+                                            {item.libelle_filiale || ""}
                                         </td>
                                         <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
                                             {item.libelle_categorie || ""}
                                         </td>
                                         <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
-                                            {item.code_type_marque}
+                                            {item.libelle_famille || ""}
+                                        </td>
+                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
+                                            {item.libelle_sous_famille || ""}
                                         </td>
                                         <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
                                             {item.libelle_marque || ""}
+                                        </td>
+                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
+                                            {item.libelle_type_marque || ""}
                                         </td>
                                         <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
                                             {formatDate(item.date_acquisition)}

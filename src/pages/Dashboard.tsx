@@ -345,7 +345,7 @@ export default function Dashboard() {
   if (loading && !data) {
     return (
       <div className="p-6">
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto w-full">
           <h1 className={components.pageTitle}>Dashboard</h1>
           <p className={components.pageDescription}>Chargement...</p>
         </div>
@@ -356,7 +356,7 @@ export default function Dashboard() {
   if (error && !data) {
     return (
       <div className="p-6">
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto w-full">
           <h1 className={components.pageTitle}>Dashboard</h1>
           <div className="mt-6 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 p-4 text-red-700">
             <p className="font-medium">Erreur de chargement</p>
@@ -996,7 +996,7 @@ export default function Dashboard() {
 
   return (
     <div className="p-6">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto w-full">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className={components.pageTitle}>Dashboard</h1>

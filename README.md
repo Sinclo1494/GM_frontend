@@ -1,73 +1,115 @@
-# React + TypeScript + Vite
+# GM Groupe Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript + Vite application for the GM Groupe management platform.
 
-Currently, two official plugins are available:
+## Development
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+The development server uses the backend at `http://localhost:8000` via the `.env` configuration.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Production Build
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run build
 ```
+
+The production build outputs static files to `dist/`.
+
+### Build Script (Windows)
+
+A PowerShell build script is provided:
+
+```powershell
+.\scripts\build-production.ps1
+```
+
+Options:
+- `-Clean` — removes the previous `dist/` before building
+- `-SkipTests` — skips the test run during the build
+
+## Environment Variables
+
+| Variable | Development | Production |
+|----------|-------------|------------|
+| `VITE_API_BASE_URL` | `http://localhost:8000/api` | `/api` |
+
+- `.env` — development configuration (tracked)
+- `.env.production` — production configuration (tracked, non-secret)
+- `.env.example` — example values for reference
+- `.env.local` — local overrides (gitignored)
+
+Do not place secrets, passwords, or API keys in `VITE_*` variables. Vite environment variables are embedded in the frontend bundle and are publicly visible.
+
+## IIS Deployment
+
+### Prerequisites
+
+The production Windows Server requires:
+
+- IIS
+- IIS URL Rewrite module
+- IIS Application Request Routing (ARR)
+
+Node.js, npm, React, and Vite are **not** required on the production server when deploying a pre-built static bundle.
+
+### Directory Structure
+
+Deploy the contents of `dist/` to the IIS site root, for example:
+
+```
+C:\inetpub\wwwroot\GM-Groupe\
+    index.html
+    assets\
+    web.config
+```
+
+### SPA Routing
+
+The `web.config` included in `dist/` configures IIS URL Rewrite to:
+
+1. Serve real files and directories directly
+2. Exclude `/api/*` from the React fallback (leaves it for ARR reverse proxy)
+3. Rewrite all other routes to `index.html` for client-side routing
+
+### Reverse Proxy
+
+Configure IIS ARR to reverse-proxy `/api/*` requests to the Django/Waitress backend.
+
+Example ARR rule:
+
+- Pattern: `^api/(.*)`
+- Action: Reverse proxy to `http://localhost:8000/api/{R:1}`
+
+### Caching
+
+- `index.html` should be served with `no-cache` headers so users always receive the latest application version
+- Hashed assets in `dist/assets/` can be cached aggressively
+
+## Scripts
+
+| Script | Description |
+|--------|-------------|
+| `npm run dev` | Start Vite dev server |
+| `npm run build` | Production build (TypeScript + Vite) |
+| `npm run preview` | Preview production build locally |
+| `npm run lint` | Run ESLint |
+| `npm run test` | Run tests in watch mode |
+| `npm run test:run` | Run tests once |
+| `scripts\build-production.ps1` | Full production build script (Windows) |
+
+## Tech Stack
+
+- React 19
+- Vite 8
+- TypeScript 6
+- Tailwind CSS 4
+- Material UI 9
+- React Router 7
+- Axios
+- Chart.js + react-chartjs-2
+- Vitest
