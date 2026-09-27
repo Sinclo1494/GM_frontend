@@ -10,6 +10,7 @@ const fields = [
     { name: "date_affectation", label: "Date Affectation", type: "datetime-local" as const, required: true },
     { name: "date_debut_affectation", label: "Date Début", type: "datetime-local" as const },
     { name: "date_fin_affectation", label: "Date Fin", type: "datetime-local" as const },
+    { name: "nbr_jours_affectation", label: "Nombre Jours", type: "number" as const },
     { name: "prenable", label: "Prenable", type: "checkbox" as const },
     { name: "est_bloque", label: "Bloqué", type: "checkbox" as const },
 ];
@@ -20,6 +21,7 @@ const columns: ColumnDef<AffectationMateriel>[] = [
     { key: "code_filiale_mere", label: "Filiale", width: "min-w-[130px]", sortable: true },
     { key: "code_site", label: "Site", width: "min-w-[130px]", sortable: true },
     { key: "date_affectation", label: "Date Affectation", width: "min-w-[170px]", sortable: true },
+    { key: "nbr_jours_affectation", label: "Nb Jours", width: "min-w-[100px]", sortable: true },
     { key: "prenable", label: "Prenable", width: "min-w-[100px]", sortable: true, render: (val: unknown) => (
         <span className={val ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full text-xs font-semibold" : "bg-gray-100 text-gray-700 dark:text-dark-text-primary px-2 py-0.5 rounded-full text-xs font-semibold"}>
             {val ? "Oui" : "Non"}

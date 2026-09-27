@@ -7,6 +7,7 @@ const fields = [
     { name: "type_situation_id", label: "Type Situation", type: "select" as const, required: true },
     { name: "code_type_etat_materiel", label: "État Matériel", type: "select" as const, required: true },
     { name: "date_situation", label: "Date Situation", type: "datetime-local" as const, required: true },
+    { name: "date_modification", label: "Date Modification", type: "datetime-local" as const },
     { name: "est_bloque", label: "Bloqué", type: "checkbox" as const },
 ];
 
@@ -17,6 +18,7 @@ const columns: ColumnDef<SituationMateriel>[] = [
     { key: "code_type_situation", label: "Type Situation", width: "min-w-[150px]", sortable: true },
     { key: "etat_materiel", label: "État", width: "min-w-[150px]", sortable: true },
     { key: "date_situation", label: "Date", width: "min-w-[160px]", sortable: true },
+    { key: "date_modification", label: "Modifié le", width: "min-w-[160px]", sortable: true, render: (val: unknown) => <>{val ?? "—"}</> },
     { key: "est_bloque", label: "Statut", width: "min-w-[100px]", sortable: true, render: (val: unknown) => (
         <span className={val ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 px-2 py-0.5 rounded-full text-xs font-semibold" : "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full text-xs font-semibold"}>
             {val ? "Bloqué" : "Actif"}

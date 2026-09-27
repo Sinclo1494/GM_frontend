@@ -12,6 +12,7 @@ const fields = [
     { name: "entete", label: "Entête", type: "textarea" as const },
     { name: "numero_identification_fiscale", label: "N° Identification Fiscale", type: "text" as const },
     { name: "numero_article_imposition", label: "N° Article Imposition", type: "text" as const },
+    { name: "logo", label: "Logo", type: "text" as const },
     { name: "est_bloque", label: "Bloqué", type: "checkbox" as const },
 ];
 
@@ -21,6 +22,9 @@ const columns: ColumnDef<Entreprise>[] = [
     { key: "numero_registre_commerce", label: "N° RC", width: "min-w-[150px]", sortable: true },
     { key: "capital_social", label: "Capital Social", width: "min-w-[150px]", sortable: true },
     { key: "type_dossier", label: "Type Dossier", width: "min-w-[130px]", sortable: true },
+    { key: "logo", label: "Logo", width: "min-w-[100px]", sortable: false, render: (val: unknown) => (
+        val ? <img src={val as string} alt="Logo" className="h-8 w-auto" /> : <span className="text-gray-400">—</span>
+    )},
     { key: "est_bloque", label: "Statut", width: "min-w-[100px]", sortable: true, render: (val: unknown) => (
         <span className={val ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 px-2 py-0.5 rounded-full text-xs font-semibold" : "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full text-xs font-semibold"}>
             {val ? "Bloqué" : "Actif"}
