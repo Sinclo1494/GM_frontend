@@ -7,6 +7,7 @@ const fields = [
     { name: "mmaa", label: "Mois/Année", type: "text" as const, required: true },
     { name: "montant_regularisation", label: "Montant", type: "number" as const, required: true },
     { name: "observation", label: "Observation", type: "textarea" as const },
+    { name: "date_modification", label: "Date Modification", type: "datetime-local" as const },
     { name: "est_bloque", label: "Bloqué", type: "checkbox" as const },
 ];
 
@@ -15,6 +16,7 @@ const columns: ColumnDef<RegularisationGM>[] = [
     { key: "mmaa", label: "Mois/Année", width: "min-w-[120px]", sortable: true },
     { key: "montant_regularisation", label: "Montant", width: "min-w-[130px]", sortable: true },
     { key: "observation", label: "Observation", width: "min-w-[200px]", sortable: true },
+    { key: "date_modification", label: "Modifié le", width: "min-w-[160px]", sortable: true, render: (val: unknown) => <>{val ?? "—"}</> },
     { key: "est_bloque", label: "Statut", width: "min-w-[100px]", sortable: true, render: (val: unknown) => (
         <span className={val ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 px-2 py-0.5 rounded-full text-xs font-semibold" : "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full text-xs font-semibold"}>
             {val ? "Bloqué" : "Actif"}

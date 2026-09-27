@@ -1,12 +1,15 @@
 import CrudPage, { type ColumnDef } from "../components/Crud/CrudPage";
+import { useEntityOptions } from "../components/Crud/useEntityOptions";
 import type { Site } from "../types/models";
 
 const fields = [
     { name: "code_site", label: "Code Site", type: "text" as const, required: true },
+    { name: "code_filiale", label: "Filiale", type: "select" as const, required: true },
     { name: "libelle_site", label: "Libellé", type: "text" as const, required: true },
     { name: "code_region", label: "Région", type: "text" as const, required: true },
     { name: "code_agence", label: "Agence", type: "text" as const, required: true },
     { name: "type_site", label: "Type Site", type: "text" as const, required: true },
+    { name: "code_division", label: "Division", type: "select" as const },
     { name: "numero_ss_employeur", label: "N° SS Employeur", type: "text" as const, required: true },
     { name: "code_commune_site", label: "Commune", type: "text" as const, required: true },
     { name: "jour_cloture_mouv_RH_paie", label: "Jour Clôture RH/Paie", type: "number" as const },
@@ -18,6 +21,7 @@ const fields = [
 const columns: ColumnDef<Site>[] = [
     { key: "code_site", label: "Code", width: "min-w-[150px]", sortable: true },
     { key: "libelle_site", label: "Libellé", width: "min-w-[200px]", sortable: true },
+    { key: "code_filiale", label: "Filiale", width: "min-w-[150px]", sortable: true },
     { key: "code_region", label: "Région", width: "min-w-[130px]", sortable: true },
     { key: "type_site", label: "Type", width: "min-w-[130px]", sortable: true },
     { key: "code_agence", label: "Agence", width: "min-w-[130px]", sortable: true },
@@ -29,11 +33,20 @@ const columns: ColumnDef<Site>[] = [
 ];
 
 export default function SitePage() {
+    const { options: filialeOptions } = useEntityOptions<any>("filiale", "code_filiale", "libelle_filiale");
+    const { options: divisionOptions } = useEntityOptions<any>("division", "code_division", "libelle_division");
+
+    const fieldsWithOptions = fields.map((f) => {
+        if (f.name === "code_filiale") return { ...f, options: filialeOptions };
+        if (f.name === "code_division") return { ...f, options: divisionOptions };
+        return f;
+    });
+
     return (
         <CrudPage<Site>
             title="Sites"
             endpoint="site"
-            fields={fields}
+            fields={fieldsWithOptions}
             columns={columns}
         />
     );
