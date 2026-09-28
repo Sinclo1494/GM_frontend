@@ -2,6 +2,7 @@ import './App.css'
 import { Outlet, useLocation } from 'react-router-dom'
 import Navbar from './components/Navigation/NavBar'
 import { ThemeProvider } from './context/ThemeContext'
+import { AnalyseFiltersProvider } from './context/AnalyseFiltersContext'
 import { usePermissions } from './auth/PermissionContext'
 import { useEffect } from 'react'
 
@@ -82,9 +83,11 @@ function AppContent() {
 function App() {
   return (
     <ThemeProvider>
-      <div className="min-h-screen flex flex-col">
-        <AppContent />
-      </div>
+      <AnalyseFiltersProvider>
+        <div className="min-h-screen flex flex-col">
+          <AppContent />
+        </div>
+      </AnalyseFiltersProvider>
     </ThemeProvider>
   )
 }

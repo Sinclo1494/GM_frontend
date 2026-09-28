@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getAQTP, getAQTPR, getFiliales } from "../api/dataServices";
 import AnalyseQuantitativeResume from "../components/AnalyseQuantitative/AnalyseQuantitativeResume";
 import AnalyseQuantitativeTable from "../components/AnalyseQuantitative/AnalyseQuantitativeTable";
+import { useAnalyseFilters } from "../context/useAnalyseFilters";
 import type {
   AnalyseQuantitativeResumeType,
   AnalyseQuantitativeType,
@@ -32,9 +33,7 @@ export default function AnalyseQuantitative() {
   const [loadingResume, setLoadingResume] = useState(false);
   const [loadingTable, setLoadingTable] = useState(false);
 
-  const [codeFiliale, setCodeFiliale] = useState("P");
-  const [dateDebut, setDateDebut] = useState("2025-09-01");
-  const [dateFin, setDateFin] = useState("2025-09-30");
+  const { codeFiliale, dateDebut, dateFin, setCodeFiliale, setDateDebut, setDateFin } = useAnalyseFilters();
 
   const handleCalculate = async () => {
     try {

@@ -1001,7 +1001,7 @@ export default function Dashboard() {
           <div>
             <h1 className={components.pageTitle}>Dashboard</h1>
             <p className={components.pageDescription}>
-              Vue operationnelle du parc materiel et des activites.
+              Vue operationnelle sur parc materiel
             </p>
           </div>
           <div className="flex flex-wrap items-end gap-3">

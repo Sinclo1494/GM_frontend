@@ -10,6 +10,18 @@ vi.mock("../../api/dataServices", () => ({
   getFiliales: vi.fn(() => Promise.resolve([])),
 }));
 
+// Mock analyse filters context
+vi.mock("../../context/useAnalyseFilters", () => ({
+  useAnalyseFilters: () => ({
+    codeFiliale: "P",
+    dateDebut: "2025-09-01",
+    dateFin: "2025-09-30",
+    setCodeFiliale: vi.fn(),
+    setDateDebut: vi.fn(),
+    setDateFin: vi.fn(),
+  }),
+}));
+
 // Mock child components
 vi.mock("../../components/AnalyseQuantitative/AnalyseQuantitativeResume", () => ({
   default: () => <div data-testid="aq-resume">Resume</div>,
