@@ -40,6 +40,7 @@ export const PERMISSIONS: PermissionDefinition[] = [
 
   { key: "import.pointage", label: "Import Pointage", category: "import", route: "/imports/pointage-csv", hasRead: false, hasWrite: true },
   { key: "import.grand_materiel", label: "Import Grand Matériel", category: "import", route: "/imports/gm-csv", hasRead: false, hasWrite: true },
+  { key: "import.materiel_filiale", label: "Affectation Filiale Matériel", category: "import", route: "/imports/materiel-filiale-csv", hasRead: false, hasWrite: true },
   { key: "import.marque", label: "Import Marque", category: "import", route: "/imports/marque-csv", hasRead: false, hasWrite: true },
   { key: "import.type_marque", label: "Import Type Marque", category: "import", route: "/imports/type-marque-csv", hasRead: false, hasWrite: true },
   { key: "import.sous_famille", label: "Import Sous-Famille", category: "import", route: "/imports/sous-famille-csv", hasRead: false, hasWrite: true },
@@ -67,6 +68,7 @@ export const PERMISSION_CATEGORIES: PermissionCategory[] = [
 export const PERMISSION_DEPENDENCIES: Record<string, string[]> = {
   "analyse.dashboard": ["gestion.filiales.read", "gestion.familles_materiel.read"],
   "import.grand_materiel": ["gestion.filiales.read", "gestion.sous_familles_materiel.read", "gestion.types_marque.read"],
+  "import.materiel_filiale": ["gestion.filiales.read", "gestion.grand_materiel.read"],
   "import.pointage": ["gestion.filiales.read", "gestion.affectations.read", "gestion.pointages.read"],
   "import.type_marque": ["gestion.marques_materiel.read"],
   "import.sous_famille": ["gestion.familles_materiel.read"],

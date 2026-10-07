@@ -1,7 +1,6 @@
-import React, { useState, useMemo } from "react";
+import { useMemo } from "react";
 import type { AnalyseQuantitativeType } from "../../types/analyseQuantitative";
 import { components } from "../../theme/components";
-import PaginationControls from "../../components/common/PaginationControls";
 
 interface Props {
   rows: AnalyseQuantitativeType[];
@@ -12,21 +11,35 @@ export default function AnalyseQuantitativeTable({
   rows,
   loading,
 }: Props) {
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const totals = useMemo(() => {
+    const sum = (pick: (row: AnalyseQuantitativeType) => number) =>
+      rows.reduce((acc, row) => acc + (pick(row) || 0), 0);
 
-  const paginatedRows = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    return rows.slice(start, start + pageSize);
-  }, [rows, page, pageSize]);
+    const nbr = sum((row) => row.nbr);
+    const ageTotal = rows.reduce(
+      (acc, row) => acc + (row.age_moyen || 0) * (row.nbr || 0),
+      0
+    );
 
-  const prevRowsLengthRef = React.useRef(rows.length);
-  React.useEffect(() => {
-    if (prevRowsLengthRef.current !== rows.length) {
-      prevRowsLengthRef.current = rows.length;
-      setPage(1);
-    }
-  }, [rows.length]);
+    return {
+      nbr,
+      age_moyen: nbr > 0 ? ageTotal / nbr : 0,
+      exploitation: {
+        en_service: sum((row) => row.exploitation.en_service),
+        en_chomage: sum((row) => row.exploitation.en_chomage),
+        en_panne: sum((row) => row.exploitation.en_panne),
+      },
+      immobilise: {
+        en_chomage: sum((row) => row.immobilise.en_chomage),
+        en_reparation: sum((row) => row.immobilise.en_reparation),
+        autre: sum((row) => row.immobilise.autre),
+      },
+      reparation: {
+        ALREM: sum((row) => row.reparation.ALREM),
+        autre: sum((row) => row.reparation.autre),
+      },
+    };
+  }, [rows]);
 
   if (loading) {
     return (
@@ -93,7 +106,7 @@ export default function AnalyseQuantitativeTable({
               </td>
             </tr>
           ) : (
-            paginatedRows.map((row) => (
+            rows.map((row) => (
               <tr
                 key={row.code_sous_famille}
                 className="dark:bg-dark-card dark:hover:bg-dark-bg-secondary transition-colors"
@@ -149,18 +162,61 @@ export default function AnalyseQuantitativeTable({
             ))
           )}
         </tbody>
+
+        {rows.length > 0 && (
+          <tfoot>
+            <tr className="bg-slate-100 dark:bg-dark-bg-tertiary font-semibold">
+              <td
+                colSpan={2}
+                className="border dark:border-dark-border px-3 py-2 text-left text-slate-800 dark:text-dark-text-primary"
+              >
+                Total
+              </td>
+
+              <td className="border dark:border-dark-border px-3 py-2 text-center text-slate-800 dark:text-dark-text-primary">
+                {totals.nbr}
+              </td>
+
+              <td className="border dark:border-dark-border px-3 py-2 text-center text-slate-800 dark:text-dark-text-primary">
+                {totals.age_moyen.toFixed(1)}
+              </td>
+
+              <td className="border dark:border-dark-border px-3 py-2 text-center text-slate-800 dark:text-dark-text-primary">
+                {totals.exploitation.en_service}
+              </td>
+
+              <td className="border dark:border-dark-border px-3 py-2 text-center text-slate-800 dark:text-dark-text-primary">
+                {totals.exploitation.en_chomage}
+              </td>
+
+              <td className="border dark:border-dark-border px-3 py-2 text-center text-slate-800 dark:text-dark-text-primary">
+                {totals.exploitation.en_panne}
+              </td>
+
+              <td className="border dark:border-dark-border px-3 py-2 text-center text-slate-800 dark:text-dark-text-primary">
+                {totals.immobilise.en_chomage}
+              </td>
+
+              <td className="border dark:border-dark-border px-3 py-2 text-center text-slate-800 dark:text-dark-text-primary">
+                {totals.immobilise.en_reparation}
+              </td>
+
+              <td className="border dark:border-dark-border px-3 py-2 text-center text-slate-800 dark:text-dark-text-primary">
+                {totals.immobilise.autre}
+              </td>
+
+              <td className="border dark:border-dark-border px-3 py-2 text-center text-slate-800 dark:text-dark-text-primary">
+                {totals.reparation.ALREM}
+              </td>
+
+              <td className="border dark:border-dark-border px-3 py-2 text-center text-slate-800 dark:text-dark-text-primary">
+                {totals.reparation.autre}
+              </td>
+            </tr>
+          </tfoot>
+        )}
       </table>
     </div>
-    <PaginationControls
-      currentPage={page}
-      totalPages={Math.max(1, Math.ceil(rows.length / pageSize))}
-      totalItems={rows.length}
-      itemsPerPage={pageSize}
-      onPageChange={setPage}
-      onItemsPerPageChange={setPageSize}
-      loading={loading}
-      showItemCount={true}
-    />
     </>
   );
 }

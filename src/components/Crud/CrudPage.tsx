@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { Plus, Trash2, Edit } from "lucide-react";
 import { components } from "../../theme/components";
 import CrudTable, { type ColumnDef, type SortField, type SortOrder } from "./CrudTable";
@@ -43,6 +43,11 @@ function CrudPage<T>({
     const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [columnFiltersInput, setColumnFiltersInput] = useState<Record<string, string>>({});
+    const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
+    const columnFilterTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const hasColumnFilters = useMemo(() => columns.some((c) => c.filter), [columns]);
 
     const [dialogOpen, setDialogOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<T | null>(null);
@@ -69,6 +74,9 @@ function CrudPage<T>({
             if (sortField) params.ordering = sortOrder === "desc" ? `-${sortField}` : sortField;
             params.page = currentPage;
             params.page_size = itemsPerPage;
+            Object.entries(columnFilters).forEach(([param, value]) => {
+                if (value !== "") params[param] = value;
+            });
             const raw = await crudList(endpoint, params, { signal: controller.signal });
             const mapped = mapRow ? raw.results.map(mapRow) : (raw.results as T[]);
             setData(mapped);
@@ -83,7 +91,7 @@ function CrudPage<T>({
             }
             setLoading(false);
         }
-    }, [endpoint, searchTerm, sortField, sortOrder, currentPage, itemsPerPage, mapRow]);
+    }, [endpoint, searchTerm, sortField, sortOrder, currentPage, itemsPerPage, mapRow, columnFilters]);
 
     useEffect(() => {
         fetchData();
@@ -94,11 +102,39 @@ function CrudPage<T>({
             if (searchTimerRef.current) {
                 clearTimeout(searchTimerRef.current);
             }
+            if (columnFilterTimerRef.current) {
+                clearTimeout(columnFilterTimerRef.current);
+            }
             if (abortControllerRef.current) {
                 abortControllerRef.current.abort();
             }
         };
     }, []);
+
+    const handleColumnFilterChange = useCallback((param: string, value: string) => {
+        setColumnFiltersInput((prev) => ({ ...prev, [param]: value }));
+        if (columnFilterTimerRef.current) {
+            clearTimeout(columnFilterTimerRef.current);
+        }
+        columnFilterTimerRef.current = setTimeout(() => {
+            setColumnFilters((prev) => ({ ...prev, [param]: value }));
+            setCurrentPage(1);
+        }, 300);
+    }, []);
+
+    const clearColumnFilters = useCallback(() => {
+        if (columnFilterTimerRef.current) {
+            clearTimeout(columnFilterTimerRef.current);
+        }
+        setColumnFiltersInput({});
+        setColumnFilters({});
+        setCurrentPage(1);
+    }, []);
+
+    const hasActiveColumnFilters = useMemo(
+        () => Object.values(columnFilters).some((v) => v !== ""),
+        [columnFilters],
+    );
 
     const handleSearchChange = useCallback((value: string) => {
         setSearchInput(value);
@@ -214,6 +250,9 @@ function CrudPage<T>({
                     onRetry={fetchData}
                     totalItems={totalItems}
                     searchPlaceholder={searchPlaceholder || `Rechercher dans ${title}...`}
+                    columnFilters={columnFiltersInput}
+                    onColumnFilterChange={hasColumnFilters ? handleColumnFilterChange : undefined}
+                    onResetColumnFilters={hasActiveColumnFilters ? clearColumnFilters : undefined}
                     actions={(row) => (
                         <div className="flex items-center gap-2">
                             <button

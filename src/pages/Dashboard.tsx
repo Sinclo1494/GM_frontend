@@ -146,6 +146,9 @@ export default function Dashboard() {
   const [materialPage, setMaterialPage] = useState(1);
   const [materialSortField, setMaterialSortField] = useState<string | null>(null);
   const [materialSortOrder, setMaterialSortOrder] = useState<"asc" | "desc">("asc");
+  const [materialColumnFilters, setMaterialColumnFilters] = useState<Record<string, string>>({});
+  const [materialColumnFiltersInput, setMaterialColumnFiltersInput] = useState<Record<string, string>>({});
+  const materialColumnFilterTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
   const sortedItems = useMemo(() => {
@@ -166,6 +169,11 @@ export default function Dashboard() {
     }
     return items;
   }, [materialDetails, materialSortField, materialSortOrder]);
+
+  const hasActiveMaterialColumnFilters = useMemo(
+    () => Object.values(materialColumnFilters).some((v) => v !== ""),
+    [materialColumnFilters]
+  );
 
   const fetchDashboard = useCallback(async () => {
     setLoading(true);
@@ -203,8 +211,11 @@ export default function Dashboard() {
       if (filters.date_fin) params.date_fin = filters.date_fin;
       if (filters.code_famille) params.code_famille = filters.code_famille;
       if (materialSearch) params.search = materialSearch;
-      params.page = materialPage;
-      params.page_size = 50;
+      
+      // Use larger page size when column filters are active for local filtering
+      const hasColumnFilters = Object.values(materialColumnFilters).some((v) => v !== "");
+      params.page = hasColumnFilters ? 1 : materialPage;
+      params.page_size = hasColumnFilters ? 1000 : 50;
 
       const result = await getMaterialDetails(params);
       setMaterialDetails(result);
@@ -218,7 +229,27 @@ export default function Dashboard() {
     } finally {
       setMaterialLoading(false);
     }
-  }, [activeTab, filters, materialSearch, materialPage]);
+  }, [activeTab, filters, materialSearch, materialPage, materialColumnFilters]);
+
+  const handleMaterialColumnFilterChange = useCallback((param: string, value: string) => {
+    setMaterialColumnFiltersInput((prev) => ({ ...prev, [param]: value }));
+    if (materialColumnFilterTimerRef.current) {
+      clearTimeout(materialColumnFilterTimerRef.current);
+    }
+    materialColumnFilterTimerRef.current = setTimeout(() => {
+      setMaterialColumnFilters((prev) => ({ ...prev, [param]: value }));
+      setMaterialPage(1);
+    }, 300);
+  }, []);
+
+  const clearMaterialColumnFilters = useCallback(() => {
+    if (materialColumnFilterTimerRef.current) {
+      clearTimeout(materialColumnFilterTimerRef.current);
+    }
+    setMaterialColumnFiltersInput({});
+    setMaterialColumnFilters({});
+    setMaterialPage(1);
+  }, []);
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
@@ -711,15 +742,16 @@ export default function Dashboard() {
 
   const renderEnginsTab = () => {
     const columns: ColumnDef<any>[] = [
-      { key: "code_materiel", label: "Code", sortable: true },
-      { key: "designation", label: "Designation", sortable: true },
-      { key: "libelle_famille", label: "Famille" },
-      { key: "libelle_sous_famille", label: "Sous-Famille" },
-      { key: "libelle_type_marque", label: "Type" },
-      { key: "libelle_filiale", label: "Filiale" },
+      { key: "code_materiel", label: "Code", sortable: true, filter: { param: "code_materiel" } },
+      { key: "designation", label: "Designation", sortable: true, filter: { param: "designation" } },
+      { key: "libelle_famille", label: "Famille", filter: { param: "libelle_famille" } },
+      { key: "libelle_sous_famille", label: "Sous-Famille", filter: { param: "libelle_sous_famille" } },
+      { key: "libelle_type_marque", label: "Type", filter: { param: "libelle_type_marque" } },
+      { key: "libelle_filiale", label: "Filiale", filter: { param: "libelle_filiale" } },
       {
         key: "est_bloque",
         label: "Statut",
+        filter: { type: "select", param: "est_bloque", options: [{ value: "false", label: "Actif" }, { value: "true", label: "Bloqué" }] },
         render: (value: unknown) => (
           <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${value ? "bg-red-100 dark:bg-red-900/30 text-red-700" : "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"}`}>
             {value ? "Inactif" : "Actif"}
@@ -810,6 +842,10 @@ export default function Dashboard() {
             emptyMessage="Aucun materiel trouve."
             title=""
             searchPlaceholder="Rechercher..."
+            columnFilters={materialColumnFiltersInput}
+            onColumnFilterChange={handleMaterialColumnFilterChange}
+            onResetColumnFilters={hasActiveMaterialColumnFilters ? clearMaterialColumnFilters : undefined}
+            enableLocalFiltering={true}
             actions={(row) => (
               <button
                 onClick={() => toggleRow(row.code_materiel)}
@@ -1001,7 +1037,7 @@ export default function Dashboard() {
           <div>
             <h1 className={components.pageTitle}>Dashboard</h1>
             <p className={components.pageDescription}>
-              Vue operationnelle du parc materiel et des activites.
+              Vue operationnelle sur parc materiel
             </p>
           </div>
           <div className="flex flex-wrap items-end gap-3">

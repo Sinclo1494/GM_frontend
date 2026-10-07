@@ -154,6 +154,10 @@ export interface GrandMateriel {
     puissance_materiel: string | null;
     code_sous_famille_materiel: string;
     code_type_marque: string | null;
+    libelle_famille: string | null;
+    libelle_categorie: string | null;
+    libelle_marque: string | null;
+    libelle_filiale: string | null;
     libelle_sous_famille: string | null;
     libelle_type_marque: string | null;
     est_bloque: boolean;
@@ -206,6 +210,8 @@ export interface Pointage {
     affectation_id: number;
     code_affectation: string;
     code_materiel: string;
+    code_site: string | null;
+    code_filiale: string | null;
     mmaa: string;
     taux_location: string | null;
     heures_service: string;
@@ -217,6 +223,7 @@ export interface Pointage {
     montant_panne: string | null;
     est_bloque: boolean;
     user_id: number;
+    user: string | null;
     date_modification: string;
     created_at: string;
     updated_at: string;

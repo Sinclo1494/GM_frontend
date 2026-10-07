@@ -29,19 +29,37 @@ const fields = [
     { name: "situation_est_bloque", label: "Situation Bloquée", type: "checkbox" as const, section: "Situation" },
 ];
 
+const DASH = (val: unknown) => <>{val ?? "—"}</>;
+
 const columns: ColumnDef<GrandMateriel>[] = [
-    { key: "code_materiel", label: "Code", width: "min-w-[140px]", sortable: true },
-    { key: "designation", label: "Désignation", width: "min-w-[180px]", sortable: true },
-    { key: "num_serie", label: "N° Série", width: "min-w-[140px]", sortable: true },
-    { key: "immatriculation", label: "Immatriculation", width: "min-w-[140px]", sortable: true },
-    { key: "code_sous_famille_materiel", label: "Sous-Famille", width: "min-w-[160px]", sortable: true },
-    { key: "code_type_marque", label: "Type Marque", width: "min-w-[150px]", sortable: true },
-    { key: "valeur_acquisition", label: "Valeur Acq.", width: "min-w-[130px]", sortable: true },
-    { key: "est_bloque", label: "Statut", width: "min-w-[100px]", sortable: true, render: (val: unknown) => (
+    { key: "id", label: "ID", width: "min-w-[80px]", sortable: false, render: DASH },
+    { key: "code_materiel", label: "Code", width: "min-w-[140px]", sortable: true, filter: { param: "code_materiel" } },
+    { key: "designation", label: "Désignation", width: "min-w-[180px]", sortable: true, filter: { param: "designation" }, render: DASH },
+    { key: "code_filiale_g", label: "Code Filiale", width: "min-w-[130px]", sortable: true, filter: { param: "code_filiale" }, render: DASH },
+    { key: "libelle_filiale", label: "Filiale", width: "min-w-[150px]", sortable: true, filter: { param: "libelle_filiale" }, render: DASH },
+    { key: "libelle_categorie", label: "Catégorie", width: "min-w-[150px]", sortable: true, filter: { param: "libelle_categorie" }, render: DASH },
+    { key: "libelle_famille", label: "Famille", width: "min-w-[150px]", sortable: true, filter: { param: "libelle_famille" }, render: DASH },
+    { key: "code_sous_famille_materiel", label: "Code Sous-Famille", width: "min-w-[170px]", sortable: true, sortParam: "code_sous_famille", filter: { param: "code_sous_famille" }, render: DASH },
+    { key: "libelle_sous_famille", label: "Sous-Famille", width: "min-w-[160px]", sortable: true, filter: { param: "libelle_sous_famille" }, render: DASH },
+    { key: "code_type_marque", label: "Code Type Marque", width: "min-w-[170px]", sortable: true, filter: { param: "code_type_marque" }, render: DASH },
+    { key: "libelle_type_marque", label: "Type Marque", width: "min-w-[150px]", sortable: true, filter: { param: "libelle_type_marque" }, render: DASH },
+    { key: "libelle_marque", label: "Marque", width: "min-w-[140px]", sortable: true, filter: { param: "libelle_marque" }, render: DASH },
+    { key: "num_serie", label: "N° Série", width: "min-w-[140px]", sortable: true, filter: { param: "num_serie" }, render: DASH },
+    { key: "immatriculation", label: "Immatriculation", width: "min-w-[140px]", sortable: true, filter: { param: "immatriculation" }, render: DASH },
+    { key: "date_acquisition", label: "Date Acquisition", width: "min-w-[170px]", sortable: true, filter: { param: "date_acquisition", placeholder: "JJ/MM/AAAA" }, render: DASH },
+    { key: "valeur_acquisition", label: "Valeur Acq.", width: "min-w-[130px]", sortable: true, filter: { param: "valeur_acquisition" }, render: DASH },
+    { key: "valeur_remplacement", label: "Valeur Rempl.", width: "min-w-[140px]", sortable: true, filter: { param: "valeur_remplacement" }, render: DASH },
+    { key: "taux_amortissement", label: "Taux Amort.", width: "min-w-[130px]", sortable: true, filter: { param: "taux_amortissement" }, render: DASH },
+    { key: "puissance_materiel", label: "Puissance", width: "min-w-[120px]", sortable: true, filter: { param: "puissance_materiel" }, render: DASH },
+    { key: "est_bloque", label: "Statut", width: "min-w-[100px]", sortable: true, filter: { type: "select", param: "est_bloque", options: [{ value: "false", label: "Actif" }, { value: "true", label: "Bloqué" }] }, render: (val: unknown) => (
         <span className={val ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 px-2 py-0.5 rounded-full text-xs font-semibold" : "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full text-xs font-semibold"}>
             {val ? "Bloqué" : "Actif"}
         </span>
     )},
+    { key: "user_id", label: "Créé par", width: "min-w-[100px]", sortable: false, render: DASH },
+    { key: "date_modification", label: "Modifié le", width: "min-w-[160px]", sortable: false, filter: { param: "date_modification", placeholder: "JJ/MM/AAAA" }, render: DASH },
+    { key: "created_at", label: "Créé le", width: "min-w-[160px]", sortable: false, filter: { param: "created_at", placeholder: "JJ/MM/AAAA" }, render: DASH },
+    { key: "updated_at", label: "Mis à jour le", width: "min-w-[160px]", sortable: false, filter: { param: "updated_at", placeholder: "JJ/MM/AAAA" }, render: DASH },
 ];
 
 export default function GrandMaterielPage() {

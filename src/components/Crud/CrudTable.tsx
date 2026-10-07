@@ -11,11 +11,25 @@ import { components } from "../../theme/components";
 export type SortField = string | null;
 export type SortOrder = "asc" | "desc";
 
+export type ColumnFilterOption = {
+    value: string;
+    label: string;
+};
+
+export type ColumnFilterDef = {
+    type?: "text" | "select";
+    param?: string;
+    options?: ColumnFilterOption[];
+    placeholder?: string;
+};
+
 export type ColumnDef<T> = {
     key: keyof T | string;
     label: string;
     width?: string;
     sortable?: boolean;
+    sortParam?: string;
+    filter?: ColumnFilterDef;
     render?: (value: unknown, row: T, index: number) => React.ReactNode;
 };
 
@@ -39,6 +53,10 @@ interface CrudTableProps<T> {
     title?: string;
     searchPlaceholder?: string;
     actions?: (row: T) => React.ReactNode;
+    columnFilters?: Record<string, string>;
+    onColumnFilterChange?: (param: string, value: string) => void;
+    onResetColumnFilters?: () => void;
+    enableLocalFiltering?: boolean;
 }
 
 const SortIcon = ({
@@ -57,6 +75,47 @@ const SortIcon = ({
         <ChevronUp className="h-4 w-4 text-gray-600" />
     ) : (
         <ChevronDown className="h-4 w-4 text-gray-600" />
+    );
+};
+
+const ColumnFilterControl = ({
+    filter,
+    value,
+    onChange,
+}: {
+    filter: ColumnFilterDef;
+    value: string;
+    onChange: (value: string) => void;
+}) => {
+    const stop = (e: React.MouseEvent) => e.stopPropagation();
+
+    if (filter.type === "select") {
+        return (
+            <select
+                value={value}
+                onClick={stop}
+                onChange={(e) => onChange(e.target.value)}
+                className={components.input + " py-1 text-xs"}
+            >
+                <option value="">Tous</option>
+                {(filter.options ?? []).map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                    </option>
+                ))}
+            </select>
+        );
+    }
+
+    return (
+        <input
+            type="text"
+            value={value}
+            onClick={stop}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={filter.placeholder ?? "Filtrer..."}
+            className={components.input + " py-1 text-xs"}
+        />
     );
 };
 
@@ -80,6 +139,10 @@ function CrudTable<T>({
     title,
     searchPlaceholder = "Rechercher...",
     actions,
+    columnFilters,
+    onColumnFilterChange,
+    onResetColumnFilters,
+    enableLocalFiltering = false,
 }: CrudTableProps<T>) {
     const sortedData = useMemo(() => {
         const sorted = [...data];
@@ -96,7 +159,22 @@ function CrudTable<T>({
         return sorted;
     }, [data, sortField, sortOrder]);
 
-    const itemCount = totalItems ?? sortedData.length;
+    const filteredData = useMemo(() => {
+        if (!enableLocalFiltering || !columnFilters) return sortedData;
+        return sortedData.filter((row: any) => {
+            return Object.entries(columnFilters).every(([param, value]) => {
+                if (!value) return true;
+                const column = columns.find((c) => (c.filter?.param ?? String(c.key)) === param);
+                if (!column) return true;
+                const rowValue = row[String(column.key)];
+                if (rowValue === undefined || rowValue === null) return false;
+                const strValue = String(rowValue).toLowerCase();
+                return strValue.includes(value.toLowerCase());
+            });
+        });
+    }, [sortedData, columnFilters, columns, enableLocalFiltering]);
+
+    const itemCount = totalItems ?? filteredData.length;
     const totalPages = Math.max(1, Math.ceil(itemCount / itemsPerPage));
     const startIdx = (currentPage - 1) * itemsPerPage;
     const endIdx = Math.min(startIdx + itemsPerPage, itemCount);
@@ -151,6 +229,15 @@ function CrudTable<T>({
                             <option value={100}>100</option>
                         </select>
                     </div>
+                    {onResetColumnFilters && (
+                        <button
+                            onClick={onResetColumnFilters}
+                            type="button"
+                            className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                        >
+                            Réinitialiser les filtres
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -176,20 +263,31 @@ function CrudTable<T>({
                             {columns.map((column) => (
                                 <th
                                     key={String(column.key)}
-                                    onClick={() => column.sortable !== false && onSort(String(column.key))}
+                                    onClick={() => column.sortable !== false && onSort(column.sortParam ?? String(column.key))}
                                     className={`${column.width || ""} px-4 py-3 align-top transition-colors ${
                                         column.sortable !== false ? "hover:bg-slate-200 cursor-pointer" : ""
                                     }`}
                                 >
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-dark-text-primary">
-                                            {column.label}
-                                        </span>
-                                        {column.sortable !== false && (
-                                            <SortIcon
-                                                field={String(column.key)}
-                                                sortField={sortField}
-                                                sortOrder={sortOrder}
+                                    <div className="flex flex-col gap-2">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-dark-text-primary">
+                                                {column.label}
+                                            </span>
+                                            {column.sortable !== false && (
+                                                <SortIcon
+                                                    field={column.sortParam ?? String(column.key)}
+                                                    sortField={sortField}
+                                                    sortOrder={sortOrder}
+                                                />
+                                            )}
+                                        </div>
+                                        {column.filter && onColumnFilterChange && (
+                                            <ColumnFilterControl
+                                                filter={column.filter}
+                                                value={columnFilters?.[column.filter.param ?? String(column.key)] ?? ""}
+                                                onChange={(value) =>
+                                                    onColumnFilterChange(column.filter!.param ?? String(column.key), value)
+                                                }
                                             />
                                         )}
                                     </div>
@@ -226,8 +324,8 @@ function CrudTable<T>({
                                     </div>
                                 </td>
                             </tr>
-                        ) : sortedData.length > 0 ? (
-                            sortedData.map((row, idx) => (
+                        ) : filteredData.length > 0 ? (
+                            filteredData.map((row, idx) => (
                                 <tr
                                     key={(row as any).id ?? idx}
                                     className={`${components.table.row} ${idx % 2 === 0 ? "bg-white dark:bg-dark-card" : "bg-slate-50/50 dark:bg-dark-bg-secondary/50"

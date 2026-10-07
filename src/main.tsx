@@ -6,11 +6,12 @@ import Login from './pages/Login.tsx';
 import ProtectedRoute from './routes/ProtectedRoute.tsx';
 import App from './App.tsx';
 import PermissionProvider from './auth/PermissionProvider';
-import Dashboard from './pages/Dashboard.tsx';
+import NewDashboard from './pages/NewDashboard.tsx';
 import AnalyseQuantitative from './pages/AnalyseQuantitative.tsx';
 import AnalyseExploitation from './pages/AnalyseExploitation.tsx';
 import PointageImportCsv from './pages/ImportPointageCSV.tsx';
 import GMImportCsv from './pages/ImportGrandMaterielCSV.tsx';
+import MaterielFilialeImportCsv from './pages/ImportMaterielFilialeCSV.tsx';
 import MarqueImportCsv from './pages/ImportMarqueCSV.tsx';
 import TypeMarqueImportCsv from './pages/ImportTypeMarqueCSV.tsx';
 import SousFamilleImportCsv from './pages/ImportSousFamilleCSV.tsx';
@@ -58,11 +59,12 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/reports/journal-materiel" element={<ProtectedRoute permission="analyse.journal_materiel"><JournalMateriel /></ProtectedRoute>} />
               <Route path="/reports/analyse-quantitative" element={<ProtectedRoute permission="analyse.quantitative"><AnalyseQuantitative /></ProtectedRoute>} />
               <Route path="/reports/analyse-exploitation" element={<ProtectedRoute permission="analyse.exploitation"><AnalyseExploitation /></ProtectedRoute>} />
-              <Route path="/" element={<ProtectedRoute permission="analyse.dashboard"><Dashboard /></ProtectedRoute>} />
-              <Route path="/Dashboard" element={<ProtectedRoute permission="analyse.dashboard"><Dashboard /></ProtectedRoute>} />
+              <Route path="/" element={<ProtectedRoute permission="analyse.dashboard"><NewDashboard /></ProtectedRoute>} />
+              <Route path="/reports/dashboard-v2" element={<ProtectedRoute permission="analyse.dashboard"><NewDashboard /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
               <Route path="/imports/pointage-csv" element={<ProtectedRoute permission="import.pointage"><PointageImportCsv /></ProtectedRoute>} />
               <Route path="/imports/gm-csv" element={<ProtectedRoute permission="import.grand_materiel"><GMImportCsv /></ProtectedRoute>} />
+              <Route path="/imports/materiel-filiale-csv" element={<ProtectedRoute permission="import.materiel_filiale"><MaterielFilialeImportCsv /></ProtectedRoute>} />
               <Route path="/imports/marque-csv" element={<ProtectedRoute permission="import.marque"><MarqueImportCsv /></ProtectedRoute>} />
               <Route path="/imports/type-marque-csv" element={<ProtectedRoute permission="import.type_marque"><TypeMarqueImportCsv /></ProtectedRoute>} />
               <Route path="/imports/sous-famille-csv" element={<ProtectedRoute permission="import.sous_famille"><SousFamilleImportCsv /></ProtectedRoute>} />
