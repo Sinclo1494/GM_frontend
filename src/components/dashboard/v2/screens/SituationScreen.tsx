@@ -9,11 +9,10 @@ import {
   ErrorBox,
   useDashboardFilters,
   filtersToParams,
-  NiveauHeader,
-  pct,
   fmtNumber,
   formatMonth,
 } from "../index";
+import type { BreakdownColumn } from "../index";
 import { getDashboardV2Situation } from "../../../../api/dashboardV2Services";
 import type { DashboardV2Situation } from "../../../../types/dashboardV2";
 
@@ -127,13 +126,13 @@ function SituationScreenImpl() {
     },
   };
 
-  const situationColumns = [
+  const situationColumns: BreakdownColumn[] = [
     { key: "code_type_situation", label: "Code", align: "center" as const, filterable: true, filterType: "text" },
     { key: "libelle_type_situation", label: "Situation", filterable: true, filterType: "text" },
     { key: "count", label: "Nombre", align: "right" as const, render: (v: unknown) => fmtNumber(v) },
   ];
 
-  const familleColumns = [
+  const familleColumns: BreakdownColumn[] = [
     { key: "code_famille", label: "Code Famille", align: "center" as const, filterable: true, filterType: "text" },
     { key: "libelle_famille", label: "Famille", filterable: true, filterType: "text" },
     { key: "code_sous_famille", label: "Code Sous-Famille", align: "center" as const, filterable: true, filterType: "text" },
@@ -167,7 +166,7 @@ function SituationScreenImpl() {
       <Section title="Détail par situation" accent="blue">
         <BreakdownTable
           columns={situationColumns}
-          rows={situationDist}
+          rows={situationDist as unknown as Record<string, unknown>[]}
           currentPage={currentPage}
           pageSize={pageSize}
           onPageChange={setCurrentPage}
@@ -179,7 +178,7 @@ function SituationScreenImpl() {
       <Section title="Répartition par famille / sous-famille" accent="blue">
         <BreakdownTable
           columns={familleColumns}
-          rows={familleDist}
+          rows={familleDist as unknown as Record<string, unknown>[]}
           currentPage={currentPage}
           pageSize={pageSize}
           onPageChange={setCurrentPage}

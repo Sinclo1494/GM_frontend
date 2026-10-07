@@ -14,6 +14,7 @@ import {
   pct,
   formatMonth,
 } from "../index";
+import type { BreakdownColumn } from "../index";
 import { DASHBOARD_TARGETS } from "../dashboardTargets";
 import { getDashboardV2Disponibilite } from "../../../../api/dashboardV2Services";
 import type { DashboardV2Disponibilite } from "../../../../types/dashboardV2";
@@ -137,7 +138,7 @@ function DisponibiliteScreenImpl() {
     ],
   };
 
-  const columns = [
+  const columns: BreakdownColumn[] = [
     {
       key: "code",
       label: "Code",

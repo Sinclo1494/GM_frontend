@@ -16,6 +16,7 @@ import {
   fmtMillions,
   formatQuarter,
 } from "../index";
+import type { BreakdownColumn } from "../index";
 import { DASHBOARD_TARGETS } from "../dashboardTargets";
 import { getDashboardV2Finances } from "../../../../api/dashboardV2Services";
 import type { DashboardV2Finances } from "../../../../types/dashboardV2";
@@ -166,7 +167,7 @@ function FinancesScreenImpl() {
     ],
   };
 
-  const rankingColumns = [
+  const rankingColumns: BreakdownColumn[] = [
     {
       key: "rang",
       label: "Rang",

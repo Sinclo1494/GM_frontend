@@ -15,6 +15,7 @@ import {
   fmtNumber,
   fmtMillions,
 } from "../index";
+import type { BreakdownColumn } from "../index";
 import { getDashboardV2Maintenance } from "../../../../api/dashboardV2Services";
 import type { DashboardV2Maintenance } from "../../../../types/dashboardV2";
 
@@ -116,7 +117,7 @@ function MaintenanceScreenImpl() {
     },
   ];
 
-  const mtbfColumns = [
+  const mtbfColumns: BreakdownColumn[] = [
     {
       key: "code",
       label: "Code",
@@ -141,7 +142,7 @@ function MaintenanceScreenImpl() {
     { key: "mtbf", label: "MTBF (h)", align: "right" as const, render: (v: unknown) => fmt(v, 1) },
   ];
 
-  const mttrColumns = [
+  const mttrColumns: BreakdownColumn[] = [
     {
       key: "code",
       label: "Code",
@@ -166,7 +167,7 @@ function MaintenanceScreenImpl() {
     { key: "mttr", label: "MTTR (h)", align: "right" as const, render: (v: unknown) => fmt(v, 1) },
   ];
 
-  const coutColumns = [
+  const coutColumns: BreakdownColumn[] = [
     {
       key: "code",
       label: "Code",

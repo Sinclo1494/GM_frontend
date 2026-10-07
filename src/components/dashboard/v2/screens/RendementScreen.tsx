@@ -14,6 +14,7 @@ import {
   fmtNumber,
   formatMonth,
 } from "../index";
+import type { BreakdownColumn } from "../index";
 import { DASHBOARD_TARGETS } from "../dashboardTargets";
 import { getDashboardV2Rendement } from "../../../../api/dashboardV2Services";
 import type { DashboardV2Rendement } from "../../../../types/dashboardV2";
@@ -181,7 +182,7 @@ function RendementScreenImpl() {
     },
   };
 
-  const columns = [
+  const columns: BreakdownColumn[] = [
     {
       key: "code",
       label: "Code",
