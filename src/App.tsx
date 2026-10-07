@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom'
 import Navbar from './components/Navigation/NavBar'
 import { ThemeProvider } from './context/ThemeContext'
 import { AnalyseFiltersProvider } from './context/AnalyseFiltersContext'
+import { DashboardFiltersProvider } from './context/DashboardFiltersContext'
 import { usePermissions } from './auth/PermissionContext'
 import { useEffect } from 'react'
 
@@ -19,7 +20,7 @@ function AppContent() {
 
     const permMap: Record<string, string> = {
       "/": "analyse.dashboard",
-      "/Dashboard": "analyse.dashboard",
+      "/reports/dashboard-v2": "analyse.dashboard",
       "/reports/journal-materiel": "analyse.journal_materiel",
       "/reports/analyse-quantitative": "analyse.quantitative",
       "/reports/analyse-exploitation": "analyse.exploitation",
@@ -46,6 +47,7 @@ function AppContent() {
       "/gestion/regularisations-mois": "gestion.regularisations_mois",
       "/imports/pointage-csv": "import.pointage",
       "/imports/gm-csv": "import.grand_materiel",
+      "/imports/materiel-filiale-csv": "import.materiel_filiale",
       "/imports/marque-csv": "import.marque",
       "/imports/type-marque-csv": "import.type_marque",
       "/imports/sous-famille-csv": "import.sous_famille",
@@ -84,9 +86,11 @@ function App() {
   return (
     <ThemeProvider>
       <AnalyseFiltersProvider>
-        <div className="min-h-screen flex flex-col">
-          <AppContent />
-        </div>
+        <DashboardFiltersProvider>
+          <div className="min-h-screen flex flex-col">
+            <AppContent />
+          </div>
+        </DashboardFiltersProvider>
       </AnalyseFiltersProvider>
     </ThemeProvider>
   )

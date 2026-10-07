@@ -281,8 +281,11 @@ export function exportAnalyseExploitation(
     startY: 42,
 
     head: [[
-      "Nombre",
-      "Potentiel",
+      "Nb existant",
+      "Nb pointage",
+      "Nb mat pt",
+      "Pot. enregistré",
+      "Pot. calculé",
       "Taux location",
 
       "H. Service",
@@ -295,8 +298,11 @@ export function exportAnalyseExploitation(
     ]],
 
     body: [[
-      resume.nombre_total,
-      resume.total_potentiel.toFixed(1),
+      resume.nombre_existant,
+      resume.nombre_pointage,
+      resume.nombre_materiels_pointes,
+      resume.total_potentiel_enregistre.toFixed(1),
+      resume.total_potentiel_calcule.toFixed(1),
       resume.taux_location_moyen.toFixed(2),
 
       `${resume.heures_service.toFixed(1)} (${resume.pct_heures_service.toFixed(1)}%)`,
@@ -361,8 +367,11 @@ export function exportAnalyseExploitation(
         [
           "Code",
           "Sous famille",
-          "Nb",
-          "Potentiel",
+          "Nb existant",
+          "Nb pointage",
+          "Nb mat pt",
+          "Pot. enregistré",
+          "Pot. calculé",
           "Taux loc.",
 
           "H. Service",
@@ -379,8 +388,11 @@ export function exportAnalyseExploitation(
         r.code_sous_famille,
         r.libelle_sous_famille,
 
-        r.nbr,
-        r.potentiel_total.toFixed(1),
+        r.nbr_existant,
+        r.nbr_pointage,
+        r.nbr_mat_pt,
+        r.potentiel_enregistre.toFixed(1),
+        r.potentiel_calcule.toFixed(1),
         r.taux_location.toFixed(2),
 
         `${r.heures_service.toFixed(1)}\n${r.pct_heures_service.toFixed(1)}%`,
@@ -425,6 +437,10 @@ export function exportAnalyseExploitation(
         },
 
         4: {
+          cellWidth: 22,
+        },
+
+        5: {
           cellWidth: 22,
         },
       },

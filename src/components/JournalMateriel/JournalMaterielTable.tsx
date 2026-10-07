@@ -274,6 +274,9 @@ const columns = [
             if (columnFilters.puissance_materiel) params.puissance_materiel = columnFilters.puissance_materiel;
             if (columnFilters.est_bloque !== "") params.est_bloque = columnFilters.est_bloque;
 
+            // Always filter by type_affectation for Journal Materiel
+            params.filtered = "true";
+
             const response = await crudList<JournalMateriel>(GM_URL, params, { signal: controller.signal });
             setData(response.results);
             setTotalItems(response.count);

@@ -73,6 +73,7 @@ const Navbar = () => {
   const canSeeAnyImport = [
     "import.pointage",
     "import.grand_materiel",
+    "import.materiel_filiale",
     "import.marque",
     "import.type_marque",
     "import.sous_famille",
@@ -121,7 +122,7 @@ const Navbar = () => {
         {canSeeDashboard && (
           <li>
             <Link to="/" className="hover:text-gray-300 transition-colors">
-              Home
+              Dashboard
             </Link>
           </li>
         )}
@@ -148,6 +149,9 @@ const Navbar = () => {
               <div className={dropdownClass}>
                 {hasPermission("import.grand_materiel") && (
                   <Link to="/imports/gm-csv" onClick={() => setImportsOpen(false)} className={dropdownItemClass}>Grand Matériel</Link>
+                )}
+                {hasPermission("import.materiel_filiale") && (
+                  <Link to="/imports/materiel-filiale-csv" onClick={() => setImportsOpen(false)} className={dropdownItemClass}>Affectation Filiale Matériel</Link>
                 )}
                 {hasPermission("import.pointage") && (
                   <Link to="/imports/pointage-csv" onClick={() => setImportsOpen(false)} className={dropdownItemClass}>Pointage</Link>
@@ -201,6 +205,11 @@ const Navbar = () => {
 
             {reportsOpen && (
               <div className={dropdownClass}>
+                {hasPermission("analyse.dashboard") && (
+                  <Link to="/" onClick={() => setReportsOpen(false)} className={dropdownItemClass}>
+                    Dashboard
+                  </Link>
+                )}
                 {hasPermission("analyse.journal_materiel") && (
                   <Link to="/reports/journal-materiel" onClick={() => setReportsOpen(false)} className={dropdownItemClass}>
                     Journal Matériel

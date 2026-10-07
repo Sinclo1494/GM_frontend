@@ -7,6 +7,9 @@ const POINTAGE_IMPORT_URL = `${API}/pointage-import/`;
 const GM_VALIDATE_URL = `${API}/gm-validate/`;
 const GM_IMPORT_URL = `${API}/gm-import/`;
 
+const MATERIEL_FILIALE_VALIDATE_URL = `${API}/materiel-filiale-validate/`;
+const MATERIEL_FILIALE_IMPORT_URL = `${API}/materiel-filiale-import/`;
+
 const MARQUE_VALIDATE_URL = `${API}/marque-validate/`;
 const MARQUE_IMPORT_URL = `${API}/marque-import/`;
 
@@ -101,6 +104,39 @@ export async function validateGM(
 
 export async function importGM(validationId: string) {
   const response = await axios.post(GM_IMPORT_URL, {
+    validation_id: validationId,
+  });
+
+  return response.data;
+}
+
+// ---------------------------------------------------------
+// Validate Materiel / Filiale CSV
+// ---------------------------------------------------------
+
+export async function validateMaterielFiliale(
+  file: File,
+  mapping: Record<number, string>,
+) {
+  const formData = new FormData();
+
+  formData.append("file", file);
+  formData.append("mapping", JSON.stringify(mapping));
+
+  const response = await axios.post(
+    MATERIEL_FILIALE_VALIDATE_URL,
+    formData,
+  );
+
+  return response.data;
+}
+
+// ---------------------------------------------------------
+// Apply the validated Materiel / Filiale updates
+// ---------------------------------------------------------
+
+export async function importMaterielFiliale(validationId: string) {
+  const response = await axios.post(MATERIEL_FILIALE_IMPORT_URL, {
     validation_id: validationId,
   });
 

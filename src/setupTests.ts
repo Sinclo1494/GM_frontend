@@ -39,7 +39,7 @@ vi.mock('lucide-react', () => {
     'Search', 'Plus', 'Trash2', 'Edit', 'Shield', 'Save', 'Lock', 'Upload',
     'CheckCircle2', 'Circle', 'AlertTriangle', 'ArrowLeft', 'ArrowRight',
     'FileText', 'FileSpreadsheet', 'ChevronDown', 'LogOut', 'Settings',
-    'Sun', 'Moon', 'Loader2',
+    'Sun', 'Moon', 'Loader2', 'X',
   ];
   names.forEach((name) => {
     icons[name] = LucideMock;

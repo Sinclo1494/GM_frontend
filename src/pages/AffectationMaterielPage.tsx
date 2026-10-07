@@ -16,18 +16,18 @@ const fields = [
 ];
 
 const columns: ColumnDef<AffectationMateriel>[] = [
-    { key: "code_affectation", label: "Code", width: "min-w-[140px]", sortable: true },
-    { key: "code_materiel", label: "Matériel", width: "min-w-[130px]", sortable: true },
-    { key: "code_filiale_mere", label: "Filiale", width: "min-w-[130px]", sortable: true },
-    { key: "code_site", label: "Site", width: "min-w-[130px]", sortable: true },
-    { key: "date_affectation", label: "Date Affectation", width: "min-w-[170px]", sortable: true },
-    { key: "nbr_jours_affectation", label: "Nb Jours", width: "min-w-[100px]", sortable: true },
-    { key: "prenable", label: "Prenable", width: "min-w-[100px]", sortable: true, render: (val: unknown) => (
+    { key: "code_affectation", label: "Code", width: "min-w-[140px]", sortable: true, filter: { param: "code_affectation" } },
+    { key: "code_materiel", label: "Matériel", width: "min-w-[130px]", sortable: true, filter: { param: "code_materiel" } },
+    { key: "code_filiale_mere", label: "Filiale", width: "min-w-[130px]", sortable: true, filter: { param: "code_filiale" } },
+    { key: "code_site", label: "Site", width: "min-w-[130px]", sortable: true, filter: { param: "code_site" } },
+    { key: "date_affectation", label: "Date Affectation", width: "min-w-[170px]", sortable: true, filter: { param: "date_affectation", placeholder: "JJ/MM/AAAA" } },
+    { key: "nbr_jours_affectation", label: "Nb Jours", width: "min-w-[100px]", sortable: true, filter: { param: "nbr_jours_affectation" } },
+    { key: "prenable", label: "Prenable", width: "min-w-[100px]", sortable: true, filter: { type: "select", param: "prenable", options: [{ value: "true", label: "Oui" }, { value: "false", label: "Non" }] }, render: (val: unknown) => (
         <span className={val ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full text-xs font-semibold" : "bg-gray-100 text-gray-700 dark:text-dark-text-primary px-2 py-0.5 rounded-full text-xs font-semibold"}>
             {val ? "Oui" : "Non"}
         </span>
     )},
-    { key: "est_bloque", label: "Statut", width: "min-w-[100px]", sortable: true, render: (val: unknown) => (
+    { key: "est_bloque", label: "Statut", width: "min-w-[100px]", sortable: true, filter: { type: "select", param: "est_bloque", options: [{ value: "false", label: "Actif" }, { value: "true", label: "Bloqué" }] }, render: (val: unknown) => (
         <span className={val ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 px-2 py-0.5 rounded-full text-xs font-semibold" : "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full text-xs font-semibold"}>
             {val ? "Bloqué" : "Actif"}
         </span>

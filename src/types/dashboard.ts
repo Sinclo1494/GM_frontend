@@ -101,7 +101,9 @@ export interface DashboardQuantitativeResume {
 }
 
 export interface DashboardExploitationResume {
-  nombre_total: number;
+  nombre_existant: number;
+  nombre_pointage: number;
+  nombre_materiels_pointes: number;
   heures_service: number;
   heures_chomage: number;
   heures_panne: number;
@@ -110,6 +112,8 @@ export interface DashboardExploitationResume {
   montant_panne: number;
   potentiel_moyen: number;
   total_potentiel: number;
+  total_potentiel_enregistre: number;
+  total_potentiel_calcule: number;
   taux_location_moyen: number;
   pct_heures_service: number;
   pct_heures_chomage: number;
