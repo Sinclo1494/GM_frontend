@@ -218,6 +218,8 @@ function RendementScreenImpl() {
         { value: "success", label: "✓ Atteint" },
         { value: "danger", label: "✗ Non atteint" },
       ],
+      filterValue: (row: Record<string, unknown>) =>
+        Number(row.rendement) >= DASHBOARD_TARGETS.rendement ? "success" : "danger",
       render: (_v: unknown, row: Record<string, unknown>) => {
         const r = Number(row.rendement);
         const ok = r >= DASHBOARD_TARGETS.rendement;

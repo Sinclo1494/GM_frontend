@@ -172,8 +172,6 @@ function FinancesScreenImpl() {
       key: "rang",
       label: "Rang",
       align: "center" as const,
-      filterable: true,
-      filterType: "number",
       render: (_v: unknown, row: Record<string, unknown>) => {
         const rang = row._rang as number;
         const medals = ["🥇", "🥈", "🥉"];
@@ -222,6 +220,8 @@ function FinancesScreenImpl() {
         { value: "Positive", label: "Positive" },
         { value: "Négative", label: "Négative" },
       ],
+      filterValue: (row: Record<string, unknown>) =>
+        Number(row.marge) >= 0 ? "Positive" : "Négative",
       render: (_v: unknown, row: Record<string, unknown>) => {
         const ok = Number(row.marge) >= 0;
         return <StatusBadge ok={ok} labelOk="Positive" labelKo="Négative" />;

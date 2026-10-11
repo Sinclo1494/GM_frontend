@@ -47,7 +47,6 @@ function AppContent() {
       "/gestion/regularisations-mois": "gestion.regularisations_mois",
       "/imports/pointage-csv": "import.pointage",
       "/imports/gm-csv": "import.grand_materiel",
-      "/imports/materiel-filiale-csv": "import.materiel_filiale",
       "/imports/marque-csv": "import.marque",
       "/imports/type-marque-csv": "import.type_marque",
       "/imports/sous-famille-csv": "import.sous_famille",

@@ -73,7 +73,6 @@ const Navbar = () => {
   const canSeeAnyImport = [
     "import.pointage",
     "import.grand_materiel",
-    "import.materiel_filiale",
     "import.marque",
     "import.type_marque",
     "import.sous_famille",
@@ -149,9 +148,6 @@ const Navbar = () => {
               <div className={dropdownClass}>
                 {hasPermission("import.grand_materiel") && (
                   <Link to="/imports/gm-csv" onClick={() => setImportsOpen(false)} className={dropdownItemClass}>Grand Matériel</Link>
-                )}
-                {hasPermission("import.materiel_filiale") && (
-                  <Link to="/imports/materiel-filiale-csv" onClick={() => setImportsOpen(false)} className={dropdownItemClass}>Affectation Filiale Matériel</Link>
                 )}
                 {hasPermission("import.pointage") && (
                   <Link to="/imports/pointage-csv" onClick={() => setImportsOpen(false)} className={dropdownItemClass}>Pointage</Link>

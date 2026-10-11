@@ -2,7 +2,6 @@ import React, { useMemo } from "react";
 import {
     ChevronUp,
     ChevronDown,
-    Search,
     Loader2,
     AlertCircle,
 } from "lucide-react";
@@ -38,8 +37,8 @@ interface CrudTableProps<T> {
     data: T[];
     loading: boolean;
     error: string | null;
-    searchTerm: string;
-    onSearchChange: (value: string) => void;
+    searchTerm?: string;
+    onSearchChange?: (value: string) => void;
     sortField: SortField;
     sortOrder: SortOrder;
     onSort: (field: string) => void;
@@ -124,8 +123,6 @@ function CrudTable<T>({
     data,
     loading,
     error,
-    searchTerm,
-    onSearchChange,
     sortField,
     sortOrder,
     onSort,
@@ -137,7 +134,6 @@ function CrudTable<T>({
     totalItems,
     emptyMessage = "Aucun résultat trouvé",
     title,
-    searchPlaceholder = "Rechercher...",
     actions,
     columnFilters,
     onColumnFilterChange,
@@ -193,8 +189,7 @@ function CrudTable<T>({
         items.push(totalPages);
         return items;
     }, [currentPage, totalPages]);
-
-    return (
+return (
         <div className={components.table.wrapper}>
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-6 border-b border-slate-200 dark:border-dark-border">
                 {title && (
@@ -203,18 +198,9 @@ function CrudTable<T>({
                     </div>
                 )}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                    <div className="relative w-full sm:w-80">
-                        <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                        <input
-                            type="text"
-                            placeholder={searchPlaceholder}
-                            value={searchTerm}
-                            onChange={(e) => onSearchChange(e.target.value)}
-                            className={components.input + " pl-10"}
-                        />
-                    </div>
                     <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-600 dark:text-dark-text-secondary">Lignes :</span>
+                        <span className="text-sm text-gray-600 dark:text-dark-text-secondary">Lignes:</span>
+
                         <select
                             value={itemsPerPage}
                             onChange={(e) => {

@@ -20,7 +20,7 @@ describe("PaginationControls.tsx", () => {
     expect(screen.getByRole("button", { name: "1" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "10" })).toBeInTheDocument();
     // Items per page select renders the size options.
-    expect(screen.getByText("Lignes :")).toBeInTheDocument();
+    expect(screen.getByText("Lignes:")).toBeInTheDocument();
   });
 
   it("disables the previous button on the first page", () => {

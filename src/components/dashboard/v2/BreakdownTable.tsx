@@ -12,6 +12,13 @@ export interface BreakdownColumn {
   filterable?: boolean;
   filterType?: "text" | "number" | "select";
   filterOptions?: { value: string; label: string }[];
+  /**
+   * Value to match the column filter against. Defaults to `row[key]`.
+   * Required for columns whose displayed value is computed (e.g. a status
+   * badge derived from another field) — otherwise the filter compares against
+   * a missing/empty cell and matches nothing.
+   */
+  filterValue?: (row: Record<string, unknown>) => string;
 }
 
 export interface BreakdownTableProps {
@@ -65,11 +72,14 @@ function BreakdownTable(props: BreakdownTableProps) {
     return rows.filter((row) => {
       return Object.entries(columnFilters).every(([key, filterValue]) => {
         if (!filterValue) return true;
-        const cellValue = String(row[key] ?? "").toLowerCase();
+        const col = columns.find((c) => c.key === key);
+        const cellValue = String(
+          col?.filterValue ? col.filterValue(row) : row[key] ?? "",
+        ).toLowerCase();
         return cellValue.includes(filterValue.toLowerCase());
       });
     });
-  }, [rows, columnFilters]);
+  }, [rows, columnFilters, columns]);
 
   const handleFilterChange = (key: string, value: string) => {
     const newFilters = { ...columnFilters, [key]: value };

@@ -4,7 +4,6 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from "react"
 import {
     ChevronUp,
     ChevronDown,
-    Search,
     Loader2,
     AlertCircle,
 } from "lucide-react";
@@ -122,15 +121,13 @@ const JournalMaterielTable: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [searchInput, setSearchInput] = useState("");
-    const [searchTerm, setSearchTerm] = useState("");
     const [sortField, setSortField] = useState<SortField>(null);
     const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [goToPageInput, setGoToPageInput] = useState("1");
 
     const abortControllerRef = useRef<AbortController | null>(null);
-    const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const filterTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const tableScrollRef = useRef<HTMLDivElement>(null);
@@ -149,41 +146,45 @@ const JournalMaterielTable: React.FC = () => {
     }, []);
 
 const columns = [
-        { key: "code_materiel", label: "Code Matériel", width: "min-w-[170px]", sortable: true },
-        { key: "designation", label: "Désignation", width: "min-w-[250px]", sortable: true },
-        { key: "num_serie", label: "N° Série", width: "min-w-[170px]", sortable: true },
+        { key: "code_materiel", label: "Code Matériel", width: "min-w-[170px]", sortable: true, filterable: true },
+        { key: "designation", label: "Désignation", width: "min-w-[250px]", sortable: true, filterable: true },
+        { key: "num_serie", label: "N° Série", width: "min-w-[170px]", sortable: true, filterable: true },
         {
             key: "immatriculation",
             label: "Immatriculation",
             width: "min-w-[170px]",
             sortable: true,
+            filterable: true,
         },
-        { key: "libelle_filiale", label: "Filiale", width: "min-w-[130px]", sortable: true },
-        { key: "libelle_categorie", label: "Catégorie", width: "min-w-[180px]", sortable: true },
-        { key: "libelle_famille", label: "Famille Matériel", width: "min-w-[180px]", sortable: true },
-        { key: "libelle_sous_famille", label: "Sous Famille", width: "min-w-[180px]", sortable: true },
-        { key: "libelle_marque", label: "Marque Matériel", width: "min-w-[180px]", sortable: true },
-        { key: "libelle_type_marque", label: "Type Marque", width: "min-w-[180px]", sortable: true },
+        { key: "libelle_filiale", label: "Filiale", width: "min-w-[130px]", sortable: true, filterable: true },
+        { key: "libelle_categorie", label: "Catégorie", width: "min-w-[180px]", sortable: true, filterable: true },
+        { key: "libelle_famille", label: "Famille Matériel", width: "min-w-[180px]", sortable: true, filterable: true },
+        { key: "libelle_sous_famille", label: "Sous Famille", width: "min-w-[180px]", sortable: true, filterable: true },
+        { key: "libelle_marque", label: "Marque Matériel", width: "min-w-[180px]", sortable: true, filterable: true },
+        { key: "libelle_type_marque", label: "Type Marque", width: "min-w-[180px]", sortable: true, filterable: true },
         {
             key: "date_acquisition",
             label: "Date Acquisition",
             width: "min-w-[170px]",
             sortable: true,
+            filterable: true,
         },
         {
             key: "valeur_acquisition",
             label: "Valeur Acquisition",
             width: "min-w-[180px]",
             sortable: true,
+            filterable: false,
         },
         {
             key: "valeur_remplacement",
             label: "Valeur Remp.",
             width: "min-w-[190px]",
             sortable: true,
+            filterable: false,
         },
-        { key: "taux_amortissement", label: "Taux Amort.", width: "min-w-[150px]", sortable: true },
-        { key: "puissance_materiel", label: "Puissance", width: "min-w-[150px]", sortable: true },
+        { key: "taux_amortissement", label: "Taux Amort.", width: "min-w-[150px]", sortable: true, filterable: false },
+        { key: "puissance_materiel", label: "Puissance", width: "min-w-[150px]", sortable: true, filterable: true },
     ] as const;
 
     const computedTableWidth = (() => {
@@ -211,9 +212,6 @@ const columns = [
         libelle_marque: "",
         libelle_filiale: "",
         date_acquisition: "",
-        valeur_acquisition: "",
-        valeur_remplacement: "",
-        taux_amortissement: "",
         puissance_materiel: "",
         est_bloque: "",
     });
@@ -229,9 +227,6 @@ const columns = [
         libelle_marque: "",
         libelle_filiale: "",
         date_acquisition: "",
-        valeur_acquisition: "",
-        valeur_remplacement: "",
-        taux_amortissement: "",
         puissance_materiel: "",
         est_bloque: "",
     });
@@ -249,7 +244,6 @@ const columns = [
 
             const params: Record<string, string | number> = {};
 
-            if (searchTerm) params.search = searchTerm;
             if (sortField) {
                 const ordering = sortOrder === "desc" ? `-${sortField}` : sortField;
                 params.ordering = ordering;
@@ -268,9 +262,6 @@ const columns = [
             if (columnFilters.libelle_marque) params.libelle_marque = columnFilters.libelle_marque;
             if (columnFilters.libelle_filiale) params.libelle_filiale = columnFilters.libelle_filiale;
             if (columnFilters.date_acquisition) params.date_acquisition = columnFilters.date_acquisition;
-            if (columnFilters.valeur_acquisition) params.valeur_acquisition = columnFilters.valeur_acquisition;
-            if (columnFilters.valeur_remplacement) params.valeur_remplacement = columnFilters.valeur_remplacement;
-            if (columnFilters.taux_amortissement) params.taux_amortissement = columnFilters.taux_amortissement;
             if (columnFilters.puissance_materiel) params.puissance_materiel = columnFilters.puissance_materiel;
             if (columnFilters.est_bloque !== "") params.est_bloque = columnFilters.est_bloque;
 
@@ -297,7 +288,7 @@ const columns = [
             }
             setLoading(false);
         }
-    }, [searchTerm, sortField, sortOrder, currentPage, itemsPerPage, columnFilters]);
+    }, [sortField, sortOrder, currentPage, itemsPerPage, columnFilters]);
 
     useEffect(() => {
         fetchData();
@@ -308,31 +299,20 @@ const columns = [
             if (abortControllerRef.current) {
                 abortControllerRef.current.abort();
             }
-            if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
             if (filterTimerRef.current) clearTimeout(filterTimerRef.current);
         };
     }, []);
 
+    // Debounce filter inputs to avoid excessive API calls
     useEffect(() => {
         if (filterTimerRef.current) clearTimeout(filterTimerRef.current);
         filterTimerRef.current = setTimeout(() => {
             setColumnFilters(columnFiltersInput);
-            setCurrentPage(1);
         }, 300);
         return () => {
             if (filterTimerRef.current) clearTimeout(filterTimerRef.current);
         };
     }, [columnFiltersInput]);
-
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setSearchInput(value);
-        if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
-        searchTimerRef.current = setTimeout(() => {
-            setSearchTerm(value);
-            setCurrentPage(1);
-        }, 400);
-    };
 
     const handleColumnFilterChange = (key: keyof typeof columnFiltersInput) => (value: string) => {
         setColumnFiltersInput((prev) => ({ ...prev, [key]: value }));
@@ -359,8 +339,6 @@ const columns = [
     };
 
     const handleReset = () => {
-        setSearchInput("");
-        setSearchTerm("");
         setColumnFiltersInput({
             code_materiel: "",
             designation: "",
@@ -373,9 +351,6 @@ const columns = [
             libelle_marque: "",
             libelle_filiale: "",
             date_acquisition: "",
-            valeur_acquisition: "",
-            valeur_remplacement: "",
-            taux_amortissement: "",
             puissance_materiel: "",
             est_bloque: "",
         });
@@ -391,9 +366,6 @@ const columns = [
             libelle_marque: "",
             libelle_filiale: "",
             date_acquisition: "",
-            valeur_acquisition: "",
-            valeur_remplacement: "",
-            taux_amortissement: "",
             puissance_materiel: "",
             est_bloque: "",
         });
@@ -478,20 +450,8 @@ const columns = [
                     </div>
 
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                        {/* Search Bar */}
-                        <div className="relative w-full sm:w-80">
-                            <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Rechercher par code matériel ou désignation..."
-                                value={searchInput}
-                                onChange={handleSearchChange}
-                                className={components.input + " pl-10"}
-                            />
-                        </div>
-
                         <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-600 dark:text-dark-text-secondary">Lignes :</span>
+                            <span className="text-sm text-gray-600 dark:text-dark-text-secondary">Lignes:</span>
 
                             <select
                                 value={itemsPerPage}
@@ -571,10 +531,12 @@ const columns = [
                                                 />
                                             </div>
 
-                                            <FilterInput
-                                                value={columnFiltersInput[column.key as keyof typeof columnFiltersInput]}
-                                                onChange={handleColumnFilterChange(column.key as keyof typeof columnFiltersInput)}
-                                            />
+                                            {column.filterable && (
+                                                <FilterInput
+                                                    value={columnFiltersInput[column.key as keyof typeof columnFiltersInput]}
+                                                    onChange={handleColumnFilterChange(column.key as keyof typeof columnFiltersInput)}
+                                                />
+                                            )}
                                         </div>
                                     </th>
                                 ))}
@@ -722,6 +684,28 @@ const columns = [
                                     </button>
                                 ),
                             )}
+
+                            <div className="flex items-center gap-1 ml-2">
+                                <span className="text-sm text-gray-600 dark:text-dark-text-secondary whitespace-nowrap">
+                                    Aller à
+                                </span>
+                                <input
+                                    type="number"
+                                    min={1}
+                                    max={totalPages}
+                                    value={goToPageInput}
+                                    onChange={(e) => setGoToPageInput(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            const page = parseInt(goToPageInput, 10);
+                                            if (!isNaN(page) && page >= 1 && page <= totalPages) {
+                                                setCurrentPage(page);
+                                            }
+                                        }
+                                    }}
+                                    className="w-16 px-2 py-1 text-sm border border-slate-300 dark:border-dark-border rounded bg-white dark:bg-dark-card text-gray-900 dark:text-dark-text-primary"
+                                />
+                            </div>
                         </div>
 
                         <button

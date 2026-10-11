@@ -41,7 +41,6 @@ import {
   Filler,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
-import { Search } from "lucide-react";
 import CrudTable from "../components/Crud/CrudTable";
 import type { ColumnDef } from "../components/Crud/CrudTable";
 
@@ -142,7 +141,6 @@ export default function Dashboard() {
   const [materialDetails, setMaterialDetails] = useState<any | null>(null);
   const [materialLoading, setMaterialLoading] = useState(false);
   const [materialError, setMaterialError] = useState<string | null>(null);
-  const [materialSearch, setMaterialSearch] = useState("");
   const [materialPage, setMaterialPage] = useState(1);
   const [materialSortField, setMaterialSortField] = useState<string | null>(null);
   const [materialSortOrder, setMaterialSortOrder] = useState<"asc" | "desc">("asc");
@@ -200,7 +198,7 @@ export default function Dashboard() {
     }
   }, [filters]);
 
-  const fetchMaterialDetails = useCallback(async () => {
+const fetchMaterialDetails = useCallback(async () => {
     if (activeTab !== "engins") return;
     setMaterialLoading(true);
     setMaterialError(null);
@@ -210,8 +208,7 @@ export default function Dashboard() {
       if (filters.date_debut) params.date_debut = filters.date_debut;
       if (filters.date_fin) params.date_fin = filters.date_fin;
       if (filters.code_famille) params.code_famille = filters.code_famille;
-      if (materialSearch) params.search = materialSearch;
-      
+
       // Use larger page size when column filters are active for local filtering
       const hasColumnFilters = Object.values(materialColumnFilters).some((v) => v !== "");
       params.page = hasColumnFilters ? 1 : materialPage;
@@ -224,12 +221,13 @@ export default function Dashboard() {
         err instanceof Error
           ? err.message
           : (err as { response?: { data?: { message?: string; detail?: string } } })?.response?.data?.message ??
+            (err as { response?: { data?: { message?: string; detail?: string } } })?.response?.data?.detail ??
             "Erreur lors du chargement des détails matériel.";
       setMaterialError(message);
     } finally {
       setMaterialLoading(false);
     }
-  }, [activeTab, filters, materialSearch, materialPage, materialColumnFilters]);
+  }, [activeTab, filters, materialPage, materialColumnFilters]);
 
   const handleMaterialColumnFilterChange = useCallback((param: string, value: string) => {
     setMaterialColumnFiltersInput((prev) => ({ ...prev, [param]: value }));
@@ -321,7 +319,6 @@ export default function Dashboard() {
       annee: String(currentYear),
       trimestre: "",
     });
-    setMaterialSearch("");
     setMaterialPage(1);
     setExpandedRows(new Set());
   };
@@ -788,21 +785,6 @@ export default function Dashboard() {
         <div className={components.card}>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
             <h2 className={components.sectionTitle}>Detail du Materiel</h2>
-            <div className="flex items-center gap-3">
-              <div className="relative w-full md:w-80">
-                <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Rechercher par code, designation, type..."
-                  value={materialSearch}
-                  onChange={(e) => {
-                    setMaterialSearch(e.target.value);
-                    setMaterialPage(1);
-                  }}
-                  className={components.input + " pl-10"}
-                />
-              </div>
-            </div>
           </div>
 
           {materialError && (
@@ -822,11 +804,6 @@ export default function Dashboard() {
             data={sortedItems}
             loading={materialLoading}
             error={materialError}
-            searchTerm={materialSearch}
-            onSearchChange={(value) => {
-              setMaterialSearch(value);
-              setMaterialPage(1);
-            }}
             sortField={materialSortField}
             sortOrder={materialSortOrder}
             onSort={(field) => {
@@ -841,7 +818,6 @@ export default function Dashboard() {
             totalItems={materialDetails?.total}
             emptyMessage="Aucun materiel trouve."
             title=""
-            searchPlaceholder="Rechercher..."
             columnFilters={materialColumnFiltersInput}
             onColumnFilterChange={handleMaterialColumnFilterChange}
             onResetColumnFilters={hasActiveMaterialColumnFilters ? clearMaterialColumnFilters : undefined}

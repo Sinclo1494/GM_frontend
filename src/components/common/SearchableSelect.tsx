@@ -93,11 +93,11 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
                     />
                     <div className="overflow-y-auto max-h-48">
                         {filteredOptions.length > 0 ? (
-                            filteredOptions.map((opt) => (
+                            filteredOptions.map((opt, index) => (
                                 <div
                                     key={opt.value}
                                     onClick={() => handleSelect(opt)}
-                                    className={`px-3 py-2 cursor-pointer text-sm hover:bg-blue-50 dark:hover:bg-dark-bg-tertiary truncate ${
+                                    className={`px-3 py-2 cursor-pointer text-sm hover:bg-blue-50 dark:hover:bg-dark-bg-tertiary whitespace-normal break-words border-t border-slate-100 dark:border-dark-border first:border-t-0 ${
                                         opt.value === value
                                             ? "bg-blue-100 dark:bg-blue-900/30 font-medium"
                                             : "text-gray-700 dark:text-dark-text-primary"

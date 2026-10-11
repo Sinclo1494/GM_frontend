@@ -35,8 +35,8 @@ interface EnginsTabProps {
 }
 
 const EnginsTab = ({ params: baseParams }: EnginsTabProps) => {
-  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [data, setData] = useState<DashboardMaterialDetailsResponse | null>(null);
@@ -59,9 +59,10 @@ const EnginsTab = ({ params: baseParams }: EnginsTabProps) => {
       const params: Record<string, string | number> = {
         ...baseParams,
         page: hasFilters ? 1 : page,
-        page_size: hasFilters ? 1000 : 50,
+        // When column filters are active, CrudTable filters locally, so fetch
+        // the whole set (capped at 1000) instead of the current page_size.
+        page_size: hasFilters ? 1000 : pageSize,
       };
-      if (search) params.search = search;
 
       const result = await getMaterialDetails(params);
       setData(result);
@@ -77,7 +78,7 @@ const EnginsTab = ({ params: baseParams }: EnginsTabProps) => {
     } finally {
       setLoading(false);
     }
-  }, [baseParams, search, page, columnFilters]);
+  }, [baseParams, page, pageSize, columnFilters]);
 
   const handleColumnFilterChange = useCallback((param: string, value: string) => {
     setColumnFiltersInput((prev) => ({ ...prev, [param]: value }));
@@ -96,6 +97,11 @@ const EnginsTab = ({ params: baseParams }: EnginsTabProps) => {
     }
     setColumnFiltersInput({});
     setColumnFilters({});
+    setPage(1);
+  }, []);
+
+  const handlePageSizeChange = useCallback((size: number) => {
+    setPageSize(size);
     setPage(1);
   }, []);
 
@@ -154,24 +160,29 @@ const EnginsTab = ({ params: baseParams }: EnginsTabProps) => {
     },
   ];
 
+  // When column filters are active the backend returns the whole fleet
+  // (page_size=1000) and CrudTable filters locally, so the pagination total
+  // must be the filtered count, not the raw fleet total.
+  const filteredCount = useMemo(() => {
+    if (!hasActiveColumnFilters) return data?.total ?? 0;
+    return sortedItems.filter((row) =>
+      Object.entries(columnFilters).every(([param, value]) => {
+        if (!value) return true;
+        const column = columns.find((c) => (c.filter?.param ?? String(c.key)) === param);
+        if (!column) return true;
+        const rowValue = row[String(column.key)];
+        if (rowValue === undefined || rowValue === null) return false;
+        return String(rowValue).toLowerCase().includes(value.toLowerCase());
+      }),
+    ).length;
+  }, [sortedItems, columnFilters, hasActiveColumnFilters, data?.total, columns]);
+
   return (
     <Section title="Détail du matériel">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-dark-text-primary">
           Materiel
         </h3>
-        <div className="relative w-full md:w-80">
-          <input
-            type="text"
-            placeholder="Rechercher par code, designation, type..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-            className="w-full rounded-lg border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-card pl-10 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-dark-text-primary"
-          />
-        </div>
       </div>
 
       {error && <ErrorBox message={error} onRetry={fetchDetails} />}
@@ -181,11 +192,6 @@ const EnginsTab = ({ params: baseParams }: EnginsTabProps) => {
         data={sortedItems}
         loading={loading}
         error={error}
-        searchTerm={search}
-        onSearchChange={(value) => {
-          setSearch(value);
-          setPage(1);
-        }}
         sortField={sortField}
         sortOrder={sortOrder}
         onSort={(field) => {
@@ -194,13 +200,12 @@ const EnginsTab = ({ params: baseParams }: EnginsTabProps) => {
         }}
         currentPage={page}
         onPageChange={setPage}
-        itemsPerPage={50}
-        onItemsPerPageChange={() => {}}
+        itemsPerPage={pageSize}
+        onItemsPerPageChange={handlePageSizeChange}
         onRetry={fetchDetails}
-        totalItems={data?.total}
+        totalItems={filteredCount}
         emptyMessage="Aucun materiel trouve."
         title=""
-        searchPlaceholder="Rechercher..."
         columnFilters={columnFiltersInput}
         onColumnFilterChange={handleColumnFilterChange}
         onResetColumnFilters={hasActiveColumnFilters ? clearColumnFilters : undefined}

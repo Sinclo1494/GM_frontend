@@ -15,6 +15,6 @@ describe('components/JournalMateriel/JournalMaterielTable', () => {
 
   it('renders items per page selector', () => {
     render(<JournalMaterielTable />);
-    expect(screen.getByText('Lignes :')).toBeDefined();
+    expect(screen.getByText('Lignes:')).toBeDefined();
   });
 });

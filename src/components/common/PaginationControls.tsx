@@ -108,7 +108,7 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="text-sm text-gray-600 dark:text-dark-text-secondary">Lignes :</span>
+        <span className="text-sm text-gray-600 dark:text-dark-text-secondary">Lignes:</span>
         <select
           value={itemsPerPage}
           onChange={(e) => onItemsPerPageChange(Number(e.target.value))}

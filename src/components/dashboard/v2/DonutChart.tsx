@@ -34,7 +34,7 @@ const DonutChart = React.memo<DonutChartProps>(({ data, centerLabel, colors }) =
             backgroundColor: resolved,
           borderColor: "transparent",
           borderWidth: 0,
-          hoverOffset: 8,
+          hoverOffset: 14,
         },
       ],
     };

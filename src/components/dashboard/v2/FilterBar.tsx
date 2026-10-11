@@ -1,6 +1,7 @@
 ﻿import React from "react";
 import { components } from "../../../theme/components";
 import { X } from "lucide-react";
+import SearchableSelect from "../../common/SearchableSelect";
 import {
   PERIODE_ANNEE,
   PERIODE_MOIS_COURANT,
@@ -114,18 +115,13 @@ const renderControl = (
 
     case "code_famille":
       return (
-        <select
-          className={components.select}
+        <SearchableSelect
           value={value}
-          onChange={(e) => onChange(key, e.target.value)}
-        >
-          <option value="">Toutes</option>
-          {familles.map((f) => (
-            <option key={f.value} value={f.value}>
-              {f.label}
-            </option>
-          ))}
-        </select>
+          onChange={(v) => onChange(key, v)}
+          options={[{ value: "", label: "Toutes" }, ...familles]}
+          placeholder="Toutes"
+          className={`${components.select} min-w-[250px]`}
+        />
       );
 
     case "periode":

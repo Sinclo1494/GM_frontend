@@ -1,4 +1,4 @@
-export const POINTAGE_EXPECTED_FIELDS = [
+﻿export const POINTAGE_EXPECTED_FIELDS = [
   {
     value: "code_materiel",
     label: "Code matériel",
@@ -156,24 +156,6 @@ export const GM_EXPECTED_FIELDS = [
     required: false,
   },
 ];
-
-
-
-export const MATERIEL_FILIALE_EXPECTED_FIELDS = [
-  {
-    value: "code_filiale_g",
-    label: "Filiale",
-    required: true,
-  },
-
-  {
-    value: "code_materiel",
-    label: "Code matériel",
-    required: true,
-  },
-];
-
-
 export const MARQUE_EXPECTED_FIELDS = [
   {
     value: "code_marque",

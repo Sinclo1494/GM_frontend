@@ -293,7 +293,7 @@ const JournalisationTable: React.FC<Props> = ({
       {totalRows > 0 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200 dark:border-dark-border px-4 py-3 bg-slate-50 dark:bg-dark-bg-secondary">
           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-dark-text-secondary">
-            <span>Lignes :</span>
+            <span>Lignes:</span>
             <select
               value={itemsPerPage}
               onChange={(e) => onItemsPerPageChange(Number(e.target.value))}

@@ -27,6 +27,12 @@ const METRIC_TABS: { id: MetricType; label: string }[] = [
   { id: "cout", label: "Coût" },
 ];
 
+const formatMonthLabel = (isoDate: string | null) => {
+  if (!isoDate) return "";
+  const d = new Date(isoDate + "T00:00:00");
+  return d.toLocaleDateString("fr-FR", { month: "short", year: "numeric" });
+};
+
 function MaintenanceScreenImpl() {
   const filters = useDashboardFilters();
   const [maintenance, setMaintenance] = useState<DashboardV2Maintenance | null>(null);
@@ -106,14 +112,23 @@ function MaintenanceScreenImpl() {
     {
       title: "MTBF (h)",
       data: (mtbf?.evolution ?? []).map((e) => e.mtbf ?? 0),
+      xLabels: (mtbf?.evolution ?? []).map((e) => formatMonthLabel(e.mmaa)),
+      description:
+        "MTBF = heures de service / nombre de pointages en panne. Plus c'est élevé, mieux c'est.",
     },
     {
       title: "MTTR (h)",
       data: (mttr?.evolution ?? []).map((e) => e.mttr ?? 0),
+      xLabels: (mttr?.evolution ?? []).map((e) => formatMonthLabel(e.mmaa)),
+      description:
+        "MTTR = heures de panne / interventions correctives. Plus c'est bas, mieux c'est.",
     },
     {
       title: "Coût panne (DA)",
       data: (coutPanne?.evolution ?? []).map((e) => e.cout_panne ?? 0),
+      xLabels: (coutPanne?.evolution ?? []).map((e) => formatMonthLabel(e.mmaa)),
+      description:
+        "Coût total des pannes du mois (M DA). L'objectif est de le voir diminuer.",
     },
   ];
 

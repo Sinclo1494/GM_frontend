@@ -88,4 +88,50 @@ describe("components/dashboard/v2/BreakdownTable", () => {
     );
     expect(screen.getByText("Aucun résultat")).toBeDefined();
   });
+
+  it("filters by a computed status column using filterValue", () => {
+    const STATUS_COLUMNS = [
+      { key: "code", label: "Code" },
+      {
+        key: "statut",
+        label: "Statut",
+        filterable: true,
+        filterType: "select",
+        filterOptions: [
+          { value: "success", label: "Atteint" },
+          { value: "danger", label: "Non atteint" },
+        ],
+        filterValue: (row: Record<string, unknown>) =>
+          Number(row.rendement) >= 80 ? "success" : "danger",
+      },
+    ];
+
+    const STATUS_ROWS = [
+      { code: "A", rendement: 90 },
+      { code: "B", rendement: 60 },
+      { code: "C", rendement: 85 },
+    ];
+
+    const { container } = render(
+      <BreakdownTable
+        columns={STATUS_COLUMNS}
+        rows={STATUS_ROWS}
+        currentPage={1}
+        pageSize={10}
+        onPageChange={vi.fn()}
+        onPageSizeChange={vi.fn()}
+        totalItems={STATUS_ROWS.length}
+      />,
+    );
+
+    expect(screen.getAllByText("A").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("B").length).toBeGreaterThan(0);
+
+    const select = container.querySelector("select") as HTMLSelectElement;
+    fireEvent.change(select, { target: { value: "danger" } });
+
+    expect(screen.queryByText("A")).toBeNull();
+    expect(screen.getAllByText("B").length).toBeGreaterThan(0);
+    expect(screen.queryByText("C")).toBeNull();
+  });
 });

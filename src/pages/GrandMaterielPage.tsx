@@ -47,19 +47,15 @@ const columns: ColumnDef<GrandMateriel>[] = [
     { key: "num_serie", label: "N° Série", width: "min-w-[140px]", sortable: true, filter: { param: "num_serie" }, render: DASH },
     { key: "immatriculation", label: "Immatriculation", width: "min-w-[140px]", sortable: true, filter: { param: "immatriculation" }, render: DASH },
     { key: "date_acquisition", label: "Date Acquisition", width: "min-w-[170px]", sortable: true, filter: { param: "date_acquisition", placeholder: "JJ/MM/AAAA" }, render: DASH },
-    { key: "valeur_acquisition", label: "Valeur Acq.", width: "min-w-[130px]", sortable: true, filter: { param: "valeur_acquisition" }, render: DASH },
-    { key: "valeur_remplacement", label: "Valeur Rempl.", width: "min-w-[140px]", sortable: true, filter: { param: "valeur_remplacement" }, render: DASH },
-    { key: "taux_amortissement", label: "Taux Amort.", width: "min-w-[130px]", sortable: true, filter: { param: "taux_amortissement" }, render: DASH },
+    { key: "valeur_acquisition", label: "Valeur Acq.", width: "min-w-[130px]", sortable: true, render: DASH },
+    { key: "valeur_remplacement", label: "Valeur Rempl.", width: "min-w-[140px]", sortable: true, render: DASH },
+    { key: "taux_amortissement", label: "Taux Amort.", width: "min-w-[130px]", sortable: true, render: DASH },
     { key: "puissance_materiel", label: "Puissance", width: "min-w-[120px]", sortable: true, filter: { param: "puissance_materiel" }, render: DASH },
     { key: "est_bloque", label: "Statut", width: "min-w-[100px]", sortable: true, filter: { type: "select", param: "est_bloque", options: [{ value: "false", label: "Actif" }, { value: "true", label: "Bloqué" }] }, render: (val: unknown) => (
         <span className={val ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 px-2 py-0.5 rounded-full text-xs font-semibold" : "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full text-xs font-semibold"}>
             {val ? "Bloqué" : "Actif"}
         </span>
     )},
-    { key: "user_id", label: "Créé par", width: "min-w-[100px]", sortable: false, render: DASH },
-    { key: "date_modification", label: "Modifié le", width: "min-w-[160px]", sortable: false, filter: { param: "date_modification", placeholder: "JJ/MM/AAAA" }, render: DASH },
-    { key: "created_at", label: "Créé le", width: "min-w-[160px]", sortable: false, filter: { param: "created_at", placeholder: "JJ/MM/AAAA" }, render: DASH },
-    { key: "updated_at", label: "Mis à jour le", width: "min-w-[160px]", sortable: false, filter: { param: "updated_at", placeholder: "JJ/MM/AAAA" }, render: DASH },
 ];
 
 export default function GrandMaterielPage() {

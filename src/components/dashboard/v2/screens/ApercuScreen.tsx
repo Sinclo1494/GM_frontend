@@ -98,8 +98,8 @@ function ApercuScreenImpl() {
     <div className="min-w-0">
       {/* PARC */}
       <Section title="PARC" accent="blue">
-        <div className="grid grid-cols-1 gap-4 min-w-0 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="lg:col-span-2 min-w-0">
+        <div className="flex flex-col items-center gap-4 min-w-0">
+          <div className="w-full max-w-xs min-w-0">
             <DonutChart
               data={donutData}
               centerLabel={fmtNumber(
@@ -107,76 +107,78 @@ function ApercuScreenImpl() {
               )}
               colors={donutColors}
             />
-            <p className="mt-2 text-xs text-gray-500 dark:text-dark-text-secondary">
+            <p className="mt-2 text-xs text-gray-500 dark:text-dark-text-secondary text-center">
               {fmtNumber(situationTotal)} engins avec situation sur un parc de{" "}
               {fmtNumber(parcTotal)}
             </p>
           </div>
-          <div className="min-w-0">
-            <KpiCard
-              title="Parc total"
-              value={fmtNumber(parcTotal)}
-              subtext={
-                <span className="text-xs text-gray-500 dark:text-dark-text-secondary">
-                  {fmtNumber(situationTotal)} avec situation
-                </span>
-              }
-              status="info"
-            />
-          </div>
-          <div className="min-w-0">
-            <KpiCard
-              title="En service"
-              value={fmtNumber(gk?.en_service)}
-              subtext={
-                <StatusBadge
-                  ok={pctOfParc(gk?.en_service) >= DASHBOARD_TARGETS.partEnService}
-                  labelKo={`< ${DASHBOARD_TARGETS.partEnService}%`}
-                  labelOk={`≥ ${DASHBOARD_TARGETS.partEnService}%`}
-                />
-              }
-              status={
-                pctOfParc(gk?.en_service) >= DASHBOARD_TARGETS.partEnService
-                  ? "success"
-                  : "warning"
-              }
-            />
-          </div>
-          <div className="min-w-0">
-            <KpiCard
-              title="En chômage"
-              value={fmtNumber(gk?.en_chomage)}
-              subtext={
-                <StatusBadge
-                  ok={pctOfParc(gk?.en_chomage) < DASHBOARD_TARGETS.partEnChomage}
-                  labelKo={`≥ ${DASHBOARD_TARGETS.partEnChomage}%`}
-                  labelOk={`< ${DASHBOARD_TARGETS.partEnChomage}%`}
-                />
-              }
-              status={
-                pctOfParc(gk?.en_chomage) < DASHBOARD_TARGETS.partEnChomage
-                  ? "success"
-                  : "warning"
-              }
-            />
-          </div>
-          <div className="min-w-0">
-            <KpiCard
-              title="En panne"
-              value={fmtNumber(gk?.en_panne)}
-              subtext={
-                <StatusBadge
-                  ok={pctOfParc(gk?.en_panne) < DASHBOARD_TARGETS.partEnPanne}
-                  labelKo={`≥ ${DASHBOARD_TARGETS.partEnPanne}%`}
-                  labelOk={`< ${DASHBOARD_TARGETS.partEnPanne}%`}
-                />
-              }
-              status={
-                pctOfParc(gk?.en_panne) < DASHBOARD_TARGETS.partEnPanne
-                  ? "success"
-                  : "danger"
-              }
-            />
+          <div className="grid grid-cols-1 gap-4 min-w-0 w-full sm:grid-cols-2 lg:grid-cols-4">
+            <div className="min-w-0">
+              <KpiCard
+                title="Parc total"
+                value={fmtNumber(parcTotal)}
+                subtext={
+                  <span className="text-xs text-gray-500 dark:text-dark-text-secondary">
+                    {fmtNumber(situationTotal)} avec situation
+                  </span>
+                }
+                status="info"
+              />
+            </div>
+            <div className="min-w-0">
+              <KpiCard
+                title="En service"
+                value={fmtNumber(gk?.en_service)}
+                subtext={
+                  <StatusBadge
+                    ok={pctOfParc(gk?.en_service) >= DASHBOARD_TARGETS.partEnService}
+                    labelKo={`< ${DASHBOARD_TARGETS.partEnService}%`}
+                    labelOk={`≥ ${DASHBOARD_TARGETS.partEnService}%`}
+                  />
+                }
+                status={
+                  pctOfParc(gk?.en_service) >= DASHBOARD_TARGETS.partEnService
+                    ? "success"
+                    : "warning"
+                }
+              />
+            </div>
+            <div className="min-w-0">
+              <KpiCard
+                title="En chômage"
+                value={fmtNumber(gk?.en_chomage)}
+                subtext={
+                  <StatusBadge
+                    ok={pctOfParc(gk?.en_chomage) < DASHBOARD_TARGETS.partEnChomage}
+                    labelKo={`≥ ${DASHBOARD_TARGETS.partEnChomage}%`}
+                    labelOk={`< ${DASHBOARD_TARGETS.partEnChomage}%`}
+                  />
+                }
+                status={
+                  pctOfParc(gk?.en_chomage) < DASHBOARD_TARGETS.partEnChomage
+                    ? "success"
+                    : "warning"
+                }
+              />
+            </div>
+            <div className="min-w-0">
+              <KpiCard
+                title="En panne"
+                value={fmtNumber(gk?.en_panne)}
+                subtext={
+                  <StatusBadge
+                    ok={pctOfParc(gk?.en_panne) < DASHBOARD_TARGETS.partEnPanne}
+                    labelKo={`≥ ${DASHBOARD_TARGETS.partEnPanne}%`}
+                    labelOk={`< ${DASHBOARD_TARGETS.partEnPanne}%`}
+                  />
+                }
+                status={
+                  pctOfParc(gk?.en_panne) < DASHBOARD_TARGETS.partEnPanne
+                    ? "success"
+                    : "danger"
+                }
+              />
+            </div>
           </div>
         </div>
       </Section>
