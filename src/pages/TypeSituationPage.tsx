@@ -10,12 +10,12 @@ const fields = [
 ];
 
 const columns: ColumnDef<TypeSituation>[] = [
-    { key: "code_type_situation", label: "Code", width: "min-w-[150px]", sortable: true },
-    { key: "libelle_type_situation", label: "Libellé", width: "min-w-[200px]", sortable: true },
-    { key:"code_type_affectation", label: "Code Type Affectation", width: "min-w-[150px]", sortable: true },
-    { key: "est_bloque", label: "Statut", width: "min-w-[100px]", sortable: true, render: (val: unknown) => (
+    { key: "code_type_situation", label: "Code", width: "min-w-[150px]", sortable: true, filter: { param: "code_type_situation" } },
+    { key: "libelle_type_situation", label: "LibellÃ©", width: "min-w-[200px]", sortable: true, filter: { param: "libelle_type_situation" } },
+    { key:"code_type_affectation", label: "Code Type Affectation", width: "min-w-[150px]", sortable: true, filter: { param: "code_type_affectation" } },
+    { key: "est_bloque", label: "Statut", width: "min-w-[100px]", sortable: true, filter: { type: "select", param: "est_bloque", options: [{ value: "false", label: "Actif" }, { value: "true", label: "BloquÃ©" }] }, render: (val: unknown) => (
         <span className={val ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 px-2 py-0.5 rounded-full text-xs font-semibold" : "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full text-xs font-semibold"}>
-            {val ? "Bloqué" : "Actif"}
+            {val ? "BloquÃ©" : "Actif"}
         </span>
     )},
 ];

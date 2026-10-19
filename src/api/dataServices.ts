@@ -20,24 +20,28 @@ interface AQTPParams {
   code_filiale: string;
   date_debut: string;
   date_fin: string;
+  include_pending?: boolean;
 }
 
 interface AETPParams {
   code_filiale: string;
   date_debut: string;
   date_fin: string;
+  include_pending?: boolean;
 }
 
 export const getAQTP = async ({
   code_filiale,
   date_debut,
   date_fin,
+  include_pending,
 }: AQTPParams): Promise<AnalyseQuantitativeType[]> => {
   const response = await axios.get<AnalyseQuantitativeType[]>(`${API}/aqtp/`, {
     params: {
       code_filiale,
       date_debut,
       date_fin,
+      ...(include_pending !== undefined && { include_pending: String(include_pending) }),
     },
     headers: getAuthHeaders(),
   });
@@ -49,12 +53,14 @@ export const getAQTPR = async ({
   code_filiale,
   date_debut,
   date_fin,
+  include_pending,
 }: AQTPParams): Promise<AnalyseQuantitativeResumeType> => {
   const response = await axios.get<AnalyseQuantitativeResumeType>(`${API}/aqtpr/`, {
     params: {
       code_filiale,
       date_debut,
       date_fin,
+      ...(include_pending !== undefined && { include_pending: String(include_pending) }),
     },
     headers: getAuthHeaders(),
   });
@@ -66,6 +72,7 @@ export const getAETP = async ({
   code_filiale,
   date_debut,
   date_fin,
+  include_pending,
 }: AETPParams): Promise<AnalyseExploitationType[]> => {
   const response = await axios.get<AnalyseExploitationType[]>(
     `${API}/aetp/`,
@@ -74,6 +81,7 @@ export const getAETP = async ({
         code_filiale,
         date_debut,
         date_fin,
+        ...(include_pending !== undefined && { include_pending: String(include_pending) }),
       },
       headers: getAuthHeaders(),
     }
@@ -86,6 +94,7 @@ export const getAETPR = async ({
   code_filiale,
   date_debut,
   date_fin,
+  include_pending,
 }: AETPParams): Promise<AnalyseExploitationResumeType> => {
   const response = await axios.get<AnalyseExploitationResumeType>(
     `${API}/aetpr/`,
@@ -94,6 +103,7 @@ export const getAETPR = async ({
         code_filiale,
         date_debut,
         date_fin,
+        ...(include_pending !== undefined && { include_pending: String(include_pending) }),
       },
       headers: getAuthHeaders(),
     }

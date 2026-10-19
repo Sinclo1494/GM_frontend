@@ -21,6 +21,7 @@ import SiteImportCsv from './pages/ImportSiteCSV.tsx';
 import RegularisationImportCsv from './pages/ImportRegularisationCSV.tsx';
 import JournalMateriel from './pages/JournalMateriel.tsx';
 import Journalisation from './pages/Journalisation.tsx';
+import PendingImports from './pages/PendingImports.tsx';
 import EntreprisePage from './pages/EntreprisePage.tsx';
 import FilialePage from './pages/FilialePage.tsx';
 import DivisionPage from './pages/DivisionPage.tsx';
@@ -42,6 +43,7 @@ import RegularisationGMPage from './pages/RegularisationGMPage.tsx';
 import RegularisationMoisGM2Page from './pages/RegularisationMoisGM2Page.tsx';
 import UsersPage from './pages/UsersPage.tsx';
 import ProfilePage from './pages/ProfilePage.tsx';
+import NotificationsPage from './pages/NotificationsPage.tsx';
 import './index.css';
 import "./api/axios";
 
@@ -58,9 +60,11 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/reports/journal-materiel" element={<ProtectedRoute permission="analyse.journal_materiel"><JournalMateriel /></ProtectedRoute>} />
               <Route path="/reports/analyse-quantitative" element={<ProtectedRoute permission="analyse.quantitative"><AnalyseQuantitative /></ProtectedRoute>} />
               <Route path="/reports/analyse-exploitation" element={<ProtectedRoute permission="analyse.exploitation"><AnalyseExploitation /></ProtectedRoute>} />
+              <Route path="/admin/pending-imports" element={<ProtectedRoute permission="administration.users"><PendingImports /></ProtectedRoute>} />
               <Route path="/" element={<ProtectedRoute permission="analyse.dashboard"><NewDashboard /></ProtectedRoute>} />
               <Route path="/reports/dashboard-v2" element={<ProtectedRoute permission="analyse.dashboard"><NewDashboard /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+              <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
               <Route path="/imports/pointage-csv" element={<ProtectedRoute permission="import.pointage"><PointageImportCsv /></ProtectedRoute>} />
               <Route path="/imports/gm-csv" element={<ProtectedRoute permission="import.grand_materiel"><GMImportCsv /></ProtectedRoute>} />
               <Route path="/imports/marque-csv" element={<ProtectedRoute permission="import.marque"><MarqueImportCsv /></ProtectedRoute>} />

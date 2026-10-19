@@ -3,7 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/useAuth";
 import { useTheme } from "../../context/ThemeContext";
 import { usePermissions } from "../../auth/PermissionContext";
-import { ChevronDown, LogOut, Settings, Sun, Moon, User } from "lucide-react";
+import { ChevronDown, LogOut, Settings, Sun, Moon, User, Bell } from "lucide-react";
+import NotificationBell from "./NotificationBell";
+import logo from "../../assets/img/logo.png";
 
 const Navbar = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -57,7 +59,10 @@ const Navbar = () => {
   if (loading) {
     return (
       <nav className="w-full bg-slate-900 text-white px-6 h-16 flex items-center justify-between">
-        <div className="text-lg font-bold text-blue-400">Grand Matériel</div>
+        <Link to="/" className="flex items-center gap-3">
+          <img src={logo} alt="Grand Matériel" className="h-16 w-auto my-2" />
+          <span className="text-lg font-bold text-blue-400">Grand Matériel</span>
+        </Link>
         <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
       </nav>
     );
@@ -113,8 +118,9 @@ const Navbar = () => {
 
   return (
     <nav ref={navRef} className="w-full bg-slate-900 text-white px-6 h-16 flex items-center justify-between">
-      <Link to="/" className="text-lg font-bold text-blue-400">
-        Grand Matériel
+      <Link to="/" className="flex items-center gap-3">
+        <img src={logo} alt="Grand Matériel" className="h-16 w-auto my-2" />
+        <span className="text-lg font-bold text-blue-400">Grand Matériel</span>
       </Link>
 
       <ul className="flex items-center gap-6 text-sm">
@@ -313,6 +319,15 @@ const Navbar = () => {
                     Utilisateurs
                   </Link>
                 )}
+                {hasPermission("administration.users") && (
+                  <Link
+                    to="/admin/pending-imports"
+                    onClick={() => setAdminOpen(false)}
+                    className={dropdownItemClass}
+                  >
+                    Imports en attente
+                  </Link>
+                )}
               </div>
             )}
           </li>
@@ -373,6 +388,8 @@ const Navbar = () => {
           )}
         </div>
 
+        <NotificationBell />
+
         <div className="relative">
           <button
             onClick={() => setUserMenuOpen(!userMenuOpen)}
@@ -398,6 +415,15 @@ const Navbar = () => {
               >
                 <User className="h-4 w-4" />
                 Profil
+              </Link>
+
+              <Link
+                to="/notifications"
+                onClick={() => setUserMenuOpen(false)}
+                className={dropdownItemClass}
+              >
+                <Bell className="h-4 w-4" />
+                Notifications
               </Link>
 
               <button

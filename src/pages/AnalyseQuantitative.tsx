@@ -3,6 +3,7 @@ import { getAQTP, getAQTPR, getFiliales } from "../api/dataServices";
 import AnalyseQuantitativeResume from "../components/AnalyseQuantitative/AnalyseQuantitativeResume";
 import AnalyseQuantitativeTable from "../components/AnalyseQuantitative/AnalyseQuantitativeTable";
 import { useAnalyseFilters } from "../context/useAnalyseFilters";
+import { usePendingFilters } from "../context/PendingFiltersContext";
 import type {
   AnalyseQuantitativeResumeType,
   AnalyseQuantitativeType,
@@ -13,6 +14,7 @@ import { components } from "../theme/components";
 
 export default function AnalyseQuantitative() {
   const [filiales, setFiliales] = useState<{ value: string; label: string }[]>([]);
+  const { includePending, setIncludePending } = usePendingFilters();
 
   const handleExport = () => {
     if (!resume || rowsTable.length === 0) return;
@@ -44,6 +46,7 @@ export default function AnalyseQuantitative() {
         code_filiale: codeFiliale,
         date_debut: dateDebut,
         date_fin: dateFin,
+        include_pending: includePending,
       };
 
       const [resumeData, tableData] = await Promise.all([
@@ -146,6 +149,18 @@ export default function AnalyseQuantitative() {
                   ? "Calculating..."
                   : "Calculate"}
               </button>
+            </div>
+
+            <div className="flex items-end">
+              <label className="flex items-center gap-2 cursor-pointer text-sm">
+                <input
+                  type="checkbox"
+                  checked={includePending}
+                  onChange={(e) => setIncludePending(e.target.checked)}
+                  className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span>Inclure données en attente</span>
+              </label>
             </div>
             <div className="flex items-end">
               <button

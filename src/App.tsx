@@ -4,8 +4,10 @@ import Navbar from './components/Navigation/NavBar'
 import { ThemeProvider } from './context/ThemeContext'
 import { AnalyseFiltersProvider } from './context/AnalyseFiltersContext'
 import { DashboardFiltersProvider } from './context/DashboardFiltersContext'
+import { PendingFiltersProvider } from './context/PendingFiltersContext'
 import { usePermissions } from './auth/PermissionContext'
 import { useEffect } from 'react'
+import { usePageTitle } from './hooks/usePageTitle'
 
 const EXCLUDED_PATHS = new Set(["/login", "/profile"]);
 
@@ -13,6 +15,8 @@ function AppContent() {
   const { loading } = usePermissions();
   const location = useLocation();
   const { hasPermission } = usePermissions();
+
+  usePageTitle();
 
   useEffect(() => {
     const path = location.pathname;
@@ -86,9 +90,11 @@ function App() {
     <ThemeProvider>
       <AnalyseFiltersProvider>
         <DashboardFiltersProvider>
-          <div className="min-h-screen flex flex-col">
-            <AppContent />
-          </div>
+          <PendingFiltersProvider>
+            <div className="min-h-screen flex flex-col">
+              <AppContent />
+            </div>
+          </PendingFiltersProvider>
         </DashboardFiltersProvider>
       </AnalyseFiltersProvider>
     </ThemeProvider>

@@ -11,6 +11,7 @@ import formatCurrency from "../../utils/FormatCurrency";
 import formatDate from "../../utils/FormatDate";
 import { components } from "../../theme/components";
 import { crudList } from "../../api/crudService";
+import { usePendingFilters } from "../../context/PendingFiltersContext";
 
 const GM_URL = "grand-materiel";
 
@@ -126,6 +127,8 @@ const JournalMaterielTable: React.FC = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [goToPageInput, setGoToPageInput] = useState("1");
+
+    const { includePending, setIncludePending } = usePendingFilters();
 
     const abortControllerRef = useRef<AbortController | null>(null);
     const filterTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -268,6 +271,11 @@ const columns = [
             // Always filter by type_affectation for Journal Materiel
             params.filtered = "true";
 
+            // Include pending records for admin users
+            if (includePending) {
+                params.include_pending = "true";
+            }
+
             const response = await crudList<JournalMateriel>(GM_URL, params, { signal: controller.signal });
             setData(response.results);
             setTotalItems(response.count);
@@ -288,7 +296,7 @@ const columns = [
             }
             setLoading(false);
         }
-    }, [sortField, sortOrder, currentPage, itemsPerPage, columnFilters]);
+    }, [sortField, sortOrder, currentPage, itemsPerPage, columnFilters, includePending]);
 
     useEffect(() => {
         fetchData();
@@ -463,6 +471,18 @@ const columns = [
                                 <option value={50}>50</option>
                                 <option value={100}>100</option>
                             </select>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <label className="flex items-center gap-2 cursor-pointer text-sm">
+                                <input
+                                    type="checkbox"
+                                    checked={includePending}
+                                    onChange={(e) => setIncludePending(e.target.checked)}
+                                    className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span>Inclure données en attente</span>
+                            </label>
                         </div>
 
                         <button

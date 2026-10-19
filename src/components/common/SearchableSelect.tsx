@@ -15,6 +15,7 @@ interface SearchableSelectProps {
     className?: string;
     disabled?: boolean;
     error?: boolean;
+    onClick?: (e: React.MouseEvent) => void;
 }
 
 const SearchableSelect: React.FC<SearchableSelectProps> = ({
@@ -25,6 +26,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
     className = "",
     disabled = false,
     error = false,
+    onClick,
 }) => {
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState("");
@@ -53,7 +55,8 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
         setSearch("");
     };
 
-    const toggleOpen = () => {
+    const toggleOpen = (e: React.MouseEvent) => {
+        e.stopPropagation();
         if (disabled) return;
         setOpen((prev) => {
             if (prev) setSearch("");
@@ -68,7 +71,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
         className;
 
     return (
-        <div ref={containerRef} className="relative w-full">
+        <div ref={containerRef} className="relative w-full" onClick={(e) => { e.stopPropagation(); onClick?.(e); }}>
             <button
                 type="button"
                 disabled={disabled}
@@ -90,13 +93,14 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
                         onChange={(e) => setSearch(e.target.value)}
                         className="w-full px-3 py-2 text-sm border-b border-slate-200 dark:border-dark-border outline-none focus:border-blue-500 dark:bg-dark-input dark:text-dark-text-primary dark:placeholder:text-dark-text-secondary"
                         autoFocus
+                        onClick={(e) => e.stopPropagation()}
                     />
                     <div className="overflow-y-auto max-h-48">
                         {filteredOptions.length > 0 ? (
-                            filteredOptions.map((opt, index) => (
+                            filteredOptions.map((opt) => (
                                 <div
                                     key={opt.value}
-                                    onClick={() => handleSelect(opt)}
+                                    onClick={(e) => { e.stopPropagation(); handleSelect(opt); }}
                                     className={`px-3 py-2 cursor-pointer text-sm hover:bg-blue-50 dark:hover:bg-dark-bg-tertiary whitespace-normal break-words border-t border-slate-100 dark:border-dark-border first:border-t-0 ${
                                         opt.value === value
                                             ? "bg-blue-100 dark:bg-blue-900/30 font-medium"

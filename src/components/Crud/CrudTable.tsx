@@ -6,6 +6,7 @@ import {
     AlertCircle,
 } from "lucide-react";
 import { components } from "../../theme/components";
+import SearchableSelect, { type SelectOption } from "../common/SearchableSelect";
 
 export type SortField = string | null;
 export type SortOrder = "asc" | "desc";
@@ -89,20 +90,22 @@ const ColumnFilterControl = ({
     const stop = (e: React.MouseEvent) => e.stopPropagation();
 
     if (filter.type === "select") {
+        const options: SelectOption[] = [
+            { value: "", label: "Tous" },
+            ...((filter.options ?? []).map((opt) => ({
+                value: opt.value,
+                label: opt.label,
+            }))),
+        ];
         return (
-            <select
+            <SearchableSelect
                 value={value}
+                onChange={onChange}
+                options={options}
+                placeholder="Tous"
+                className="w-full py-1 text-xs"
                 onClick={stop}
-                onChange={(e) => onChange(e.target.value)}
-                className={components.input + " py-1 text-xs"}
-            >
-                <option value="">Tous</option>
-                {(filter.options ?? []).map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                    </option>
-                ))}
-            </select>
+            />
         );
     }
 
