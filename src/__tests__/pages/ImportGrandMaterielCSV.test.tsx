@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { resetAllMocks, mockAxios } from "../test-utils";
+import { resetAllMocks, mockAxios, localStorageMock } from "../test-utils";
+import { AuthProvider } from "../../context/AuthProvider";
 import GMImportCsvPage from "../../pages/ImportGrandMaterielCSV";
 
 // Mock ImportCSV components
@@ -111,27 +112,35 @@ describe("ImportGrandMaterielCSV", () => {
   beforeEach(() => {
     resetAllMocks();
     vi.clearAllMocks();
+    localStorageMock.setItem("token", "test-token");
     mockAxios.get.mockResolvedValue({ data: [] });
     mockAxios.post.mockResolvedValue({ data: {} });
   });
 
+  const renderPage = () =>
+    render(
+      <AuthProvider>
+        <GMImportCsvPage />
+      </AuthProvider>
+    );
+
   it("renders without crashing", async () => {
-    render(<GMImportCsvPage />);
+    renderPage();
     expect(screen.getByText("Journal Matériel - Import Des Données")).toBeTruthy();
   });
 
   it("renders the upload zone in step 1", async () => {
-    render(<GMImportCsvPage />);
+    renderPage();
     expect(screen.getByTestId("upload-zone")).toBeTruthy();
   });
 
   it("renders the stepper", async () => {
-    render(<GMImportCsvPage />);
+    renderPage();
     expect(screen.getByTestId("import-stepper")).toBeTruthy();
   });
 
   it("advances to step 2 when file is selected and filiale is set", async () => {
-    render(<GMImportCsvPage />);
+    renderPage();
     fireEvent.click(screen.getByText("Upload"));
     await waitFor(() => {
       expect(screen.getByTestId("file-information")).toBeTruthy();

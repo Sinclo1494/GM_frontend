@@ -164,6 +164,7 @@ export interface GrandMateriel {
     user_id: number;
     code_filiale_g: string;
     date_modification: string | null;
+    status: string;
     created_at: string;
     updated_at: string;
 }

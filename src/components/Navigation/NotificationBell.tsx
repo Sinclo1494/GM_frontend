@@ -3,11 +3,19 @@ import { Bell, ExternalLink, Check, Mail } from 'lucide-react';
 import { getNotifications, markRead, markAllRead } from '../../api/notifications';
 import { useNavigate } from 'react-router-dom';
 
+interface Notification {
+  id: string | number;
+  title: string;
+  message: string;
+  type: string;
+  related_object_id?: string | null;
+  is_read: boolean;
+}
+
 export default function NotificationBell() {
   const [open, setOpen] = useState(false);
-  const [notifications, setNotifications] = useState([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unread, setUnread] = useState(0);
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const load = async () => {
@@ -37,11 +45,11 @@ export default function NotificationBell() {
     } catch (e) {}
   };
 
-  const handleMarkOneRead = async (e: React.MouseEvent, notification: any) => {
+  const handleMarkOneRead = async (e: React.MouseEvent, notification: Notification) => {
     e.stopPropagation();
     if (notification.is_read) return;
     try {
-      await markRead(notification.id);
+      await markRead(notification.id.toString());
       setNotifications(prev => prev.map(n => n.id === notification.id ? { ...n, is_read: true } : n));
       setUnread(prev => Math.max(0, prev - 1));
     } catch (e) {}

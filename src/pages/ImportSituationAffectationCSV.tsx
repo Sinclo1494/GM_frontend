@@ -31,6 +31,8 @@ import {
     SITUATION_AFFECTATION_EXPECTED_FIELDS,
 } from "../constants/expectedFields";
 
+import { useImportFiliale } from "../hooks/useImportFiliale";
+
 import type {
     ValidationResult,
     ImportResult,
@@ -43,6 +45,13 @@ const STORAGE_KEY =
     "situation-affectation-column-mapping";
 
 export default function ImportSituationAffectationCSV() {
+
+    const {
+        isAdmin,
+        userFiliale,
+        selectedFiliale,
+        setSelectedFiliale,
+    } = useImportFiliale();
 
     // ---------------------------------------------------------
     // State
@@ -58,9 +67,6 @@ export default function ImportSituationAffectationCSV() {
 
     const [filiales, setFiliales] =
         useState<FilialeOption[]>([]);
-
-    const [selectedFiliale, setSelectedFiliale] =
-        useState("");
 
     const [preview, setPreview] =
         useState<PreviewColumn[]>([]);
@@ -97,7 +103,9 @@ export default function ImportSituationAffectationCSV() {
     const [importResult, setImportResult] =
         useState<ImportResult | null>(null);
     const [importError, setImportError] =
+
         useState<string | null>(null);
+
 
     // ---------------------------------------------------------
     // Mapping information
@@ -494,6 +502,8 @@ export default function ImportSituationAffectationCSV() {
                                         onFilialeChange={
                                             handleFilialeChange
                                         }
+                                        isAdmin={isAdmin}
+                                        userFiliale={userFiliale}
                                     />
 
                                 </div>

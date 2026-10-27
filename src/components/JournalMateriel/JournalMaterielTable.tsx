@@ -12,8 +12,13 @@ import formatDate from "../../utils/FormatDate";
 import { components } from "../../theme/components";
 import { crudList } from "../../api/crudService";
 import { usePendingFilters } from "../../context/PendingFiltersContext";
-
+import { usePermissions } from "../../auth/PermissionContext";
+import SearchableSelect from "../common/SearchableSelect";
+import { useEntityOptions } from "../Crud/useEntityOptions";
 const GM_URL = "grand-materiel";
+
+const toCodeLibelle = (opts: { value: string; label: string }[]) =>
+    opts.map((o) => ({ value: o.value, label: `${o.value} - ${o.label}` }));
 
 interface JournalMateriel {
     id: number;
@@ -117,6 +122,20 @@ const FilterInput = ({
 );
 
 const JournalMaterielTable: React.FC = () => {
+    const { options: filialeOptions } = useEntityOptions<any>("filiale", "code_filiale", "libelle_filiale");
+    const { options: familleOptions } = useEntityOptions<any>("famille-materiel", "code_famille", "libelle_famille");
+    const { options: categorieOptions } = useEntityOptions<any>("categorie-gm", "code_categorie", "libelle_categorie");
+    const { options: sousFamilleOptions } = useEntityOptions<any>("sous-famille-materiel", "code_sous_famille", "libelle_sous_famille");
+    const { options: marqueOptions } = useEntityOptions<any>("marque-materiel", "code_marque", "libelle_marque");
+    const { options: typeMarqueOptions } = useEntityOptions<any>("type-marque", "code_type_marque", "libelle_type_marque");
+
+    const filialeFilterOptions = useMemo(() => toCodeLibelle(filialeOptions), [filialeOptions]);
+    const familleFilterOptions = useMemo(() => toCodeLibelle(familleOptions), [familleOptions]);
+    const categorieFilterOptions = useMemo(() => toCodeLibelle(categorieOptions), [categorieOptions]);
+    const sousFamilleFilterOptions = useMemo(() => toCodeLibelle(sousFamilleOptions), [sousFamilleOptions]);
+    const marqueFilterOptions = useMemo(() => toCodeLibelle(marqueOptions), [marqueOptions]);
+    const typeMarqueFilterOptions = useMemo(() => toCodeLibelle(typeMarqueOptions), [typeMarqueOptions]);
+
     const [data, setData] = useState<JournalMateriel[]>([]);
     const [totalItems, setTotalItems] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -129,7 +148,28 @@ const JournalMaterielTable: React.FC = () => {
     const [goToPageInput, setGoToPageInput] = useState("1");
 
     const { includePending, setIncludePending } = usePendingFilters();
+    const { user, hasPermission, hasAnyPermission } = usePermissions();
+    const canIncludePending =
+        !!user?.is_superuser ||
+        (hasPermission("analyse.journal_materiel") &&
+            hasAnyPermission([
+                "import.grand_materiel",
+                "import.pointage",
+                "import.marque",
+                "import.type_marque",
+                "import.sous_famille",
+                "import.famille",
+                "import.categorie_gm",
+                "import.situation_affectation",
+                "import.site",
+                "import.regularisation",
+            ]));
 
+    useEffect(() => {
+        if (!canIncludePending && includePending) {
+            setIncludePending(false);
+        }
+    }, [canIncludePending, includePending, setIncludePending]);
     const abortControllerRef = useRef<AbortController | null>(null);
     const filterTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -316,6 +356,7 @@ const columns = [
         if (filterTimerRef.current) clearTimeout(filterTimerRef.current);
         filterTimerRef.current = setTimeout(() => {
             setColumnFilters(columnFiltersInput);
+            setCurrentPage(1);
         }, 300);
         return () => {
             if (filterTimerRef.current) clearTimeout(filterTimerRef.current);
@@ -324,6 +365,29 @@ const columns = [
 
     const handleColumnFilterChange = (key: keyof typeof columnFiltersInput) => (value: string) => {
         setColumnFiltersInput((prev) => ({ ...prev, [key]: value }));
+    };
+
+    const getFilterOptions = (key: string) => {
+        switch (key) {
+            case "libelle_filiale":
+                return [{ value: "", label: "Tous" }, ...filialeFilterOptions];
+            case "libelle_categorie":
+                return [{ value: "", label: "Tous" }, ...categorieFilterOptions];
+            case "libelle_famille":
+                return [{ value: "", label: "Tous" }, ...familleFilterOptions];
+            case "libelle_sous_famille":
+                return [{ value: "", label: "Tous" }, ...sousFamilleFilterOptions];
+            case "libelle_marque":
+                return [{ value: "", label: "Tous" }, ...marqueFilterOptions];
+            case "libelle_type_marque":
+                return [{ value: "", label: "Tous" }, ...typeMarqueFilterOptions];
+            default:
+                return null;
+        }
+    };
+
+    const isSearchableSelectFilter = (key: string) => {
+        return ["libelle_filiale", "libelle_categorie", "libelle_famille", "libelle_sous_famille", "libelle_marque", "libelle_type_marque"].includes(key);
     };
 
     const handleSort = (field: SortField) => {
@@ -473,17 +537,19 @@ const columns = [
                             </select>
                         </div>
 
-                        <div className="flex items-center gap-2">
-                            <label className="flex items-center gap-2 cursor-pointer text-sm">
-                                <input
-                                    type="checkbox"
-                                    checked={includePending}
-                                    onChange={(e) => setIncludePending(e.target.checked)}
-                                    className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                />
-                                <span>Inclure données en attente</span>
-                            </label>
-                        </div>
+                        {canIncludePending && (
+                            <div className="flex items-center gap-2">
+                                <label className="flex items-center gap-2 cursor-pointer text-sm">
+                                    <input
+                                        type="checkbox"
+                                        checked={includePending}
+                                        onChange={(e) => setIncludePending(e.target.checked)}
+                                        className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    />
+                                    <span>Inclure données en attente</span>
+                                </label>
+                            </div>
+                        )}
 
                         <button
                             onClick={handleReset}
@@ -499,7 +565,7 @@ const columns = [
                     <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
                         Affichage de <span className="font-semibold">{startIdx}</span> à{" "}
                         <span className="font-semibold">{endIdx}</span>{" "}
-                        sur <span className="font-semibold">{totalItems}</span>{" "}
+                        sur <span className="font-semibold text-lg text-red-700 dark:text-red-500">{totalItems}</span>{" "}
                         résultat{totalItems !== 1 ? "s" : ""}
                     </p>
                 </div>
@@ -552,10 +618,23 @@ const columns = [
                                             </div>
 
                                             {column.filterable && (
-                                                <FilterInput
-                                                    value={columnFiltersInput[column.key as keyof typeof columnFiltersInput]}
-                                                    onChange={handleColumnFilterChange(column.key as keyof typeof columnFiltersInput)}
-                                                />
+                                                <>
+                                                    {isSearchableSelectFilter(column.key as string) ? (
+                                                        <SearchableSelect
+                                                            value={columnFiltersInput[column.key as keyof typeof columnFiltersInput]}
+                                                            onChange={handleColumnFilterChange(column.key as keyof typeof columnFiltersInput)}
+                                                            options={getFilterOptions(column.key as string) || []}
+                                                            placeholder="Tous"
+                                                            className="w-full py-1 text-xs"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        />
+                                                    ) : (
+                                                        <FilterInput
+                                                            value={columnFiltersInput[column.key as keyof typeof columnFiltersInput]}
+                                                            onChange={handleColumnFilterChange(column.key as keyof typeof columnFiltersInput)}
+                                                        />
+                                                    )}
+                                                </>
                                             )}
                                         </div>
                                     </th>

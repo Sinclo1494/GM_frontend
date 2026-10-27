@@ -22,6 +22,7 @@ export default function TypeEtatMaterielPage() {
         <CrudPage<TypeEtatMateriel>
             title="Types d'État Matériel"
             endpoint="type-etat-materiel"
+            writePermission="gestion.types_etat_materiel.write"
             fields={fields}
             columns={columns}
         />

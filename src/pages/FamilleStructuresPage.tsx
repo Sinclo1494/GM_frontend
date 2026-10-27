@@ -24,6 +24,7 @@ export default function FamilleStructuresPage() {
         <CrudPage<FamilleStructures>
             title="Familles de Structures"
             endpoint="famille-structures"
+            writePermission="gestion.familles_structures.write"
             fields={fields}
             columns={columns}
         />

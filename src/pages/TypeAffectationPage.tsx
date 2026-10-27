@@ -22,6 +22,7 @@ export default function TypeAffectationPage() {
         <CrudPage<TypeAffectation>
             title="Types d'Affectation"
             endpoint="type-affectation"
+            writePermission="gestion.types_affectation.write"
             fields={fields}
             columns={columns}
         />

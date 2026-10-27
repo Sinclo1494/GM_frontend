@@ -5,13 +5,21 @@ interface Props {
     filiales: FilialeOption[];
     selectedFiliale: string;
     onFilialeChange: (value: string) => void;
+    isAdmin: boolean;
+    userFiliale?: string | null;
 }
 
 export default function ImportSettings({
     filiales,
     selectedFiliale,
     onFilialeChange,
+    isAdmin,
+    userFiliale,
 }: Props) {
+    const displayFiliale =
+        userFiliale ||
+        (isAdmin ? selectedFiliale : "");
+
     return (
         <div className="rounded-xl border dark:border-dark-border dark:bg-dark-bg-secondary p-6">
             <h2 className="text-lg font-semibold dark:text-dark-text-primary">
@@ -30,27 +38,54 @@ export default function ImportSettings({
                     Filiale
                 </label>
 
-                <select
-                    id="filiale"
-                    value={selectedFiliale}
-                    onChange={(event) =>
-                        onFilialeChange(event.target.value)
-                    }
-                    className={components.select}
-                >
-                    <option value="">
-                        Sélectionnez une filiale...
-                    </option>
-
-                    {filiales.map((filiale) => (
-                        <option
-                            key={filiale.value}
-                            value={filiale.value}
-                        >
-                            {filiale.value} - {filiale.label}
+                {isAdmin ? (
+                    <select
+                        id="filiale"
+                        value={selectedFiliale}
+                        onChange={(event) =>
+                            onFilialeChange(event.target.value)
+                        }
+                        className={components.select}
+                    >
+                        <option value="">
+                            Sélectionnez une filiale...
                         </option>
-                    ))}
-                </select>
+
+                        {filiales.map((filiale) => (
+                            <option
+                                key={filiale.value}
+                                value={filiale.value}
+                            >
+                                {filiale.value} - {filiale.label}
+                            </option>
+                        ))}
+                    </select>
+                ) : (
+                    <div
+                        id="filiale"
+                        className={
+                            components.select +
+                            " bg-gray-100 dark:bg-dark-bg-tertiary"
+                        }
+                    >
+                        {displayFiliale ? (
+                            <>
+                                {displayFiliale} -
+                                {filiales.find(
+                                    (f) => f.value === displayFiliale
+                                )?.label ?? ""}
+                            </>
+                        ) : (
+                            "Aucune filiale configurée"
+                        )}
+                    </div>
+                )}
+
+                {!isAdmin && userFiliale && (
+                    <p className="mt-1 text-xs text-gray-500 dark:text-dark-text-secondary">
+                        Import vers votre filiale : {userFiliale}
+                    </p>
+                )}
             </div>
         </div>
     );

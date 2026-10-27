@@ -44,6 +44,7 @@ export default function TypeMarquePage() {
         <CrudPage<TypeMarque>
             title="Types de Marque"
             endpoint="type-marque"
+            writePermission="gestion.types_marque.write"
             fields={fieldsWithOptions}
             columns={columns}
         />

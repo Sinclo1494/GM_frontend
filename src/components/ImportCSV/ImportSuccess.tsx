@@ -17,6 +17,12 @@ export default function ImportSuccess({
                 {result.message ??
                     `${result.imported_rows} ligne(s) importée(s) avec succès.`}
             </p>
+
+            {result.import_batch_id && (
+                <p className="mt-2 text-xs text-gray-500 dark:text-dark-text-secondary">
+                    Lot d'import : {result.import_batch_id}
+                </p>
+            )}
         </div>
     );
 }

@@ -56,8 +56,8 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
             <>
               Affichage de <span className="font-semibold">{startIdx}</span> à{" "}
               <span className="font-semibold">{endIdx}</span> sur{" "}
-              <span className="font-semibold">{totalItems}</span> résultat
-              {totalItems !== 1 ? "s" : ""}
+              <span className="font-semibold text-lg text-red-700 dark:text-red-500">{totalItems}</span>{" "}
+              résultat{totalItems !== 1 ? "s" : ""}
             </>
           )}
         </div>

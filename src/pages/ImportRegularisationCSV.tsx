@@ -29,6 +29,8 @@ import {
 
 import { REGULARISATION_GM_EXPECTED_FIELDS } from "../constants/expectedFields";
 
+import { useImportFiliale } from "../hooks/useImportFiliale";
+
 import type {
     ValidationResult,
     ImportResult,
@@ -42,6 +44,13 @@ const STORAGE_KEY = "regularisation-gm-column-mapping";
 
 export default function RegularisationImportCsvPage() {
 
+    const {
+        isAdmin,
+        userFiliale,
+        selectedFiliale,
+        setSelectedFiliale,
+    } = useImportFiliale();
+
     const expectedFields = REGULARISATION_GM_EXPECTED_FIELDS;
     const [step, setStep] = useState(1);
 
@@ -49,9 +58,6 @@ export default function RegularisationImportCsvPage() {
 
     const [filiales, setFiliales] =
         useState<FilialeOption[]>([]);
-
-    const [selectedFiliale, setSelectedFiliale] =
-        useState("");
 
     const [preview, setPreview] =
         useState<PreviewColumn[]>([]);
@@ -448,6 +454,8 @@ export default function RegularisationImportCsvPage() {
                                         onFilialeChange={
                                             handleFilialeChange
                                         }
+                                        isAdmin={isAdmin}
+                                        userFiliale={userFiliale}
                                     />
 
 

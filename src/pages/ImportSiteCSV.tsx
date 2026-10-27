@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useAuth } from "../context/useAuth";
 import {
     ArrowLeft,
     ArrowRight,
@@ -80,6 +81,10 @@ export default function SiteImportCsvPage() {
         useState<ImportResult | null>(null);
     const [importError, setImportError] =
         useState<string | null>(null);
+
+    const { user } = useAuth();
+
+    const userFiliale = user?.filiale ?? "";
 
 
     // ---------------------------------------------------------
@@ -278,7 +283,7 @@ export default function SiteImportCsvPage() {
                 await validateSite(
                     file,
                     mapping,
-                    "",
+                    userFiliale,
                 );
 
             setResult(response);

@@ -35,6 +35,7 @@ export default function MarqueMaterielPage() {
         <CrudPage<MarqueMateriel>
             title="Marques Matériel"
             endpoint="marque-materiel"
+            writePermission="gestion.marques_materiel.write"
             fields={fields}
             columns={columns}
         />

@@ -22,6 +22,7 @@ export default function DivisionPage() {
         <CrudPage<Division>
             title="Divisions"
             endpoint="division"
+            writePermission="gestion.divisions.write"
             fields={fields}
             columns={columns}
         />

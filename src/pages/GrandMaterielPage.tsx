@@ -31,6 +31,27 @@ const fields = [
 
 const DASH = (val: unknown) => <>{val ?? "—"}</>;
 
+// Confirmation workflow status (Grand_Materiel.STATUS_CHOICES)
+const STATUS_OPTIONS = [
+    { value: "PENDING", label: "En attente" },
+    { value: "CONFIRMED", label: "Confirmé" },
+    { value: "REJECTED", label: "Rejeté" },
+];
+
+const STATUS_LABEL: Record<string, string> = {
+    PENDING: "En attente",
+    CONFIRMED: "Confirmé",
+    REJECTED: "Rejeté",
+};
+
+const STATUS_BADGE: Record<string, string> = {
+    PENDING: "bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400",
+    CONFIRMED: "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400",
+    REJECTED: "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400",
+};
+
+const STATUS_BADGE_DEFAULT = "bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300";
+
 const toCodeLibelle = (opts: { value: string; label: string }[]) =>
     opts.map((o) => ({ value: o.value, label: `${o.value} - ${o.label}` }));
 
@@ -52,6 +73,7 @@ export default function GrandMaterielPage() {
     const { options: categorieOptions } = useEntityOptions<any>("categorie-gm", "code_categorie", "libelle_categorie");
     const { options: marqueOptions } = useEntityOptions<any>("marque-materiel", "code_marque", "libelle_marque");
 
+    const filialeFilterOptions = toCodeLibelle(filialeOptions);
     const familleFilterOptions = toCodeLibelle(familleOptions);
     const categorieFilterOptions = toCodeLibelle(categorieOptions);
     const marqueFilterOptions = toCodeLibelle(marqueOptions);
@@ -60,10 +82,25 @@ export default function GrandMaterielPage() {
 
     const columns: ColumnDef<GrandMateriel>[] = [
         { key: "id", label: "ID", width: "min-w-[80px]", sortable: false, render: DASH },
+        {
+            key: "status",
+            label: "Statut",
+            width: "min-w-[130px]",
+            sortable: true,
+            filter: { type: "select", param: "status", options: STATUS_OPTIONS },
+            render: (val: unknown) => {
+                const key = (val ?? "").toString().trim().toUpperCase();
+                return (
+                    <span className={`${STATUS_BADGE[key] ?? STATUS_BADGE_DEFAULT} px-2 py-0.5 rounded-full text-xs font-semibold`}>
+                        {STATUS_LABEL[key] ?? "—"}
+                    </span>
+                );
+            },
+        },
         { key: "code_materiel", label: "Code", width: "min-w-[140px]", sortable: true, filter: { param: "code_materiel" } },
         { key: "designation", label: "Désignation", width: "min-w-[180px]", sortable: true, filter: { param: "designation" }, render: DASH },
         { key: "code_filiale_g", label: "Code Filiale", width: "min-w-[130px]", sortable: true, filter: { param: "code_filiale" }, render: DASH },
-        { key: "libelle_filiale", label: "Filiale", width: "min-w-[150px]", sortable: true, filter: { param: "libelle_filiale" }, render: DASH },
+        { key: "libelle_filiale", label: "Filiale", width: "min-w-[150px]", sortable: true, filter: { type: "select", param: "libelle_filiale", options: filialeFilterOptions }, render: DASH },
         { key: "libelle_categorie", label: "Catégorie", width: "min-w-[160px]", sortable: true, filter: { type: "select", param: "libelle_categorie", options: categorieFilterOptions }, render: DASH },
         { key: "libelle_famille", label: "Famille", width: "min-w-[160px]", sortable: true, filter: { type: "select", param: "libelle_famille", options: familleFilterOptions }, render: DASH },
         { key: "code_sous_famille_materiel", label: "Sous-Famille", width: "min-w-[220px]", sortable: true, sortParam: "code_sous_famille", filter: { type: "select", param: "code_sous_famille", options: sousFamilleFilterOptions }, render: (_val, row) => CODE_LIBELLE(row.code_sous_famille_materiel, row.libelle_sous_famille) },
@@ -76,7 +113,7 @@ export default function GrandMaterielPage() {
         { key: "valeur_remplacement", label: "Valeur Rempl.", width: "min-w-[140px]", sortable: true, render: DASH },
         { key: "taux_amortissement", label: "Taux Amort.", width: "min-w-[130px]", sortable: true, render: DASH },
         { key: "puissance_materiel", label: "Puissance", width: "min-w-[120px]", sortable: true, filter: { param: "puissance_materiel" }, render: DASH },
-        { key: "est_bloque", label: "Statut", width: "min-w-[100px]", sortable: true, filter: { type: "select", param: "est_bloque", options: [{ value: "false", label: "Actif" }, { value: "true", label: "Bloqué" }] }, render: (val: unknown) => (
+        { key: "est_bloque", label: "Bloqué", width: "min-w-[100px]", sortable: true, filter: { type: "select", param: "est_bloque", options: [{ value: "false", label: "Actif" }, { value: "true", label: "Bloqué" }] }, render: (val: unknown) => (
             <span className={val ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 px-2 py-0.5 rounded-full text-xs font-semibold" : "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full text-xs font-semibold"}>
                 {val ? "Bloqué" : "Actif"}
             </span>
@@ -97,6 +134,7 @@ export default function GrandMaterielPage() {
         <CrudPage<GrandMateriel>
             title="Grand Matériel"
             endpoint="grand-materiel"
+            writePermission="gestion.grand_materiel.write"
             fields={enrichedFields}
             columns={columns}
             initialFormValues={() => ({

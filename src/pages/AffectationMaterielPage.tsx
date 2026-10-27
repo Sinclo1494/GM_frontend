@@ -50,6 +50,7 @@ export default function AffectationMaterielPage() {
         <CrudPage<AffectationMateriel>
             title="Affectations Matériel"
             endpoint="affectation-materiel"
+            writePermission="gestion.affectations.write"
             fields={enrichedFields}
             columns={columns}
         />

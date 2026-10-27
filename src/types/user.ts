@@ -6,6 +6,9 @@ export interface UserInfo {
   email: string;
   is_active: boolean;
   is_superuser: boolean;
+  can_access_all_filiales: boolean;
+  filiale: string | null;
+  accessible_databases: string[];
   permissions: string[];
 }
 
@@ -30,5 +33,8 @@ export interface CurrentUserResponse {
   email: string;
   is_active: boolean;
   is_superuser: boolean;
+  can_access_all_filiales: boolean;
+  filiale: string | null;
+  accessible_databases: string[];
   permissions: string[];
 }

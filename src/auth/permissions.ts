@@ -11,6 +11,7 @@ export interface PermissionDefinition {
 
 export const PERMISSIONS: PermissionDefinition[] = [
   { key: "administration.users", label: "Utilisateurs", category: "administration", route: "/admin/users", hasRead: true, hasWrite: true },
+  { key: "administration.all_filiales", label: "Accès à toutes les filiales", category: "administration", route: "/admin/users", hasRead: true, hasWrite: true },
   { key: "administration.journalisation", label: "Journalisation", category: "administration", route: "/admin/journalisation", hasRead: true, hasWrite: false },
 
   { key: "analyse.dashboard", label: "Dashboard", category: "analyse", route: "/", hasRead: true, hasWrite: false },

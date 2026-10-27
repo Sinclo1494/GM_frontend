@@ -31,6 +31,7 @@ export default function FilialePage() {
         <CrudPage<Filiale>
             title="Filiales"
             endpoint="filiale"
+            writePermission="gestion.filiales.write"
             fields={fieldsWithOptions}
             columns={columns}
         />

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useAuth } from "../context/useAuth";
 import {
     ArrowLeft,
     ArrowRight,
@@ -77,6 +78,10 @@ export default function CategorieGMImportCsvPage() {
         useState<ImportResult | null>(null);
     const [importError, setImportError] =
         useState<string | null>(null);
+
+    const { user } = useAuth();
+
+    const userFiliale = user?.filiale ?? "";
 
 
     const usedFields = Object.values(mapping);
@@ -247,7 +252,7 @@ export default function CategorieGMImportCsvPage() {
                 await validateCategorieGM(
                     file,
                     mapping,
-                    "",
+                    userFiliale,
                 );
 
             setResult(response);

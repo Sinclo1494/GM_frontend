@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getNotifications, markRead, markAllRead, deleteNotification } from "../api/notifications";
-import { useAuth } from "../context/useAuth";
 import { components } from "../theme/components";
 
 interface Notification {
@@ -49,7 +48,6 @@ interface NotificationPageState {
 }
 
 export default function NotificationsPage() {
-  const { user } = useAuth();
   const navigate = useNavigate();
   
   const [state, setState] = useState<NotificationPageState>({
@@ -319,7 +317,6 @@ export default function NotificationsPage() {
                 const isRejected = notification.type === "IMPORT_REJECTED";
                 const isPending = notification.type === "PENDING_IMPORT";
                 const isConfirmed = notification.type === "IMPORT_CONFIRMED";
-                const isUnread = !notification.is_read;
                 const cardBgClass = notification.is_read
                   ? "bg-white dark:bg-dark-bg-primary"
                   : isRejected

@@ -4,6 +4,7 @@ import { components } from "../../theme/components";
 import CrudTable, { type ColumnDef, type SortField, type SortOrder } from "./CrudTable";
 import EntityFormDialog, { type FieldConfig } from "./EntityFormDialog";
 import { crudList, crudGet, crudCreate, crudUpdate, crudDelete } from "../../api/crudService";
+import { usePermissions } from "../../auth/PermissionContext";
 
 export type { ColumnDef } from "./CrudTable";
 export type { FieldConfig } from "./EntityFormDialog";
@@ -18,6 +19,7 @@ interface CrudPageProps<T> {
     beforeSubmit?: (values: Record<string, unknown>, mode: "create" | "edit") => Record<string, unknown>;
     deleteConfirmMessage?: (item: T) => string;
     searchPlaceholder?: string;
+    writePermission?: string;
 }
 
 function CrudPage<T>({
@@ -30,6 +32,7 @@ function CrudPage<T>({
     beforeSubmit,
     deleteConfirmMessage,
     searchPlaceholder,
+    writePermission,
 }: CrudPageProps<T>) {
     const [data, setData] = useState<T[]>([]);
     const [totalItems, setTotalItems] = useState(0);
@@ -48,6 +51,9 @@ function CrudPage<T>({
     const columnFilterTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const hasColumnFilters = useMemo(() => columns.some((c) => c.filter), [columns]);
+
+    const { hasPermission } = usePermissions();
+    const canWrite = writePermission ? hasPermission(writePermission) : true;
 
     const [dialogOpen, setDialogOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<T | null>(null);
@@ -179,14 +185,27 @@ function CrudPage<T>({
 
     const handleSubmit = async (values: Record<string, unknown>) => {
         const payload = beforeSubmit ? beforeSubmit(values, editingItem ? "edit" : "create") : values;
-        if (editingItem) {
-            const id = (editingItem as any).id;
-            await crudUpdate(endpoint, id, payload);
-        } else {
-            await crudCreate(endpoint, payload);
+        try {
+            if (editingItem) {
+                const id = (editingItem as any).id;
+                await crudUpdate(endpoint, id, payload);
+            } else {
+                await crudCreate(endpoint, payload);
+            }
+            setDialogOpen(false);
+            fetchData();
+        } catch (err: any) {
+            if (err?.response?.status === 403) {
+                alert("Privilèges insuffisants : vous n'êtes pas autorisé à effectuer cette création ou modification.");
+                return;
+            }
+            setFormError(
+                err?.response?.data?.message ??
+                err?.response?.data?.detail ??
+                err?.message ??
+                "Erreur lors de l'enregistrement.",
+            );
         }
-        setDialogOpen(false);
-        fetchData();
     };
 
     const openDelete = (item: T) => {
@@ -206,6 +225,12 @@ function CrudPage<T>({
             setDeletingItem(null);
             fetchData();
         } catch (err: any) {
+            if (err?.response?.status === 403) {
+                alert("Privilèges insuffisants : vous n'êtes pas autorisé à effectuer cette suppression.");
+                setDeleteOpen(false);
+                setDeletingItem(null);
+                return;
+            }
             setDeleteError(
                 err?.response?.data?.message ??
                 err?.response?.data?.detail ??
@@ -219,19 +244,21 @@ function CrudPage<T>({
 
     return (
         <div className="p-6">
-            <div className="mx-auto max-w-7xl">
-                <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div>
-                        <h1 className={components.pageTitle}>{title}</h1>
-                        <p className={components.pageDescription}>
-                            Gérez les enregistrements de cette section.
-                        </p>
-                    </div>
-                    <button onClick={openCreate} type="button" className={components.button.primary}>
-                        <Plus className="h-4 w-4" />
-                        Nouvel enregistrement
-                    </button>
-                </header>
+                    <div className="mx-auto max-w-7xl">
+                        <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div>
+                                <h1 className={components.pageTitle}>{title}</h1>
+                                <p className={components.pageDescription}>
+                                    Gérez les enregistrements de cette section.
+                                </p>
+                            </div>
+                            {canWrite && (
+                                <button onClick={openCreate} type="button" className={components.button.primary}>
+                                    <Plus className="h-4 w-4" />
+                                    Nouvel enregistrement
+                                </button>
+                            )}
+                        </header>
 
                 <CrudTable<T>
                     columns={columns}
@@ -255,20 +282,24 @@ function CrudPage<T>({
                     onResetColumnFilters={hasActiveColumnFilters ? clearColumnFilters : undefined}
                     actions={(row) => (
                         <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => openEdit(row)}
-                                className="text-blue-600 hover:text-blue-800 transition-colors"
-                                title="Modifier"
-                            >
-                                <Edit className="h-4 w-4" />
-                            </button>
-                            <button
-                                onClick={() => openDelete(row)}
-                                className="text-red-600 dark:text-red-400 hover:text-red-800  transition-colors"
-                                title="Supprimer"
-                            >
-                                <Trash2 className="h-4 w-4" />
-                            </button>
+                            {canWrite && (
+                                <>
+                                    <button
+                                        onClick={() => openEdit(row)}
+                                        className="text-blue-600 hover:text-blue-800 transition-colors"
+                                        title="Modifier"
+                                    >
+                                        <Edit className="h-4 w-4" />
+                                    </button>
+                                    <button
+                                        onClick={() => openDelete(row)}
+                                        className="text-red-600 dark:text-red-400 hover:text-red-800  transition-colors"
+                                        title="Supprimer"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </button>
+                                </>
+                            )}
                         </div>
                     )}
                 />

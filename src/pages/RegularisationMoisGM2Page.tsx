@@ -22,6 +22,7 @@ export default function RegularisationMoisGM2Page() {
         <CrudPage<RegularisationMoisGM2>
             title="Régularisations Mensuelles"
             endpoint="regularisation-mois-gm2"
+            writePermission="gestion.regularisations_mois.write"
             fields={fields}
             columns={columns}
         />

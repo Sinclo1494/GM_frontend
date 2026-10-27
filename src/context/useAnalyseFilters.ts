@@ -26,6 +26,9 @@ export const getCurrentMonthRange = (): Pick<AnalyseFilters, "dateDebut" | "date
 };
 
 export const defaultFilters: AnalyseFilters = {
+  // Fallback affiliate for users allowed to query every affiliate database.
+  // A user locked to a single affiliate gets their own code instead, see
+  // `lockedFiliale` and `AnalyseFiltersProvider`.
   codeFiliale: "P",
   ...getCurrentMonthRange(),
 };

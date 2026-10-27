@@ -64,6 +64,7 @@ export default function PointagePage() {
         <CrudPage<Pointage>
             title="Pointages"
             endpoint="pointage"
+            writePermission="gestion.pointages.write"
             fields={enrichedFields}
             columns={columns}
             initialFormValues={() => ({

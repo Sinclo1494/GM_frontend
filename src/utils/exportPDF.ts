@@ -20,11 +20,19 @@ const COLORS = {
   white: [255, 255, 255] as [number, number, number],
 };
 
+function formatDateFr(dateStr: string): string {
+  if (!dateStr) return "";
+  const [y, m, d] = dateStr.split("-");
+  if (!y || !m || !d) return dateStr;
+  return `${d}/${m}/${y}`;
+}
+
 function drawHeader(
   pdf: jsPDF,
   title: string,
   filters: {
     filiale: string;
+    filialeLabel?: string;
     dateDebut: string;
     dateFin: string;
   },
@@ -33,18 +41,22 @@ function drawHeader(
 
   // Blue banner
   pdf.setFillColor(...COLORS.primary);
-  pdf.rect(0, 0, pageWidth, 24, "F");
+  pdf.rect(0, 0, pageWidth, 30, "F");
 
   pdf.setTextColor(...COLORS.white);
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(20);
-  pdf.text(title, 14, 15);
+  pdf.text(title, 14, 14);
+
+  const filialeDisplay = filters.filialeLabel
+    ? `${filters.filiale} - ${filters.filialeLabel}`
+    : filters.filiale;
 
   pdf.setFontSize(10);
   pdf.text(
-    `Filiale : ${filters.filiale}    |    Période : ${filters.dateDebut} → ${filters.dateFin}`,
+    `Filiale : ${filialeDisplay}    |    Période : ${formatDateFr(filters.dateDebut)} → ${formatDateFr(filters.dateFin)}`,
     14,
-    31,
+    22,
   );
 
   pdf.setDrawColor(...COLORS.border);
@@ -88,6 +100,7 @@ export function exportAnalyseQuantitative(
   }[],
   filters: {
     filiale: string;
+    filialeLabel?: string;
     dateDebut: string;
     dateFin: string;
   },
@@ -161,24 +174,39 @@ export function exportAnalyseQuantitative(
     },
   });
 
-  // Category tables
-  categories.forEach((category) => {
-    pdf.addPage();
+  // Category tables — flow one after another, page break only when needed
+  const pageHeight = pdf.internal.pageSize.getHeight();
 
-    drawHeader(pdf, "Analyse Quantitative", filters);
+  categories.forEach((category, index) => {
+    let startY = index === 0
+      ? ((pdf as any).lastAutoTable?.finalY ?? 42) + 10
+      : (pdf as any).lastAutoTable?.finalY + 10;
+
+    // Check if the category title + table would overflow the current page
+    const estimatedTableHeight = 20 + category.rows.length * 10;
+    if (index > 0 && startY + estimatedTableHeight > pageHeight - 15) {
+      pdf.addPage();
+      drawHeader(pdf, "Analyse Quantitative", filters);
+      startY = 42;
+    }
+
+    if (index === 0 || (pdf as any).lastAutoTable?.finalY === undefined) {
+      // already on first page with header
+    }
 
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(15);
     pdf.setTextColor(...COLORS.primary);
 
+    const titleY = (index === 0 ? startY : startY);
     pdf.text(
       `${category.code_categorie} - ${category.title}`,
       14,
-      42,
+      titleY,
     );
 
     autoTable(pdf, {
-      startY: 48,
+      startY: titleY + 6,
 
       head: [[
         "Sous famille",
@@ -198,25 +226,39 @@ export function exportAnalyseQuantitative(
         "Autre",
       ]],
 
-      body: category.rows.map((r) => [
-        r.libelle_sous_famille,
-
-        r.nbr,
-        r.age_moyen,
-
-        r.exploitation.en_service,
-        r.exploitation.en_chomage,
-        r.exploitation.en_panne,
-
-        r.immobilise.en_chomage,
-        r.immobilise.en_reparation,
-        r.immobilise.autre,
-
-        r.reparation.ALREM,
-        r.reparation.autre,
-      ]),
-
-      theme: "grid",
+       body: category.rows.map((r) => [
+         r.libelle_sous_famille,
+ 
+         r.nbr,
+         r.age_moyen,
+ 
+         r.exploitation.en_service,
+         r.exploitation.en_chomage,
+         r.exploitation.en_panne,
+ 
+         r.immobilise.en_chomage,
+         r.immobilise.en_reparation,
+         r.immobilise.autre,
+ 
+         r.reparation.ALREM,
+         r.reparation.autre,
+       ]),
+ 
+       foot: [[
+         "TOTAL",
+         category.rows.reduce((s, r) => s + r.nbr, 0),
+         "",
+         category.rows.reduce((s, r) => s + r.exploitation.en_service, 0),
+         category.rows.reduce((s, r) => s + r.exploitation.en_chomage, 0),
+         category.rows.reduce((s, r) => s + r.exploitation.en_panne, 0),
+         category.rows.reduce((s, r) => s + r.immobilise.en_chomage, 0),
+         category.rows.reduce((s, r) => s + r.immobilise.en_reparation, 0),
+         category.rows.reduce((s, r) => s + r.immobilise.autre, 0),
+         category.rows.reduce((s, r) => s + r.reparation.ALREM, 0),
+         category.rows.reduce((s, r) => s + r.reparation.autre, 0),
+       ]],
+ 
+       showFoot: "lastPage",
 
       styles: {
         font: "helvetica",
@@ -236,11 +278,17 @@ export function exportAnalyseQuantitative(
         },
       },
 
-      headStyles: {
-        fillColor: COLORS.secondary,
-        textColor: COLORS.primary,
-        fontStyle: "bold",
-      },
+       headStyles: {
+         fillColor: COLORS.secondary,
+         textColor: COLORS.primary,
+         fontStyle: "bold",
+       },
+
+       footStyles: {
+         fillColor: COLORS.light,
+         textColor: COLORS.primary,
+         fontStyle: "bold",
+       },
 
       alternateRowStyles: {
         fillColor: COLORS.light,
@@ -266,6 +314,7 @@ export function exportAnalyseExploitation(
   }[],
   filters: {
     filiale: string;
+    filialeLabel?: string;
     dateDebut: string;
     dateFin: string;
   },
@@ -345,10 +394,22 @@ export function exportAnalyseExploitation(
   // ===========================
   // Category tables
   // ===========================
-  categories.forEach((category) => {
-    pdf.addPage();
+  const pageHeight = pdf.internal.pageSize.getHeight();
 
-    drawHeader(pdf, "Analyse de l'Exploitation du Matériel", filters);
+  categories.forEach((category, index) => {
+    let startY = index === 0
+      ? ((pdf as any).lastAutoTable?.finalY ?? 42) + 10
+      : (pdf as any).lastAutoTable?.finalY + 10;
+
+    // Check if the category title + table would overflow the current page
+    const estimatedTableHeight = 20 + category.rows.length * 12;
+    if (startY + estimatedTableHeight > pageHeight - 15) {
+      pdf.addPage();
+      drawHeader(pdf, "Analyse de l'Exploitation du Matériel", filters);
+      startY = 42;
+    }
+
+    const titleY = startY;
 
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(15);
@@ -357,11 +418,11 @@ export function exportAnalyseExploitation(
     pdf.text(
       `${category.code_categorie} - ${category.title}`,
       14,
-      42,
+      titleY,
     );
 
     autoTable(pdf, {
-      startY: 48,
+      startY: titleY + 6,
 
       head: [
         [
@@ -384,27 +445,44 @@ export function exportAnalyseExploitation(
         ],
       ],
 
-      body: category.rows.map((r) => [
-        r.code_sous_famille,
-        r.libelle_sous_famille,
-
-        r.nbr_existant,
-        r.nbr_pointage,
-        r.nbr_mat_pt,
-        r.potentiel_enregistre.toFixed(1),
-        r.potentiel_calcule.toFixed(1),
-        r.taux_location.toFixed(2),
-
-        `${r.heures_service.toFixed(1)}\n${r.pct_heures_service.toFixed(1)}%`,
-        `${r.heures_chomage.toFixed(1)}\n${r.pct_heures_chomage.toFixed(1)}%`,
-        `${r.heures_panne.toFixed(1)}\n${r.pct_heures_panne.toFixed(1)}%`,
-
-        `${r.montant_service.toFixed(2)}\n${r.pct_montant_service.toFixed(1)}%`,
-        `${r.montant_chomage.toFixed(2)}\n${r.pct_montant_chomage.toFixed(1)}%`,
-        `${r.montant_panne.toFixed(2)}\n${r.pct_montant_panne.toFixed(1)}%`,
-      ]),
-
-      theme: "grid",
+       body: category.rows.map((r) => [
+         r.code_sous_famille,
+         r.libelle_sous_famille,
+ 
+         r.nbr_existant,
+         r.nbr_pointage,
+         r.nbr_mat_pt,
+         r.potentiel_enregistre.toFixed(1),
+         r.potentiel_calcule.toFixed(1),
+         r.taux_location.toFixed(2),
+ 
+         `${r.heures_service.toFixed(1)}\n${r.pct_heures_service.toFixed(1)}%`,
+         `${r.heures_chomage.toFixed(1)}\n${r.pct_heures_chomage.toFixed(1)}%`,
+         `${r.heures_panne.toFixed(1)}\n${r.pct_heures_panne.toFixed(1)}%`,
+ 
+         `${r.montant_service.toFixed(2)}\n${r.pct_montant_service.toFixed(1)}%`,
+         `${r.montant_chomage.toFixed(2)}\n${r.pct_montant_chomage.toFixed(1)}%`,
+         `${r.montant_panne.toFixed(2)}\n${r.pct_montant_panne.toFixed(1)}%`,
+       ]),
+ 
+       foot: [[
+         "",
+         "TOTAL",
+         category.rows.reduce((s, r) => s + r.nbr_existant, 0),
+         category.rows.reduce((s, r) => s + r.nbr_pointage, 0),
+         category.rows.reduce((s, r) => s + r.nbr_mat_pt, 0),
+         category.rows.reduce((s, r) => s + r.potentiel_enregistre, 0).toFixed(1),
+         category.rows.reduce((s, r) => s + r.potentiel_calcule, 0).toFixed(1),
+         "",
+         category.rows.reduce((s, r) => s + r.heures_service, 0).toFixed(1),
+         category.rows.reduce((s, r) => s + r.heures_chomage, 0).toFixed(1),
+         category.rows.reduce((s, r) => s + r.heures_panne, 0).toFixed(1),
+         category.rows.reduce((s, r) => s + r.montant_service, 0).toFixed(2),
+         category.rows.reduce((s, r) => s + r.montant_chomage, 0).toFixed(2),
+         category.rows.reduce((s, r) => s + r.montant_panne, 0).toFixed(2),
+       ]],
+ 
+       showFoot: "lastPage",
 
       styles: {
         font: "helvetica",
@@ -445,11 +523,17 @@ export function exportAnalyseExploitation(
         },
       },
 
-      headStyles: {
-        fillColor: COLORS.secondary,
-        textColor: COLORS.primary,
-        fontStyle: "bold",
-      },
+       headStyles: {
+         fillColor: COLORS.secondary,
+         textColor: COLORS.primary,
+         fontStyle: "bold",
+       },
+
+       footStyles: {
+         fillColor: COLORS.light,
+         textColor: COLORS.primary,
+         fontStyle: "bold",
+       },
 
       alternateRowStyles: {
         fillColor: COLORS.light,

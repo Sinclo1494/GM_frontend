@@ -112,7 +112,6 @@ function RendementScreenImpl() {
         type: "linear" as const,
         position: "left" as const,
         min: 0,
-        max: 100,
         title: { display: true, text: "Pourcentage %" },
         ticks: { font: { size: 10 }, stepSize: 10 },
         border: { display: false },

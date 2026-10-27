@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { ChevronRight, ChevronDown, Loader2, XCircle, Package, CheckCircle, XCircle as RejectIcon } from "lucide-react";
+import axios from "axios";
 import { listPending, bulkConfirmPending, rejectPending } from "../api/pendingImports";
 import { useAuth } from "../context/useAuth";
 import { useSearchParams } from "react-router-dom";
@@ -26,6 +27,28 @@ interface PendingDetail {
     created_at: string | null;
   }>;
 }
+
+/**
+ * Extract a human readable message from an API error.
+ * The backend answers with { success, message, errors?, error_count? }.
+ */
+const extractErrorMessage = (err: unknown, fallback: string): string => {
+  const data = axios.isAxiosError(err) ? err.response?.data : undefined;
+  const details: string[] = Array.isArray(data?.errors) ? data.errors : [];
+  const count =
+    typeof data?.error_count === "number" ? data.error_count : details.length;
+  const message =
+    typeof data?.message === "string" && data.message ? data.message : fallback;
+
+  if (details.length === 0) {
+    return message;
+  }
+
+  const suffix = count > details.length ? ` (${count} erreurs)` : "";
+  const first = details.slice(0, 3).join("\n");
+
+  return `${message}${suffix}\n${first}`;
+};
 
 export default function PendingImportsPage() {
   const [batches, setBatches] = useState<PendingBatch[]>([]);
@@ -83,7 +106,7 @@ export default function PendingImportsPage() {
       }
     } catch (err) {
       console.error(err);
-      alert("Erreur lors de la confirmation en lot");
+      alert(extractErrorMessage(err, "Erreur lors de la confirmation en lot"));
     } finally {
       setConfirming(null);
     }
@@ -108,8 +131,7 @@ export default function PendingImportsPage() {
       setRejectReason("");
     } catch (err: unknown) {
       console.error(err);
-      const message = err instanceof Error ? err.message : "Erreur lors du rejet";
-      alert(message);
+      alert(extractErrorMessage(err, "Erreur lors du rejet"));
     } finally {
       setConfirming(null);
     }

@@ -255,8 +255,9 @@ const Navbar = () => {
                 <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-dark-text-secondary uppercase">Référentiels</div>
                 {hasPermission("gestion.entreprises") && <Link to="/gestion/entreprises" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Entreprises</Link>}
                 {hasPermission("gestion.filiales") && <Link to="/gestion/filiales" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Filiales</Link>}
-                {hasPermission("gestion.divisions") && <Link to="/gestion/divisions" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Divisions</Link>}
-                {hasPermission("gestion.familles_structures") && <Link to="/gestion/familles-structures" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Familles Structures</Link>}
+                {hasPermission("gestion.types_affectation") && <Link to="/gestion/types-affectation" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Types Affectation</Link>}
+                {hasPermission("gestion.types_situation") && <Link to="/gestion/types-situation" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Types Situation</Link>}
+                {hasPermission("gestion.types_etat_materiel") && <Link to="/gestion/types-etat-materiel" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Types État Matériel</Link>}
                 <div className="border-t border-slate-100 dark:border-dark-border my-1" />
                 <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-dark-text-secondary uppercase">Matériel</div>
                 {hasPermission("gestion.categories_gm") && <Link to="/gestion/categories-gm" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Catégories GM</Link>}
@@ -264,18 +265,15 @@ const Navbar = () => {
                 {hasPermission("gestion.sous_familles_materiel") && <Link to="/gestion/sous-familles-materiel" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Sous-Familles Matériel</Link>}
                 {hasPermission("gestion.marques_materiel") && <Link to="/gestion/marques-materiel" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Marques Matériel</Link>}
                 {hasPermission("gestion.types_marque") && <Link to="/gestion/types-marque" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Types de Marque</Link>}
-                {hasPermission("gestion.grand_materiel") && <Link to="/gestion/grand-materiel" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Grand Matériel</Link>}
                 <div className="border-t border-slate-100 dark:border-dark-border my-1" />
                 <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-dark-text-secondary uppercase">Opérations</div>
-                {hasPermission("gestion.types_affectation") && <Link to="/gestion/types-affectation" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Types Affectation</Link>}
-                {hasPermission("gestion.types_situation") && <Link to="/gestion/types-situation" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Types Situation</Link>}
-                {hasPermission("gestion.types_etat_materiel") && <Link to="/gestion/types-etat-materiel" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Types État Matériel</Link>}
+                {hasPermission("gestion.grand_materiel") && <Link to="/gestion/grand-materiel" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Grand Matériel</Link>}
                 {hasPermission("gestion.sites") && <Link to="/gestion/sites" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Sites</Link>}
                 {hasPermission("gestion.affectations") && <Link to="/gestion/affectations" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Affectations</Link>}
                 {hasPermission("gestion.situations") && <Link to="/gestion/situations" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Situations</Link>}
                 {hasPermission("gestion.pointages") && <Link to="/gestion/pointages" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Pointages</Link>}
                 {hasPermission("gestion.regularisations_gm") && <Link to="/gestion/regularisations-gm" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Régularisations GM</Link>}
-                {hasPermission("gestion.regularisations_mois") && <Link to="/gestion/regularisations-mois" onClick={() => setGestionOpen(false)} className={dropdownItemClass}>Régularisations Mensuelles</Link>}
+
               </div>
             )}
           </li>

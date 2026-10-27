@@ -1,4 +1,5 @@
-import { useState, useEffect, type ReactNode } from "react";
+import { useState, useEffect, useContext, type ReactNode } from "react";
+import { AuthContext } from "./AuthContext";
 import {
   DashboardFiltersContext,
   type DashboardFilters,
@@ -12,6 +13,7 @@ import {
   PERIODE_MOIS_COURANT,
   PERIODE_PERSONNALISEE,
 } from "./useDashboardFilters";
+import { lockedFiliale } from "./filialeScope";
 
 const STORAGE_KEY = "dashboard-v2-filters";
 
@@ -117,6 +119,22 @@ export function DashboardFiltersProvider({
     getStoredFilters(),
   );
 
+  // The default affiliate is a hardcoded code and the persisted filters are
+  // not scoped to an account, so a user assigned to another affiliate would
+  // keep filtering on a database they cannot read. Pin the filter to the
+  // affiliate the user is locked to. An explicit choice (including "Toutes")
+  // made afterwards is left untouched: the effect only reacts to a change of
+  // the locked affiliate itself.
+  const user = useContext(AuthContext)?.user ?? null;
+  const locked = lockedFiliale(user);
+
+  useEffect(() => {
+    if (!locked) return;
+    setFilters((prev) =>
+      prev.codeFiliale === locked ? prev : { ...prev, codeFiliale: locked },
+    );
+  }, [locked]);
+
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filters));
   }, [filters]);
@@ -198,7 +216,12 @@ export function DashboardFiltersProvider({
     setFilters((prev) => ({ ...prev, niveau: value }));
 
   const resetFilters = () => {
-    setFilters({ ...defaultDashboardFilters });
+    setFilters({
+      ...defaultDashboardFilters,
+      // A user locked to a single affiliate must not be sent back to the
+      // hardcoded default affiliate: it is outside their scope.
+      codeFiliale: locked ?? defaultDashboardFilters.codeFiliale,
+    });
   };
 
   return (

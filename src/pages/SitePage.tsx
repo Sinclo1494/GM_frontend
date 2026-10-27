@@ -46,6 +46,7 @@ export default function SitePage() {
         <CrudPage<Site>
             title="Sites"
             endpoint="site"
+            writePermission="gestion.sites.write"
             fields={fieldsWithOptions}
             columns={columns}
         />

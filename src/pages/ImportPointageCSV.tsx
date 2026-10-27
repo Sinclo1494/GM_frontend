@@ -29,6 +29,8 @@ import {
 
 import { POINTAGE_EXPECTED_FIELDS } from "../constants/expectedFields";
 
+import { useImportFiliale } from "../hooks/useImportFiliale";
+
 import type {
     ValidationResult,
     ImportResult,
@@ -42,6 +44,13 @@ const STORAGE_KEY = "pointage-column-mapping";
 
 export default function PointageImportCsvPage() {
 
+    const {
+        isAdmin,
+        userFiliale,
+        selectedFiliale,
+        setSelectedFiliale,
+    } = useImportFiliale();
+
     // ---------------------------------------------------------
     // State
     // ---------------------------------------------------------
@@ -52,9 +61,6 @@ export default function PointageImportCsvPage() {
 
     const [filiales, setFiliales] =
         useState<FilialeOption[]>([]);
-
-    const [selectedFiliale, setSelectedFiliale] =
-        useState("");
 
     const [preview, setPreview] =
         useState<PreviewColumn[]>([]);
@@ -513,6 +519,8 @@ export default function PointageImportCsvPage() {
                                         onFilialeChange={
                                             handleFilialeChange
                                         }
+                                        isAdmin={isAdmin}
+                                        userFiliale={userFiliale}
                                     />
 
                                 </div>

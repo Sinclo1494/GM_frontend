@@ -29,6 +29,8 @@ import {
 
 import { GM_EXPECTED_FIELDS } from "../constants/expectedFields";
 
+import { useImportFiliale } from "../hooks/useImportFiliale";
+
 import type {
     ValidationResult,
     ImportResult,
@@ -43,6 +45,13 @@ const STORAGE_KEY = "gm-column-mapping";
 
 export default function GMImportCsvPage() {
 
+    const {
+        isAdmin,
+        userFiliale,
+        selectedFiliale,
+        setSelectedFiliale,
+    } = useImportFiliale();
+
     // ---------------------------------------------------------
     // State
     // ---------------------------------------------------------
@@ -53,9 +62,6 @@ export default function GMImportCsvPage() {
 
     const [filiales, setFiliales] =
         useState<FilialeOption[]>([]);
-
-    const [selectedFiliale, setSelectedFiliale] =
-        useState("");
 
     const [preview, setPreview] =
         useState<PreviewColumn[]>([]);
@@ -514,6 +520,8 @@ export default function GMImportCsvPage() {
                                         onFilialeChange={
                                             handleFilialeChange
                                         }
+                                        isAdmin={isAdmin}
+                                        userFiliale={userFiliale}
                                     />
 
                                 </div>

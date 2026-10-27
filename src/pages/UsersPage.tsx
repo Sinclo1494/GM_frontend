@@ -4,17 +4,19 @@ import { components } from "../theme/components";
 import CrudTable, { type ColumnDef, type SortField, type SortOrder } from "../components/Crud/CrudTable";
 import EntityFormDialog, { type FieldConfig } from "../components/Crud/EntityFormDialog";
 import { getUsers, createUser, updateUser, deleteUser, getUser, getUserPermissions, updateUserPermissions, setUserPassword } from "../api/userService";
+import { useEntityOptions } from "../components/Crud/useEntityOptions";
 import type { UserInfo } from "../types/user";
 import UserPermissionsDialog from "../components/administration/users/UserPermissionsDialog";
 import { usePermissions } from "../auth/PermissionContext";
 
-const fields: FieldConfig[] = [
+const getFields = (filialeOptions: { value: string; label: string }[]): FieldConfig[] => [
   { name: "username", label: "Nom d'utilisateur", type: "text", required: true },
   { name: "first_name", label: "Prénom", type: "text" },
   { name: "last_name", label: "Nom", type: "text" },
   { name: "email", label: "Email", type: "text" },
   { name: "password", label: "Mot de passe", type: "password", required: true },
   { name: "is_active", label: "Actif", type: "checkbox" },
+  { name: "filiale", label: "Filiale", type: "select", options: [{ value: "", label: "— Aucune —" }, ...filialeOptions] },
 ];
 
 const columns: ColumnDef<UserInfo>[] = [
@@ -44,10 +46,20 @@ const columns: ColumnDef<UserInfo>[] = [
     width: "min-w-[200px]",
     render: (_val: unknown, row: UserInfo) => {
       const count = (row.permissions || []).length;
+      const perms = row.permissions || [];
+      const hasAllFiliales =
+        perms.includes("administration.all_filiales") ||
+        perms.includes("administration.all_filiales.read") ||
+        perms.includes("administration.all_filiales.write");
       return (
         <div className="flex items-center gap-1">
           <Shield className="h-4 w-4 text-gray-400" />
           <span className="text-sm">{count} droit{count !== 1 ? "s" : ""}</span>
+          {hasAllFiliales && (
+            <span className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-1.5 py-0.5 rounded-full font-semibold">
+              Toutes filiales
+            </span>
+          )}
         </div>
       );
     },
@@ -59,6 +71,8 @@ export default function UsersPage() {
   const canManageUsers = currentUser?.is_superuser
     || currentPermissions.includes("administration.users")
     || currentPermissions.includes("administration.users.write");
+
+  const { options: filialeOptions } = useEntityOptions<any>("filiale", "code_filiale", "libelle_filiale");
 
   const [data, setData] = useState<UserInfo[]>([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -166,6 +180,7 @@ export default function UsersPage() {
       email: "",
       password: "",
       is_active: true,
+      filiale: "",
     });
     setFormError(null);
     setDialogOpen(true);
@@ -182,6 +197,7 @@ export default function UsersPage() {
         last_name: detail.last_name,
         email: detail.email,
         is_active: detail.is_active,
+        filiale: detail.filiale ?? "",
       });
     } catch {
       setFormValues({
@@ -190,6 +206,7 @@ export default function UsersPage() {
         last_name: user.last_name,
         email: user.email,
         is_active: user.is_active,
+        filiale: user.filiale ?? "",
       });
     }
     setDialogOpen(true);
@@ -197,14 +214,18 @@ export default function UsersPage() {
 
   const handleSubmit = async (values: Record<string, unknown>) => {
     try {
+      const { password, ...rest } = values;
+      const payload = { ...rest };
+      if (payload.filiale === "" || payload.filiale === null) {
+        payload.filiale = null;
+      }
       if (editingUser) {
-        const { password, ...rest } = values;
-        await updateUser(editingUser.id, rest as { first_name?: string; last_name?: string; email?: string; is_active?: boolean });
+        await updateUser(editingUser.id, payload as { first_name?: string; last_name?: string; email?: string; is_active?: boolean; filiale?: number | null });
         if (password && typeof password === "string" && password.trim() !== "") {
           await setUserPassword(editingUser.id, password);
         }
       } else {
-        await createUser(values as { username: string; first_name: string; last_name: string; email: string; password: string; is_active?: boolean });
+        await createUser(payload as { username: string; first_name: string; last_name: string; email: string; password: string; is_active?: boolean; filiale?: number | null });
       }
       setDialogOpen(false);
       fetchData();
@@ -350,7 +371,7 @@ export default function UsersPage() {
           open={dialogOpen}
           onClose={() => setDialogOpen(false)}
           onSubmit={handleSubmit}
-          fields={fields}
+          fields={getFields(filialeOptions)}
           initialValues={formValues}
           error={formError}
           title={editingUser ? `Modifier ${editingUser.username}` : "Nouvel utilisateur"}

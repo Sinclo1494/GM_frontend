@@ -44,6 +44,7 @@ export default function SousFamilleMaterielPage() {
         <CrudPage<SousFamilleMateriel>
             title="Sous-Familles Matériel"
             endpoint="sous-famille-materiel"
+            writePermission="gestion.sous_familles_materiel.write"
             fields={fieldsWithOptions}
             columns={columns}
         />

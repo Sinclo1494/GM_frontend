@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { resetAllMocks } from "../test-utils";
 import GrandMaterielPage from "../../pages/GrandMaterielPage";
+import CrudPage from "../../components/Crud/CrudPage";
 
 vi.mock("../../components/Crud/CrudPage", () => ({
   default: vi.fn(({ title, endpoint, fields, columns, initialFormValues, beforeSubmit }) => (
@@ -50,5 +51,30 @@ describe("GrandMaterielPage", () => {
     render(<GrandMaterielPage />);
     expect(screen.getByTestId("has-initial-form").textContent).toBe("yes");
     expect(screen.getByTestId("has-before-submit").textContent).toBe("yes");
+  });
+
+  it("exposes a status column with a select filter on the status param", () => {
+    render(<GrandMaterielPage />);
+    const columns = (CrudPage as unknown as { mock: { calls: any[][] } }).mock.calls[0][0].columns;
+    const statusColumn = columns.find((c: any) => c.key === "status");
+
+    expect(statusColumn).toBeDefined();
+    expect(statusColumn.label).toBe("Statut");
+    expect(statusColumn.filter.type).toBe("select");
+    expect(statusColumn.filter.param).toBe("status");
+    expect(statusColumn.filter.options).toEqual([
+      { value: "PENDING", label: "En attente" },
+      { value: "CONFIRMED", label: "Confirmé" },
+      { value: "REJECTED", label: "Rejeté" },
+    ]);
+  });
+
+  it("keeps a single column labelled Statut", () => {
+    render(<GrandMaterielPage />);
+    const columns = (CrudPage as unknown as { mock: { calls: any[][] } }).mock.calls[0][0].columns;
+    const labelled = columns.filter((c: any) => c.label === "Statut");
+
+    expect(labelled).toHaveLength(1);
+    expect(labelled[0].key).toBe("status");
   });
 });

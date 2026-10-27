@@ -35,6 +35,7 @@ export default function CategorieGMPage() {
         <CrudPage<CategorieGM>
             title="Catégories GM"
             endpoint="categorie-gm"
+            writePermission="gestion.categories_gm.write"
             fields={fields}
             columns={columns}
         />

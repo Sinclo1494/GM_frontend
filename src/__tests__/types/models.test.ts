@@ -158,6 +158,8 @@ describe('types/models', () => {
       email: 'u@e.com',
       is_active: true,
       is_superuser: false,
+      filiale: null,
+      accessible_databases: [],
       permissions: [],
       groups: [],
     };

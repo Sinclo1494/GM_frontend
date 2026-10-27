@@ -31,6 +31,7 @@ export default function TypeSituationPage() {
         <CrudPage<TypeSituation>
             title="Types de Situation"
             endpoint="type-situation"
+            writePermission="gestion.types_situation.write"
             fields={fieldsWithOptions}
             columns={columns}
         />

@@ -26,6 +26,7 @@ export interface ImportResult {
     success: boolean;
     imported_rows: number;
     filiale?: string;
+    import_batch_id?: string;
     message?: string;
     validation_summary?: ValidationSummaryData;
 }

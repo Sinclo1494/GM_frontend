@@ -43,6 +43,7 @@ export default function SituationMaterielPage() {
         <CrudPage<SituationMateriel>
             title="Situations Matériel"
             endpoint="situation-materiel"
+            writePermission="gestion.situations.write"
             fields={enrichedFields}
             columns={columns}
         />

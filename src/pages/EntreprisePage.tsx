@@ -37,6 +37,7 @@ export default function EntreprisePage() {
         <CrudPage<Entreprise>
             title="Entreprises"
             endpoint="entreprise"
+            writePermission="gestion.entreprises.write"
             fields={fields}
             columns={columns}
         />
