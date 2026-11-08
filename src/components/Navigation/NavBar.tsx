@@ -218,7 +218,7 @@ const Navbar = () => {
                     Journal Matériel
                   </Link>
                 )}
-                {hasPermission("analyse.journal_materiel") && (
+                {hasPermission("analyse.mgt_dashboard") && (
                   <Link to="/reports/mgt-dashboard" onClick={() => setReportsOpen(false)} className={dropdownItemClass}>
                     Mgt Dashboard
                   </Link>

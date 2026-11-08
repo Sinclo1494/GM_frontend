@@ -61,7 +61,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/admin/journalisation" element={<ProtectedRoute permission="administration.journalisation"><Journalisation /></ProtectedRoute>} />
             <Route path="/admin/external-apps" element={<ProtectedRoute permission="administration.users"><ExternalAppsPage /></ProtectedRoute>} />
               <Route path="/reports/journal-materiel" element={<ProtectedRoute permission="analyse.journal_materiel"><JournalMateriel /></ProtectedRoute>} />
-<Route path="/reports/mgt-dashboard" element={<ProtectedRoute permission="analyse.journal_materiel"><MgtDashboard /></ProtectedRoute>} />
+<Route path="/reports/mgt-dashboard" element={<ProtectedRoute permission="analyse.mgt_dashboard"><MgtDashboard /></ProtectedRoute>} />
               <Route path="/reports/analyse-quantitative" element={<ProtectedRoute permission="analyse.quantitative"><AnalyseQuantitative /></ProtectedRoute>} />
               <Route path="/reports/analyse-exploitation" element={<ProtectedRoute permission="analyse.exploitation"><AnalyseExploitation /></ProtectedRoute>} />
               <Route path="/admin/pending-imports" element={<ProtectedRoute permission="administration.users"><PendingImports /></ProtectedRoute>} />

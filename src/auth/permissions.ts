@@ -16,6 +16,7 @@ export const PERMISSIONS: PermissionDefinition[] = [
   { key: "administration.external_apps", label: "Applications externes", category: "administration", route: "/admin/external-apps", hasRead: true, hasWrite: true },
 
   { key: "analyse.dashboard", label: "Dashboard", category: "analyse", route: "/", hasRead: true, hasWrite: false },
+  { key: "analyse.mgt_dashboard", label: "MGT Dashboard", category: "analyse", route: "/reports/mgt-dashboard", hasRead: true, hasWrite: false },
   { key: "analyse.journal_materiel", label: "Journal Matériel", category: "analyse", route: "/reports/journal-materiel", hasRead: true, hasWrite: false },
   { key: "analyse.quantitative", label: "Analyse quantitative", category: "analyse", route: "/reports/analyse-quantitative", hasRead: true, hasWrite: false },
   { key: "analyse.exploitation", label: "Analyse exploitation", category: "analyse", route: "/reports/analyse-exploitation", hasRead: true, hasWrite: false },
@@ -68,6 +69,7 @@ export const PERMISSION_CATEGORIES: PermissionCategory[] = [
 
 export const PERMISSION_DEPENDENCIES: Record<string, string[]> = {
   "analyse.dashboard": ["gestion.filiales.read", "gestion.familles_materiel.read"],
+  "analyse.mgt_dashboard": ["gestion.filiales.read", "gestion.familles_materiel.read"],
   "import.grand_materiel": ["gestion.filiales.read", "gestion.sous_familles_materiel.read", "gestion.types_marque.read"],
   "import.pointage": ["gestion.filiales.read", "gestion.affectations.read", "gestion.pointages.read"],
   "import.type_marque": ["gestion.marques_materiel.read"],
