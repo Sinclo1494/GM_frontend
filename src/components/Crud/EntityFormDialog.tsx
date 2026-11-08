@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { X } from "lucide-react";
+import { X, Copy, RefreshCw } from "lucide-react";
 import { components } from "../../theme/components";
 import SearchableSelect from "../common/SearchableSelect";
 
-export type FieldType = "text" | "number" | "date" | "datetime-local" | "select" | "textarea" | "checkbox" | "readonly" | "password";
+export type FieldType = "text" | "number" | "date" | "datetime-local" | "select" | "textarea" | "checkbox" | "readonly" | "password" | "multiselect";
 
 export interface FieldConfig {
     name: string;
@@ -15,6 +15,8 @@ export interface FieldConfig {
     readOnly?: boolean;
     colSpan?: number;
     section?: string;
+    copyable?: boolean;
+    onGenerate?: () => string;
 }
 
 interface EntityFormDialogProps {
@@ -36,6 +38,63 @@ function getFieldError(
     if (!err || err.length === 0) return undefined;
     return err[0];
 }
+
+const copyToClipboard = async (text: string) => {
+    try {
+        await navigator.clipboard.writeText(text);
+    } catch {
+        // ignore
+    }
+};
+
+const FieldInputWithActions = ({
+    field,
+    value,
+    handleChange,
+    submitting,
+    inputEl,
+}: {
+    field: FieldConfig;
+    value: unknown;
+    handleChange: (name: string, value: unknown) => void;
+    submitting: boolean;
+    inputEl: React.ReactNode;
+}) => {
+    const hasActions = field.copyable || field.onGenerate;
+    if (!hasActions) return <>{inputEl}</>;
+
+    return (
+        <div className="flex">
+            <div className="flex-1">
+                {inputEl}
+            </div>
+            <div className="flex flex-col gap-1 ml-1">
+                {field.onGenerate && (
+                    <button
+                        type="button"
+                        disabled={submitting}
+                        onClick={() => handleChange(field.name, field.onGenerate!())}
+                        className="px-2 py-1 text-xs rounded border border-slate-300 dark:border-dark-border hover:bg-slate-100 dark:hover:bg-dark-bg-tertiary text-gray-600 dark:text-dark-text-secondary"
+                        title="Générer"
+                    >
+                        <RefreshCw className="h-3 w-3" />
+                    </button>
+                )}
+                {field.copyable && (
+                    <button
+                        type="button"
+                        disabled={submitting}
+                        onClick={() => copyToClipboard(String(value ?? ""))}
+                        className="px-2 py-1 text-xs rounded border border-slate-300 dark:border-dark-border hover:bg-slate-100 dark:hover:bg-dark-bg-tertiary text-gray-600 dark:text-dark-text-secondary"
+                        title="Copier"
+                    >
+                        <Copy className="h-3 w-3" />
+                    </button>
+                )}
+            </div>
+        </div>
+    );
+};
 
 const EntityFormDialog: React.FC<EntityFormDialogProps> = ({
     open,
@@ -145,14 +204,22 @@ const EntityFormDialog: React.FC<EntityFormDialogProps> = ({
                                     </label>
 
                                     {field.type === "text" || field.type === "readonly" ? (
-                                        <input
-                                            type="text"
-                                            value={String(value ?? "")}
-                                            readOnly={field.readOnly}
-                                            disabled={field.readOnly || submitting}
-                                            placeholder={field.placeholder}
-                                            onChange={(e) => handleChange(field.name, e.target.value)}
-                                            className={components.input + (fieldError ? " border-red-300 focus:border-red-500 focus:ring-red-100" : "")}
+                                        <FieldInputWithActions
+                                            field={field}
+                                            value={value}
+                                            handleChange={handleChange}
+                                            submitting={submitting}
+                                            inputEl={
+                                                <input
+                                                    type="text"
+                                                    value={String(value ?? "")}
+                                                    readOnly={field.readOnly}
+                                                    disabled={field.readOnly || submitting}
+                                                    placeholder={field.placeholder}
+                                                    onChange={(e) => handleChange(field.name, e.target.value)}
+                                                    className={components.input + (fieldError ? " border-red-300 focus:border-red-500 focus:ring-red-100" : "")}
+                                                />
+                                            }
                                         />
                                     ) : field.type === "number" ? (
                                         <input
@@ -188,6 +255,24 @@ const EntityFormDialog: React.FC<EntityFormDialogProps> = ({
                                             disabled={submitting}
                                             error={!!fieldError}
                                         />
+                                    ) : field.type === "multiselect" ? (
+                                        <SearchableSelect
+                                            value=""
+                                            onChange={() => {}}
+                                            multi
+                                            selectedValues={Array.isArray(value) ? (value as string[]) : []}
+                                            onToggle={(val) => {
+                                                const current = Array.isArray(value) ? (value as string[]) : [];
+                                                const next = current.includes(val)
+                                                    ? current.filter((v) => v !== val)
+                                                    : [...current, val];
+                                                handleChange(field.name, next);
+                                            }}
+                                            options={field.options ?? []}
+                                            placeholder="Sélectionner..."
+                                            disabled={submitting}
+                                            error={!!fieldError}
+                                        />
                                     ) : field.type === "textarea" ? (
                                         <textarea
                                             value={String(value ?? "")}
@@ -197,13 +282,21 @@ const EntityFormDialog: React.FC<EntityFormDialogProps> = ({
                                             className={components.input + " min-h-[80px]" + (fieldError ? " border-red-300 focus:border-red-500 focus:ring-red-100" : "")}
                                         />
                                     ) : field.type === "password" ? (
-                                        <input
-                                            type="password"
-                                            value={String(value ?? "")}
-                                            disabled={submitting}
-                                            placeholder={field.placeholder}
-                                            onChange={(e) => handleChange(field.name, e.target.value)}
-                                            className={components.input + (fieldError ? " border-red-300 focus:border-red-500 focus:ring-red-100" : "")}
+                                        <FieldInputWithActions
+                                            field={field}
+                                            value={value}
+                                            handleChange={handleChange}
+                                            submitting={submitting}
+                                            inputEl={
+                                                <input
+                                                    type="password"
+                                                    value={String(value ?? "")}
+                                                    disabled={submitting}
+                                                    placeholder={field.placeholder}
+                                                    onChange={(e) => handleChange(field.name, e.target.value)}
+                                                    className={components.input + (fieldError ? " border-red-300 focus:border-red-500 focus:ring-red-100" : "")}
+                                                />
+                                            }
                                         />
                                     ) : field.type === "checkbox" ? (
                                         <input

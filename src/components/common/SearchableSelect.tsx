@@ -16,6 +16,9 @@ interface SearchableSelectProps {
     disabled?: boolean;
     error?: boolean;
     onClick?: (e: React.MouseEvent) => void;
+    multi?: boolean;
+    selectedValues?: string[];
+    onToggle?: (value: string) => void;
 }
 
 const SearchableSelect: React.FC<SearchableSelectProps> = ({
@@ -27,6 +30,9 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
     disabled = false,
     error = false,
     onClick,
+    multi = false,
+    selectedValues = [],
+    onToggle,
 }) => {
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState("");
@@ -50,6 +56,10 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
         : options;
 
     const handleSelect = (opt: SelectOption) => {
+        if (multi && onToggle) {
+            onToggle(opt.value);
+            return;
+        }
         onChange(opt.value);
         setOpen(false);
         setSearch("");
@@ -70,6 +80,8 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
         " cursor-pointer text-left flex items-center justify-between " +
         className;
 
+    const isMultiSelected = (opt: string) => selectedValues.includes(opt);
+
     return (
         <div ref={containerRef} className="relative w-full" onClick={(e) => { e.stopPropagation(); onClick?.(e); }}>
             <button
@@ -79,7 +91,11 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
                 className={baseClassName}
             >
                 <span className={value ? "truncate" : "text-gray-400 dark:text-dark-text-secondary"}>
-                    {selectedLabel || placeholder}
+                    {multi
+                        ? (selectedValues.length > 0
+                            ? `${selectedValues.length} sélectionné(s)`
+                            : placeholder)
+                        : (selectedLabel || placeholder)}
                 </span>
                 <ChevronDown className="h-4 w-4 text-gray-400 ml-2 flex-shrink-0" />
             </button>
@@ -102,11 +118,20 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
                                     key={opt.value}
                                     onClick={(e) => { e.stopPropagation(); handleSelect(opt); }}
                                     className={`px-3 py-2 cursor-pointer text-sm hover:bg-blue-50 dark:hover:bg-dark-bg-tertiary whitespace-normal break-words border-t border-slate-100 dark:border-dark-border first:border-t-0 ${
-                                        opt.value === value
-                                            ? "bg-blue-100 dark:bg-blue-900/30 font-medium"
-                                            : "text-gray-700 dark:text-dark-text-primary"
+                                        multi
+                                            ? isMultiSelected(opt.value)
+                                                ? "bg-blue-100 dark:bg-blue-900/30 font-medium"
+                                                : "text-gray-700 dark:text-dark-text-primary"
+                                            : opt.value === value
+                                                ? "bg-blue-100 dark:bg-blue-900/30 font-medium"
+                                                : "text-gray-700 dark:text-dark-text-primary"
                                     }`}
                                 >
+                                    {multi && (
+                                        <span className="mr-2">
+                                            {isMultiSelected(opt.value) ? "☑" : "☐"}
+                                        </span>
+                                    )}
                                     {opt.label}
                                 </div>
                             ))

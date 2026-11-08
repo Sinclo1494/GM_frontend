@@ -13,6 +13,7 @@ export const PERMISSIONS: PermissionDefinition[] = [
   { key: "administration.users", label: "Utilisateurs", category: "administration", route: "/admin/users", hasRead: true, hasWrite: true },
   { key: "administration.all_filiales", label: "Accès à toutes les filiales", category: "administration", route: "/admin/users", hasRead: true, hasWrite: true },
   { key: "administration.journalisation", label: "Journalisation", category: "administration", route: "/admin/journalisation", hasRead: true, hasWrite: false },
+  { key: "administration.external_apps", label: "Applications externes", category: "administration", route: "/admin/external-apps", hasRead: true, hasWrite: true },
 
   { key: "analyse.dashboard", label: "Dashboard", category: "analyse", route: "/", hasRead: true, hasWrite: false },
   { key: "analyse.journal_materiel", label: "Journal Matériel", category: "analyse", route: "/reports/journal-materiel", hasRead: true, hasWrite: false },

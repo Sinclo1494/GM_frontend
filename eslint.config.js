@@ -3,6 +3,7 @@ import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
+import typescript from 'typescript'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
@@ -17,6 +18,9 @@ export default defineConfig([
     ],
     languageOptions: {
       globals: globals.browser,
+      parserOptions: {
+        typescript,
+      },
     },
     rules: {
       'react-hooks/set-state-in-effect': 'warn',

@@ -201,3 +201,21 @@ export const getMaterialDetails = async (params: MaterialDetailParams = {}) => {
   return data;
 };
 
+
+export const getMgtDecadaire = async (params: any = {}) => {
+  const res = await axios.get(`${API}/mgt-dashboard/decadaire/`, { params, headers: getAuthHeaders() });
+  return res.data;
+};
+export const getMgtMensuel = async (params: any = {}) => {
+  const res = await axios.get(`${API}/mgt-dashboard/mensuel/`, { params, headers: getAuthHeaders() });
+  return res.data;
+};
+export const getMgtDecadaireRecap = async (params: any = {}) => {
+  const res = await axios.get(`${API}/mgt-dashboard/decadaire-recap/`, { params, headers: getAuthHeaders() });
+  return res.data;
+};
+export const getMgtMensuelRecap = async (params: any = {}) => {
+  const res = await axios.get(`${API}/mgt-dashboard/mensuel-recap/`, { params, headers: getAuthHeaders() });
+  return res.data;
+};
+

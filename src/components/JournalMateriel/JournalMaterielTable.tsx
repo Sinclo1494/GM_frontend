@@ -39,6 +39,7 @@ interface JournalMateriel {
     libelle_filiale: string | null;
     libelle_sous_famille: string | null;
     libelle_type_marque: string | null;
+    libelle_site: string | null;
     est_bloque: boolean;
     user_id: number;
     code_filiale_g: string;
@@ -62,6 +63,7 @@ type SortField =
     | "libelle_categorie"
     | "libelle_marque"
     | "libelle_filiale"
+    | "libelle_site"
     | "est_bloque"
     | null;
 type SortOrder = "asc" | "desc";
@@ -123,12 +125,11 @@ const FilterInput = ({
 
 const JournalMaterielTable: React.FC = () => {
     const { options: filialeOptions } = useEntityOptions<any>("filiale", "code_filiale", "libelle_filiale");
-    const { options: familleOptions } = useEntityOptions<any>("famille-materiel", "code_famille", "libelle_famille");
-    const { options: categorieOptions } = useEntityOptions<any>("categorie-gm", "code_categorie", "libelle_categorie");
-    const { options: sousFamilleOptions } = useEntityOptions<any>("sous-famille-materiel", "code_sous_famille", "libelle_sous_famille");
-    const { options: marqueOptions } = useEntityOptions<any>("marque-materiel", "code_marque", "libelle_marque");
-    const { options: typeMarqueOptions } = useEntityOptions<any>("type-marque", "code_type_marque", "libelle_type_marque");
-
+    const { options: familleOptions } = useEntityOptions<any>("famille-materiel", "code_famille", "libelle_famille", {}, 1000);
+    const { options: categorieOptions } = useEntityOptions<any>("categorie-gm", "code_categorie", "libelle_categorie", {}, 1000);
+    const { options: sousFamilleOptions } = useEntityOptions<any>("sous-famille-materiel", "code_sous_famille", "libelle_sous_famille", {}, 1000);
+    const { options: marqueOptions } = useEntityOptions<any>("marque-materiel", "code_marque", "libelle_marque", {}, 1000);
+    const { options: typeMarqueOptions } = useEntityOptions<any>("type-marque", "code_type_marque", "libelle_type_marque", {}, 1000);
     const filialeFilterOptions = useMemo(() => toCodeLibelle(filialeOptions), [filialeOptions]);
     const familleFilterOptions = useMemo(() => toCodeLibelle(familleOptions), [familleOptions]);
     const categorieFilterOptions = useMemo(() => toCodeLibelle(categorieOptions), [categorieOptions]);
@@ -199,6 +200,7 @@ const columns = [
             sortable: true,
             filterable: true,
         },
+        { key: "libelle_site", label: "Site", width: "min-w-[150px]", sortable: true, filterable: true },
         { key: "libelle_filiale", label: "Filiale", width: "min-w-[130px]", sortable: true, filterable: true },
         { key: "libelle_categorie", label: "Catégorie", width: "min-w-[180px]", sortable: true, filterable: true },
         { key: "libelle_famille", label: "Famille Matériel", width: "min-w-[180px]", sortable: true, filterable: true },
@@ -230,6 +232,22 @@ const columns = [
         { key: "puissance_materiel", label: "Puissance", width: "min-w-[150px]", sortable: true, filterable: true },
     ] as const;
 
+    const filterControls = [
+        { key: "code_materiel", label: "Code Matériel" },
+        { key: "designation", label: "Désignation" },
+        { key: "num_serie", label: "N° Série" },
+        { key: "immatriculation", label: "Immatriculation" },
+        { key: "libelle_filiale", label: "Filiale" },
+        { key: "libelle_categorie", label: "Catégorie" },
+        { key: "libelle_famille", label: "Famille Matériel" },
+        { key: "libelle_sous_famille", label: "Sous Famille" },
+        { key: "libelle_marque", label: "Marque Matériel" },
+        { key: "libelle_type_marque", label: "Type Marque" },
+        { key: "libelle_site", label: "Site" },
+        { key: "date_acquisition", label: "Date Acquisition" },
+        { key: "puissance_materiel", label: "Puissance" },
+    ] as const;
+
     const computedTableWidth = (() => {
         let total = 0;
         columns.forEach((col) => {
@@ -250,6 +268,7 @@ const columns = [
         immatriculation: "",
         libelle_sous_famille: "",
         libelle_type_marque: "",
+        libelle_site: "",
         libelle_famille: "",
         libelle_categorie: "",
         libelle_marque: "",
@@ -265,6 +284,7 @@ const columns = [
         immatriculation: "",
         libelle_sous_famille: "",
         libelle_type_marque: "",
+        libelle_site: "",
         libelle_famille: "",
         libelle_categorie: "",
         libelle_marque: "",
@@ -273,6 +293,16 @@ const columns = [
         puissance_materiel: "",
         est_bloque: "",
     });
+
+    const siteParams = useMemo(() => {
+        const p: Record<string, string> = {};
+        if (columnFiltersInput.libelle_filiale) {
+            p.code_filiale = columnFiltersInput.libelle_filiale;
+        }
+        return p;
+    }, [columnFiltersInput.libelle_filiale]);
+
+    const { options: siteOptions } = useEntityOptions<any>("site", "code_site", "libelle_site", siteParams, 1000);
 
     const fetchData = useCallback(async () => {
         if (abortControllerRef.current) {
@@ -300,6 +330,7 @@ const columns = [
             if (columnFilters.immatriculation) params.immatriculation = columnFilters.immatriculation;
             if (columnFilters.libelle_sous_famille) params.libelle_sous_famille = columnFilters.libelle_sous_famille;
             if (columnFilters.libelle_type_marque) params.libelle_type_marque = columnFilters.libelle_type_marque;
+            if (columnFilters.libelle_site) params.libelle_site = columnFilters.libelle_site;
             if (columnFilters.libelle_famille) params.libelle_famille = columnFilters.libelle_famille;
             if (columnFilters.libelle_categorie) params.libelle_categorie = columnFilters.libelle_categorie;
             if (columnFilters.libelle_marque) params.libelle_marque = columnFilters.libelle_marque;
@@ -363,6 +394,13 @@ const columns = [
         };
     }, [columnFiltersInput]);
 
+    // Cascade: when a filiale is selected, reset the site filter and reload site
+    // options for that filiale (server-side via the code_filiale param).
+    useEffect(() => {
+        setColumnFiltersInput((prev) => ({ ...prev, libelle_site: "" }));
+        setColumnFilters((prev) => ({ ...prev, libelle_site: "" }));
+    }, [columnFiltersInput.libelle_filiale, setColumnFiltersInput, setColumnFilters]);
+
     const handleColumnFilterChange = (key: keyof typeof columnFiltersInput) => (value: string) => {
         setColumnFiltersInput((prev) => ({ ...prev, [key]: value }));
     };
@@ -381,13 +419,15 @@ const columns = [
                 return [{ value: "", label: "Tous" }, ...marqueFilterOptions];
             case "libelle_type_marque":
                 return [{ value: "", label: "Tous" }, ...typeMarqueFilterOptions];
+            case "libelle_site":
+                return [{ value: "", label: "Tous" }, ...toCodeLibelle(siteOptions)];
             default:
                 return null;
         }
     };
 
     const isSearchableSelectFilter = (key: string) => {
-        return ["libelle_filiale", "libelle_categorie", "libelle_famille", "libelle_sous_famille", "libelle_marque", "libelle_type_marque"].includes(key);
+        return ["libelle_filiale", "libelle_categorie", "libelle_famille", "libelle_sous_famille", "libelle_marque", "libelle_type_marque", "libelle_site"].includes(key);
     };
 
     const handleSort = (field: SortField) => {
@@ -422,6 +462,7 @@ const columns = [
             libelle_categorie: "",
             libelle_marque: "",
             libelle_filiale: "",
+            libelle_site: "",
             date_acquisition: "",
             puissance_materiel: "",
             est_bloque: "",
@@ -437,6 +478,7 @@ const columns = [
             libelle_categorie: "",
             libelle_marque: "",
             libelle_filiale: "",
+            libelle_site: "",
             date_acquisition: "",
             puissance_materiel: "",
             est_bloque: "",
@@ -550,13 +592,6 @@ const columns = [
                                 </label>
                             </div>
                         )}
-
-                        <button
-                            onClick={handleReset}
-                            className={components.button.secondary}
-                        >
-                            Réinitialiser
-                        </button>
                     </div>
                 </div>
 
@@ -578,6 +613,59 @@ const columns = [
                 >
                     <div className="h-px"
                         style={{ width: `${computedTableWidth}px` }} />
+                </div>
+
+                {/* Filtres de colonnes */}
+                <div className="p-4 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl">
+                    <div className="flex flex-wrap items-end gap-4">
+                        {filterControls.map((f) => {
+                            const isSearchable = isSearchableSelectFilter(f.key);
+                            const value = columnFiltersInput[f.key];
+                            return (
+                                <div key={f.key} className="flex flex-col gap-1 flex-1 min-w-[170px]">
+                                    <label className={components.label}>{f.label}</label>
+                                    {isSearchable ? (
+                                        <SearchableSelect
+                                            value={value}
+                                            onChange={handleColumnFilterChange(f.key)}
+                                            options={getFilterOptions(f.key) || []}
+                                            placeholder="Tous"
+                                            className="w-full py-1 text-xs"
+                                            onClick={(e) => e.stopPropagation()}
+                                        />
+                                    ) : (
+                                        <FilterInput
+                                            value={value}
+                                            onChange={handleColumnFilterChange(f.key)}
+                                        />
+                                    )}
+                                </div>
+                            );
+                        })}
+                        <div className="flex flex-col gap-1 flex-1 min-w-[170px]">
+                            <label className={components.label}>Statut</label>
+                            <select
+                                value={columnFilters.est_bloque}
+                                onChange={(e) =>
+                                    setColumnFilters((prev) => ({
+                                        ...prev,
+                                        est_bloque: e.target.value,
+                                    }))
+                                }
+                                onClick={(e) => e.stopPropagation()}
+                                className={components.input}
+                            >
+                                <option value="">Tous</option>
+                                <option value="false">Actif</option>
+                                <option value="true">Bloqué</option>
+                            </select>
+                        </div>
+                        <div className="flex flex-col gap-1 flex-1 min-w-[170px]">
+                            <button type="button" onClick={handleReset} className={`${components.button.secondary} h-10 px-4 w-full`}>
+                                Réinitialiser
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Table */}
@@ -617,26 +705,7 @@ const columns = [
                                                 />
                                             </div>
 
-                                            {column.filterable && (
-                                                <>
-                                                    {isSearchableSelectFilter(column.key as string) ? (
-                                                        <SearchableSelect
-                                                            value={columnFiltersInput[column.key as keyof typeof columnFiltersInput]}
-                                                            onChange={handleColumnFilterChange(column.key as keyof typeof columnFiltersInput)}
-                                                            options={getFilterOptions(column.key as string) || []}
-                                                            placeholder="Tous"
-                                                            className="w-full py-1 text-xs"
-                                                            onClick={(e) => e.stopPropagation()}
-                                                        />
-                                                    ) : (
-                                                        <FilterInput
-                                                            value={columnFiltersInput[column.key as keyof typeof columnFiltersInput]}
-                                                            onChange={handleColumnFilterChange(column.key as keyof typeof columnFiltersInput)}
-                                                        />
-                                                    )}
-                                                </>
-                                            )}
-                                        </div>
+                                            </div>
                                     </th>
                                 ))}
 
@@ -657,22 +726,6 @@ const columns = [
                                                 sortable={true}
                                             />
                                         </div>
-
-                                        <select
-                                            value={columnFilters.est_bloque}
-                                            onChange={(e) =>
-                                                setColumnFilters((prev) => ({
-                                                    ...prev,
-                                                    est_bloque: e.target.value,
-                                                }))
-                                            }
-                                            onClick={(e) => e.stopPropagation()}
-                                            className={components.input}
-                                        >
-                                            <option value="">Tous</option>
-                                            <option value="false">Actif</option>
-                                            <option value="true">Bloqué</option>
-                                        </select>
                                     </div>
                                 </th>
                             </tr>
@@ -696,6 +749,9 @@ const columns = [
                                         </td>
                                         <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
                                             {item.immatriculation}
+                                        </td>
+                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
+                                            {item.libelle_site || ""}
                                         </td>
                                         <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
                                             {item.libelle_filiale || ""}
@@ -739,7 +795,7 @@ const columns = [
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={16}
+                                        colSpan={17}
                                         className="px-4 py-8 text-center text-gray-500 dark:text-dark-text-secondary"
                                     >
                                         Aucun résultat trouvé

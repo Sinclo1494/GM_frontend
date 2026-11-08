@@ -71,6 +71,7 @@ const Navbar = () => {
   const canSeeDashboard = hasPermission("analyse.dashboard");
   const canSeeJournalisation = hasPermission("administration.journalisation");
   const canSeeUsers = hasPermission("administration.users");
+  const canSeeExternalApps = hasPermission("administration.external_apps");
   const canSeeJournalMateriel = hasPermission("analyse.journal_materiel");
   const canSeeQuantitative = hasPermission("analyse.quantitative");
   const canSeeExploitation = hasPermission("analyse.exploitation");
@@ -112,7 +113,7 @@ const Navbar = () => {
     "gestion.regularisations_mois",
   ].some((p) => hasPermission(p));
 
-  const canSeeAnyAdmin = canSeeJournalisation || canSeeUsers;
+  const canSeeAnyAdmin = canSeeJournalisation || canSeeUsers || canSeeExternalApps;
 
   const displayName = user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.username : "User";
 
@@ -217,6 +218,11 @@ const Navbar = () => {
                     Journal Matériel
                   </Link>
                 )}
+                {hasPermission("analyse.journal_materiel") && (
+                  <Link to="/reports/mgt-dashboard" onClick={() => setReportsOpen(false)} className={dropdownItemClass}>
+                    Mgt Dashboard
+                  </Link>
+                )}
                 {hasPermission("analyse.quantitative") && (
                   <Link to="/reports/analyse-quantitative" onClick={() => setReportsOpen(false)} className={dropdownItemClass}>
                     Analyse Quantitative
@@ -315,6 +321,15 @@ const Navbar = () => {
                     className={dropdownItemClass}
                   >
                     Utilisateurs
+                  </Link>
+                )}
+                {(hasPermission("administration.external_apps") || hasPermission("administration.users")) && (
+                  <Link
+                    to="/admin/external-apps"
+                    onClick={() => setAdminOpen(false)}
+                    className={dropdownItemClass}
+                  >
+                    External Apps
                   </Link>
                 )}
                 {hasPermission("administration.users") && (

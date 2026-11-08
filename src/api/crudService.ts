@@ -92,9 +92,16 @@ export async function crudDelete(
 export async function crudOptions<T>(
     endpoint: string,
     params: Record<string, string> = {},
+    page_size?: number,
 ): Promise<T[]> {
+    const queryParams: Record<string, string> = { ...params };
+    if (page_size !== undefined) {
+        queryParams.page_size = String(page_size);
+    } else {
+        queryParams.page_size = "10";
+    }
     const { data } = await axios.get<CrudListResponse<T>>(`${API}/${endpoint}/`, {
-        params: { ...params, page_size: 1000 },
+        params: queryParams,
         headers: authHeaders(),
     });
     return data.results;
