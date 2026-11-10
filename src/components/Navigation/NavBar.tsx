@@ -137,7 +137,7 @@ const Navbar = () => {
                     onClick={closeAllDropdowns}
                     className={dropdownItemClass}
                   >
-                    Analyse Exploitation
+                    Anlyse d'Exploitation
                   </Link>
                 )}
               </div>

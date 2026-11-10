@@ -95,7 +95,7 @@ const TABS: { id: TabId; label: string }[] = [
   { id: "groupe", label: "GROUPE" },
   { id: "journal", label: "JOURNAL MATÉRIEL" },
   { id: "analyse_quantitative", label: "ANALYSE QUANTITATIVE" },
-  { id: "analyse_exploitation", label: "ANALYSE EXPLOITATION" },
+  { id: "analyse_exploitation", label: "Anlyse d'Exploitation" },
   { id: "disponibilite", label: "TAUX DISPONIBILITÉ" },
   { id: "panne", label: "TAUX PANNE" },
   { id: "mtbf", label: "MTBF" },

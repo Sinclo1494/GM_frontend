@@ -25,7 +25,7 @@ const SUB_TABS: { id: SubTabId; label: string }[] = [
   { id: "engins", label: "ENGINS" },
   { id: "groupe", label: "GROUPE" },
   { id: "analyse_quantitative", label: "ANALYSE QUANTITATIVE" },
-  { id: "analyse_exploitation", label: "ANALYSE EXPLOITATION" },
+  { id: "analyse_exploitation", label: "Anlyse d'Exploitation" },
   { id: "journal", label: "JOURNAL MATÉRIEL" },
 ];
 

@@ -28,7 +28,7 @@ export const PERMISSIONS: PermissionDefinition[] = [
   { key: "analyse.mgt_dashboard", label: "MGT Dashboard", category: "analyse", route: "/reports/mgt-dashboard", hasRead: true, hasWrite: false, hasMenu: true, parentMenu: "menu.recapitulatifs" },
   { key: "analyse.journal_materiel", label: "Journal Matériel", category: "analyse", route: "/reports/journal-materiel", hasRead: true, hasWrite: false, hasMenu: true, parentMenu: "menu.recapitulatifs" },
   { key: "analyse.quantitative", label: "Analyse quantitative", category: "analyse", route: "/reports/analyse-quantitative", hasRead: true, hasWrite: false, hasMenu: true, parentMenu: "menu.recapitulatifs" },
-  { key: "analyse.exploitation", label: "Analyse exploitation", category: "analyse", route: "/reports/analyse-exploitation", hasRead: true, hasWrite: false, hasMenu: true, parentMenu: "menu.recapitulatifs" },
+  { key: "analyse.exploitation", label: "Anlyse d'Exploitation", category: "analyse", route: "/reports/analyse-exploitation", hasRead: true, hasWrite: false, hasMenu: true, parentMenu: "menu.recapitulatifs" },
 
   { key: "gestion.entreprises", label: "Entreprises", category: "gestion", route: "/gestion/entreprises", hasRead: true, hasWrite: true, hasMenu: true, parentMenu: "menu.administration" },
   { key: "gestion.filiales", label: "Filiales", category: "gestion", route: "/gestion/filiales", hasRead: true, hasWrite: true, hasMenu: true, parentMenu: "menu.administration" },
