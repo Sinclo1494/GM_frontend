@@ -5,22 +5,37 @@ import MgtDashboardTable from '../components/MgtDashboard/MgtDashboardTable'
 import MgtDashboardMonthlyTable from '../components/MgtDashboard/MgtDashboardMonthlyTable'
 import MgtDashboardDecadaireRecap from '../components/MgtDashboard/MgtDashboardDecadaireRecap'
 import MgtDashboardMensuelRecap from '../components/MgtDashboard/MgtDashboardMensuelRecap'
+import { getDefaultTwoMonthsAgoRange, loadWithTimestamp, saveWithTimestamp } from '../utils/dateUtils'
 
 const TABS = ['Suivi Décadaire Chantier', 'Suivi Mensuel Chantier', 'Récap Décadaire', 'Récap Mensuel']
 
 const STORAGE_KEY = 'mgt_dashboard_filters'
 
 const loadFilters = () => {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return null
-    return JSON.parse(raw)
-  } catch { return null }
+  return loadWithTimestamp<{
+    filiale?: string;
+    site?: string;
+    famille?: string;
+    decade?: string;
+    month?: string;
+    year?: string;
+  }>(STORAGE_KEY);
 }
 
-const now = new Date()
-const defaultMonth = String(now.getMonth() + 1)
-const defaultYear = String(now.getFullYear())
+/** Default month: the ending month of the 2-months-ago billing period (N-2). */
+const getDefaultMgtMonth = (): string => {
+  const range = getDefaultTwoMonthsAgoRange();
+  // range.dateFin is the end date (20th of N-2 month)
+  return String(new Date(range.dateFin).getMonth() + 1);
+};
+
+const getDefaultMgtYear = (): string => {
+  const range = getDefaultTwoMonthsAgoRange();
+  return String(new Date(range.dateFin).getFullYear());
+};
+
+const defaultMonth = getDefaultMgtMonth();
+const defaultYear = getDefaultMgtYear();
 
 const MgtDashboard: React.FC = () => {
   const saved = loadFilters()
@@ -36,7 +51,7 @@ const MgtDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0)
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(filters))
+    saveWithTimestamp(STORAGE_KEY, filters);
   }, [filters])
 
   useEffect(() => {

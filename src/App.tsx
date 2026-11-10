@@ -23,8 +23,8 @@ function AppContent() {
     if (EXCLUDED_PATHS.has(path)) return;
 
     const permMap: Record<string, string> = {
-      "/": "analyse.dashboard",
-      "/reports/dashboard-v2": "analyse.dashboard",
+      "/": "menu.dashboard",
+      "/reports/dashboard-v2": "menu.dashboard",
       "/reports/journal-materiel": "analyse.journal_materiel",
 "/reports/mgt-dashboard": "analyse.journal_materiel",
       "/reports/analyse-quantitative": "analyse.quantitative",

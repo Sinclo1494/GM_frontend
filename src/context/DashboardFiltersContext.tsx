@@ -5,15 +5,18 @@ import {
   type DashboardFilters,
   defaultDashboardFilters,
   getCurrentMonthRange,
+  getDefaultTwoMonthsAgoRange,
   monthRange,
   quarterRange,
   resolveYear,
   yearRange,
   PERIODE_ANNEE,
   PERIODE_MOIS_COURANT,
+  PERIODE_DEUX_MOIS_AVANT,
   PERIODE_PERSONNALISEE,
 } from "./useDashboardFilters";
 import { lockedFiliale } from "./filialeScope";
+import { loadWithTimestamp, saveWithTimestamp } from "../utils/dateUtils";
 
 const STORAGE_KEY = "dashboard-v2-filters";
 
@@ -48,6 +51,11 @@ const expectedRange = (
   if (periode === "" || periode === PERIODE_MOIS_COURANT) {
     return getCurrentMonthRange();
   }
+  if (periode === PERIODE_DEUX_MOIS_AVANT) {
+    // Keep stored dates as-is (the 2-months-ago billing period).
+    // Return null so getStoredFilters preserves the stored dates.
+    return null;
+  }
   if (periode === PERIODE_ANNEE) {
     return yearRange(year);
   }
@@ -74,38 +82,35 @@ const expectedRange = (
  * re-derived from the stored period intent: whenever the stored range does
  * not match what `periode`/`trimestre`/`annee` imply, it is rebuilt. Only a
  * `personnalisee` (free-form) range is kept as is.
+ * 
+ * Filters expire after 3 days.
  */
 const getStoredFilters = (): DashboardFilters => {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      const current = getCurrentMonthRange();
-      const storedPeriode: string = parsed?.periode ?? "";
-      const storedTrimestre: string = parsed?.trimestre ?? "";
-      const annee: string = parsed?.annee ?? defaultDashboardFilters.annee;
-      const expected = expectedRange(storedPeriode, storedTrimestre, annee);
-      const dateDebut: string = parsed?.dateDebut ?? expected?.dateDebut ?? current.dateDebut;
-      const dateFin: string = parsed?.dateFin ?? expected?.dateFin ?? current.dateFin;
-      const isStale =
-        expected !== null &&
-        (dateDebut !== expected.dateDebut || dateFin !== expected.dateFin);
+  const parsed = loadWithTimestamp<Partial<DashboardFilters>>(STORAGE_KEY);
+  if (parsed) {
+    const current = getCurrentMonthRange();
+    const storedPeriode: string = parsed.periode ?? "";
+    const storedTrimestre: string = parsed.trimestre ?? "";
+    const annee: string = parsed.annee ?? defaultDashboardFilters.annee;
+    const expected = expectedRange(storedPeriode, storedTrimestre, annee);
+    const dateDebut: string = parsed.dateDebut ?? expected?.dateDebut ?? current.dateDebut;
+    const dateFin: string = parsed.dateFin ?? expected?.dateFin ?? current.dateFin;
+    const isStale =
+      expected !== null &&
+      (dateDebut !== expected.dateDebut || dateFin !== expected.dateFin);
 
-      return {
-        codeFiliale:
-          parsed?.codeFiliale ?? defaultDashboardFilters.codeFiliale,
-        codeFamille:
-          parsed?.codeFamille ?? defaultDashboardFilters.codeFamille,
-        dateDebut: isStale ? expected.dateDebut : dateDebut,
-        dateFin: isStale ? expected.dateFin : dateFin,
-        periode: storedPeriode,
-        trimestre: storedTrimestre,
-        annee,
-        niveau: parsed?.niveau ?? defaultDashboardFilters.niveau,
-      };
-    }
-  } catch {
-    // fall through to defaults
+    return {
+      codeFiliale:
+        parsed.codeFiliale ?? defaultDashboardFilters.codeFiliale,
+      codeFamille:
+        parsed.codeFamille ?? defaultDashboardFilters.codeFamille,
+      dateDebut: isStale ? expected.dateDebut : dateDebut,
+      dateFin: isStale ? expected.dateFin : dateFin,
+      periode: storedPeriode,
+      trimestre: storedTrimestre,
+      annee,
+      niveau: parsed.niveau ?? defaultDashboardFilters.niveau,
+    };
   }
   return { ...defaultDashboardFilters };
 };
@@ -136,7 +141,7 @@ export function DashboardFiltersProvider({
   }, [locked]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(filters));
+    saveWithTimestamp(STORAGE_KEY, filters);
   }, [filters]);
 
   const setCodeFiliale = (value: string) =>
@@ -164,6 +169,9 @@ export function DashboardFiltersProvider({
       }
       if (value === PERIODE_MOIS_COURANT) {
         return { ...next, ...getCurrentMonthRange() };
+      }
+      if (value === PERIODE_DEUX_MOIS_AVANT) {
+        return { ...next, ...getDefaultTwoMonthsAgoRange() };
       }
       const month = parseInt(value, 10);
       if (Number.isNaN(month) || month < 1 || month > 12) {

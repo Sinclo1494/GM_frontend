@@ -42,8 +42,8 @@ export default function NewDashboard() {
 
   return (
     <DashboardV2Shell
-      title="Dashboard V2"
-      subtitle="Vue opérationnelle sur parc matériel"
+      title="Dashboard"
+      subtitle="Vue opérationnelle le sur parc matériel"
       tabs={TABS}
       activeTab={activeTab}
       onTabChange={setActiveTab}

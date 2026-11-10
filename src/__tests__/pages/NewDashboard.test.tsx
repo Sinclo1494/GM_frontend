@@ -98,7 +98,7 @@ describe("pages/NewDashboard", () => {
     );
     await waitFor(
       () => {
-        expect(screen.getByText("Dashboard V2")).toBeDefined();
+        expect(screen.getByText("Dashboard")).toBeDefined();
       },
       { timeout: 15000 },
     );

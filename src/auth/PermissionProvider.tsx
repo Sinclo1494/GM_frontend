@@ -38,12 +38,22 @@ export default function PermissionProvider({ children }: PermissionProviderProps
     loadUser();
   }, [loadUser]);
 
+  const hasMenuPermission = useCallback(
+    (permission: string) => {
+      if (!user) return false;
+      if (user.is_superuser) return true;
+      // Only check for .menu suffix for submenu visibility
+      return permissions.includes(`${permission}.menu`);
+    },
+    [user, permissions],
+  );
+
   const hasPermission = useCallback(
     (permission: string) => {
       if (!user) return false;
       if (user.is_superuser) return true;
       if (permissions.includes(permission)) return true;
-      return permissions.includes(`${permission}.read`) || permissions.includes(`${permission}.write`);
+      return permissions.includes(`${permission}.read`) || permissions.includes(`${permission}.write`) || permissions.includes(`${permission}.menu`);
     },
     [user, permissions],
   );
@@ -54,7 +64,7 @@ export default function PermissionProvider({ children }: PermissionProviderProps
       if (user.is_superuser) return true;
       return perms.some((p) => {
         if (permissions.includes(p)) return true;
-        return permissions.includes(`${p}.read`) || permissions.includes(`${p}.write`);
+        return permissions.includes(`${p}.read`) || permissions.includes(`${p}.write`) || permissions.includes(`${p}.menu`);
       });
     },
     [user, permissions],
@@ -66,7 +76,7 @@ export default function PermissionProvider({ children }: PermissionProviderProps
       if (user.is_superuser) return true;
       return perms.every((p) => {
         if (permissions.includes(p)) return true;
-        return permissions.includes(`${p}.read`) || permissions.includes(`${p}.write`);
+        return permissions.includes(`${p}.read`) || permissions.includes(`${p}.write`) || permissions.includes(`${p}.menu`);
       });
     },
     [user, permissions],
@@ -79,6 +89,7 @@ export default function PermissionProvider({ children }: PermissionProviderProps
         permissions,
         loading,
         hasPermission,
+        hasMenuPermission,
         hasAnyPermission,
         hasAllPermissions,
       }}

@@ -6,6 +6,7 @@ export interface PermissionContextValue {
   permissions: string[];
   loading: boolean;
   hasPermission: (permission: string) => boolean;
+  hasMenuPermission: (permission: string) => boolean;
   hasAnyPermission: (permissions: string[]) => boolean;
   hasAllPermissions: (permissions: string[]) => boolean;
 }
@@ -20,6 +21,7 @@ export function usePermissions(): PermissionContextValue {
       permissions: [],
       loading: true,
       hasPermission: () => false,
+      hasMenuPermission: () => false,
       hasAnyPermission: () => false,
       hasAllPermissions: () => false,
     };

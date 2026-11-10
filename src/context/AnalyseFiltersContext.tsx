@@ -6,6 +6,7 @@ import {
   type AnalyseFilters,
 } from "./useAnalyseFilters";
 import { lockedFiliale } from "./filialeScope";
+import { saveWithTimestamp } from "../utils/dateUtils";
 
 const STORAGE_KEY = "analyse_filters";
 
@@ -28,7 +29,7 @@ export function AnalyseFiltersProvider({ children }: { children: ReactNode }) {
   }, [locked]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(filters));
+    saveWithTimestamp(STORAGE_KEY, filters);
   }, [filters]);
 
   const setCodeFiliale = (value: string) => setFilters((prev) => ({ ...prev, codeFiliale: value }));

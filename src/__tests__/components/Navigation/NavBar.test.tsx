@@ -2,6 +2,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import NavBar from '../../../components/Navigation/NavBar';
 
+// Use the real lucide-react icons (the global setup mock is missing the "Bell" icon
+// used by NotificationBell).
+vi.mock('lucide-react', async (importOriginal) => {
+  const actual = await importOriginal();
+  return { ...actual };
+});
+
 vi.mock('../../../context/useAuth');
 vi.mock('../../../context/ThemeContext');
 vi.mock('../../../auth/PermissionContext');
@@ -37,6 +44,7 @@ describe('components/Navigation/NavBar', () => {
       hasPermission: () => true,
       hasAnyPermission: () => true,
       hasAllPermissions: () => true,
+      hasMenuPermission: () => true,
     });
   });
 
@@ -61,7 +69,9 @@ describe('components/Navigation/NavBar', () => {
     });
 
     render(<NavBar />);
-    fireEvent.click(screen.getByText('Déconnexion'));
+    // Open user menu first
+    fireEvent.click(screen.getByText('u'));
+    fireEvent.click(screen.getByText('Logout'));
     expect(logout).toHaveBeenCalled();
   });
 });

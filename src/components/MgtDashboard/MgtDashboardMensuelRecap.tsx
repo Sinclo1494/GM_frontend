@@ -3,6 +3,9 @@ import { getMgtMensuelRecap } from '../../api/dataServices'
 import { useEntityOptions } from '../Crud/useEntityOptions'
 import SearchableSelect from '../common/SearchableSelect'
 
+const PERIODE_OPTION_STYLE = { color: "#166534" } as React.CSSProperties;
+const PERIODE_SELECT_STYLE = { color: "#166534", backgroundColor: "#dcfce7" } as React.CSSProperties;
+
 const FAMILLE_PAGE_SIZE = 1000
 
 interface Props {
@@ -75,11 +78,11 @@ const MgtDashboardMensuelRecap: React.FC<Props> = ({
       <div className="w-64">
         <SearchableSelect options={[{ value: '', label: 'Tous les chantiers' }, ...siteOpts.options.map((o: any) => ({ value: o.value, label: o.value + ' - ' + o.label }))]} value={site} onChange={setSite} placeholder="Chantier (Site)" />
       </div>
-      <select value={month} onChange={e => setMonth(e.target.value)} className="border p-2 rounded">
-        {Array.from({ length: 12 }, (_, i) => i + 1).map(m => <option key={m} value={m}>{monthNames[m - 1]}</option>)}
+      <select value={month} onChange={e => setMonth(e.target.value)} className="border p-2 rounded" style={PERIODE_SELECT_STYLE}>
+        {Array.from({ length: 12 }, (_, i) => i + 1).map(m => <option key={m} value={m} style={PERIODE_OPTION_STYLE}>{monthNames[m - 1]}</option>)}
       </select>
-      <select value={year} onChange={e => setYear(e.target.value)} className="border p-2 rounded">
-        {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map(y => <option key={y} value={y}>{y}</option>)}
+      <select value={year} onChange={e => setYear(e.target.value)} className="border p-2 rounded" style={PERIODE_SELECT_STYLE}>
+        {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map(y => <option key={y} value={y} style={PERIODE_OPTION_STYLE}>{y}</option>)}
       </select>
     </div>
   )

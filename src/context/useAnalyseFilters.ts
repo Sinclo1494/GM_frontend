@@ -1,4 +1,5 @@
 import { createContext, useContext } from "react";
+import { getDefaultTwoMonthsAgoRange as getDefaultRange, loadWithTimestamp } from "../utils/dateUtils";
 
 const STORAGE_KEY = "analyse_filters";
 
@@ -30,22 +31,17 @@ export const defaultFilters: AnalyseFilters = {
   // A user locked to a single affiliate gets their own code instead, see
   // `lockedFiliale` and `AnalyseFiltersProvider`.
   codeFiliale: "P",
-  ...getCurrentMonthRange(),
+  ...getDefaultRange(),
 };
 
 export const getStoredFilters = (): AnalyseFilters => {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      return {
-        codeFiliale: parsed?.codeFiliale ?? defaultFilters.codeFiliale,
-        dateDebut: parsed?.dateDebut ?? defaultFilters.dateDebut,
-        dateFin: parsed?.dateFin ?? defaultFilters.dateFin,
-      };
-    }
-  } catch {
-    // fall through to defaults
+  const parsed = loadWithTimestamp<Partial<AnalyseFilters>>(STORAGE_KEY);
+  if (parsed) {
+    return {
+      codeFiliale: parsed.codeFiliale ?? defaultFilters.codeFiliale,
+      dateDebut: parsed.dateDebut ?? defaultFilters.dateDebut,
+      dateFin: parsed.dateFin ?? defaultFilters.dateFin,
+    };
   }
   return defaultFilters;
 };

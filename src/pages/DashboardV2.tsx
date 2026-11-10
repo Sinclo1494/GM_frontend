@@ -33,7 +33,7 @@ export default function DashboardV2() {
   return (
     <DashboardV2Shell
       title="Tableau de bord V2"
-      subtitle="Vue opérationnelle sur parc matériel"
+      subtitle="Vue opérationnelle sur le parc matériel"
       tabs={SCREENS}
       activeTab={activeScreen}
       onTabChange={setActiveScreen}

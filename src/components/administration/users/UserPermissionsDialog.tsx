@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { components } from "../../../theme/components";
 import { useAuth } from "../../../context/useAuth";
-import { PERMISSIONS, PERMISSION_CATEGORIES, CATEGORY_LABELS, PERMISSION_DEPENDENCIES, getPermissionsByCategory, getAllDependencies, getPermissionByKey, type PermissionDefinition } from "../../../auth/permissions";
+import { PERMISSIONS, getPermissionsByParentMenu, getTopLevelMenuPermissions, getAllDependencies, getPermissionByKey } from "../../../auth/permissions";
 
 interface UserPermissionsDialogProps {
   open: boolean;
@@ -20,12 +20,12 @@ interface UserPermissionsDialogProps {
   error: string | null;
 }
 
-type PermissionState = Record<string, { read: boolean; write: boolean }>;
+type PermissionState = Record<string, { read: boolean; write: boolean; menu: boolean }>;
 
 function normalizePermissions(perms: string[]): PermissionState {
   const state: PermissionState = {};
   PERMISSIONS.forEach((p) => {
-    state[p.key] = { read: false, write: false };
+    state[p.key] = { read: false, write: false, menu: false };
   });
   perms.forEach((p) => {
     if (p.endsWith(".read")) {
@@ -37,6 +37,9 @@ function normalizePermissions(perms: string[]): PermissionState {
         state[base].read = true;
         state[base].write = true;
       }
+    } else if (p.endsWith(".menu")) {
+      const base = p.slice(0, -5);
+      if (state[base]) state[base].menu = true;
     } else {
       if (state[p]) {
         state[p].read = true;
@@ -47,45 +50,33 @@ function normalizePermissions(perms: string[]): PermissionState {
   return state;
 }
 
+function computeParentMenuState(state: PermissionState): PermissionState {
+  const newState = { ...state };
+  // For each top-level menu, compute M from submenus
+  const topMenus = PERMISSIONS.filter((p) => p.category === "menu" && !p.parentMenu);
+  topMenus.forEach((menuPerm) => {
+    const subPerms = PERMISSIONS.filter((p) => p.parentMenu === menuPerm.key);
+    const anySubmenuHasMenu = subPerms.some((p) => newState[p.key]?.menu);
+    newState[menuPerm.key] = { ...newState[menuPerm.key], menu: anySubmenuHasMenu };
+  });
+  return newState;
+}
+
 function serializePermissions(state: PermissionState): string[] {
   const perms: string[] = [];
-  Object.entries(state).forEach(([key, { read, write }]) => {
+  Object.entries(state).forEach(([key, { read, write, menu }]) => {
     const permDef = getPermissionByKey(key);
     if (!permDef) return;
+    if (menu && permDef.hasMenu) perms.push(`${key}.menu`);
     if (read) perms.push(`${key}.read`);
     if (write && permDef.hasWrite) perms.push(`${key}.write`);
   });
   return perms;
 }
 
-function findParentPermissions(key: string): string[] {
-  const baseKey = key.replace(/\.read$/, "").replace(/\.write$/, "");
-  const parents: string[] = [];
-  for (const [perm, deps] of Object.entries(PERMISSION_DEPENDENCIES)) {
-    if (deps.some((d) => d === key || d.startsWith(baseKey + "."))) {
-      parents.push(perm);
-    }
-  }
-  return parents;
-}
-
-function removePermissionWithParents(state: PermissionState, key: string): PermissionState {
-  const newState: PermissionState = {};
-  Object.entries(state).forEach(([k, v]) => {
-    newState[k] = { ...v };
-  });
-  const stack = [key];
-  while (stack.length > 0) {
-    const current = stack.pop()!;
-    newState[current] = { read: false, write: false };
-    const parents = findParentPermissions(current);
-    for (const parent of parents) {
-      if (newState[parent]?.read || newState[parent]?.write) {
-        stack.push(parent);
-      }
-    }
-  }
-  return newState;
+function findParentMenu(key: string): string | null {
+  const permDef = getPermissionByKey(key);
+  return permDef?.parentMenu || null;
 }
 
 function recomputeDependencies(state: PermissionState): PermissionState {
@@ -127,12 +118,13 @@ export default function UserPermissionsDialog({
       if (isSuperuser) {
         const allState: PermissionState = {};
         PERMISSIONS.forEach((p) => {
-          allState[p.key] = { read: true, write: p.hasWrite };
+          allState[p.key] = { read: true, write: p.hasWrite, menu: p.hasMenu };
         });
         setPermState(allState);
       } else {
         const normalized = normalizePermissions(selectedPermissions);
-        setPermState(recomputeDependencies(normalized));
+        const withDeps = recomputeDependencies(normalized);
+        setPermState(computeParentMenuState(withDeps));
       }
       setInitialized(true);
     }
@@ -153,10 +145,26 @@ export default function UserPermissionsDialog({
     setPermState((prev) => {
       const wasRead = prev[key]?.read;
       if (wasRead) {
-        const newState = removePermissionWithParents(prev, key);
+        // Uncheck L
+        // Rule: Uncheck L while M=1 → Auto-uncheck M and E
+        // Rule: Uncheck L while E=1 → Auto-uncheck E and M
+        const newState = { ...prev };
+        newState[key] = { read: false, write: false, menu: false };
+        
+        // Update parent menu M: if no submenus have M, uncheck parent M
+        const parentMenu = findParentMenu(key);
+        if (parentMenu) {
+          const anySubmenuHasMenu = PERMISSIONS
+            .filter((p) => p.parentMenu === parentMenu)
+            .some((p) => newState[p.key]?.menu);
+          newState[parentMenu] = { ...newState[parentMenu], menu: anySubmenuHasMenu };
+        }
+        
         syncToParent(newState);
         return newState;
       } else {
+        // Check L
+        // Rule: Check L → Check L only (no auto-check M)
         const newState = { ...prev };
         newState[key] = { ...newState[key], read: true };
         const withDeps = recomputeDependencies(newState);
@@ -171,92 +179,29 @@ export default function UserPermissionsDialog({
     setPermState((prev) => {
       const newWrite = !prev[key]?.write;
       if (!newWrite) {
-        const newState = removePermissionWithParents(prev, key);
+        // Uncheck E
+        // Rule: Uncheck E → Keep M and L checked
+        const newState = { ...prev };
+        newState[key] = { ...newState[key], write: false };
         syncToParent(newState);
         return newState;
       } else {
+        // Check E
+        // Rule: Check E → Auto-check M and L
         const newState = { ...prev };
-        newState[key] = { read: true, write: true };
+        newState[key] = { read: true, write: true, menu: true };
+        
+        // Update parent menu M: at least one submenu has M, so check parent M
+        const parentMenu = findParentMenu(key);
+        if (parentMenu) {
+          newState[parentMenu] = { ...newState[parentMenu], menu: true };
+        }
+        
         const withDeps = recomputeDependencies(newState);
         syncToParent(withDeps);
         return withDeps;
       }
     });
-  };
-
-  const toggleCategoryRead = (category: string) => {
-    if (isSuperuser) return;
-    const categoryPerms = getPermissionsByCategory(category as PermissionDefinition["category"]);
-    setPermState((prev) => {
-      const allRead = categoryPerms.every((p) => p.hasRead && prev[p.key]?.read);
-      if (allRead) {
-        let newState = { ...prev };
-        categoryPerms.forEach((p) => {
-          if (p.hasRead) {
-            newState = removePermissionWithParents(newState, p.key);
-          }
-        });
-        syncToParent(newState);
-        return newState;
-      } else {
-        const newState = { ...prev };
-        categoryPerms.forEach((p) => {
-          if (p.hasRead) {
-            newState[p.key] = { read: true, write: newState[p.key]?.write || false };
-          }
-        });
-        const withDeps = recomputeDependencies(newState);
-        syncToParent(withDeps);
-        return withDeps;
-      }
-    });
-  };
-
-  const toggleCategoryWrite = (category: string) => {
-    if (isSuperuser) return;
-    const categoryPerms = getPermissionsByCategory(category as PermissionDefinition["category"]);
-    setPermState((prev) => {
-      const allWrite = categoryPerms.every((p) => p.hasWrite && prev[p.key]?.write);
-      if (allWrite) {
-        let newState = { ...prev };
-        categoryPerms.forEach((p) => {
-          if (p.hasWrite) {
-            newState = removePermissionWithParents(newState, p.key);
-          }
-        });
-        syncToParent(newState);
-        return newState;
-      } else {
-        const newState = { ...prev };
-        categoryPerms.forEach((p) => {
-          if (p.hasWrite) {
-            newState[p.key] = { read: true, write: true };
-          }
-        });
-        const withDeps = recomputeDependencies(newState);
-        syncToParent(withDeps);
-        return withDeps;
-      }
-    });
-  };
-
-  const getCategoryReadState = (category: string): boolean | "indeterminate" => {
-    const categoryPerms = getPermissionsByCategory(category as PermissionDefinition["category"]);
-    const readPerms = categoryPerms.filter((p) => p.hasRead);
-    const selectedCount = readPerms.filter((p) => permState[p.key]?.read).length;
-    if (selectedCount === 0) return false;
-    if (selectedCount === readPerms.length) return true;
-    return "indeterminate";
-  };
-
-  const getCategoryWriteState = (category: string): boolean | "indeterminate" => {
-    const categoryPerms = getPermissionsByCategory(category as PermissionDefinition["category"]);
-    const writePerms = categoryPerms.filter((p) => p.hasWrite);
-    if (writePerms.length === 0) return false;
-    const selectedCount = writePerms.filter((p) => permState[p.key]?.write).length;
-    if (selectedCount === 0) return false;
-    if (selectedCount === writePerms.length) return true;
-    return "indeterminate";
   };
 
   const currentUserIsTarget = currentUser?.id === user.id;
@@ -292,42 +237,317 @@ export default function UserPermissionsDialog({
         )}
 
         <div className="space-y-4">
-          {PERMISSION_CATEGORIES.map((category) => {
-            const categoryPerms = getPermissionsByCategory(category);
-            const readState = getCategoryReadState(category);
-            const writeState = getCategoryWriteState(category);
-            const isReadIndeterminate = readState === "indeterminate";
-            const isWriteIndeterminate = writeState === "indeterminate";
-            const hasWritePerms = categoryPerms.some((p) => p.hasWrite);
+          {getTopLevelMenuPermissions().map((menuPerm) => {
+            const subPerms = getPermissionsByParentMenu(menuPerm.key);
+            const isStandaloneMenu = subPerms.length === 0 && menuPerm.hasMenu;
 
-            return (
-              <div key={category} className="border border-slate-200 dark:border-dark-border rounded-lg p-4">
-                <div className="flex items-center gap-4 mb-3">
-                  <label className="flex items-center gap-2 cursor-pointer select-none flex-1">
-                    <input
-                      type="checkbox"
-                      checked={readState === true}
-                      ref={(el) => {
-                        if (el) el.indeterminate = isReadIndeterminate;
-                      }}
-                      onChange={() => toggleCategoryRead(category)}
-                      disabled={isSuperuser}
-                      className="h-4 w-4 rounded border-gray-300 text-gray-600 focus:ring-gray-500 disabled:opacity-50"
-                    />
-                    <span className="font-semibold text-gray-800 dark:text-dark-text-primary">
-                      {CATEGORY_LABELS[category]}
+            // Skip menus without submenus that don't have their own M permission
+            if (!isStandaloneMenu && subPerms.length === 0) return null;
+
+            if (isStandaloneMenu) {
+              // Standalone menu (like Dashboard) - render with its own M/L/E
+              const isMenuChecked = permState[menuPerm.key]?.menu || false;
+              const isReadChecked = permState[menuPerm.key]?.read || false;
+              const isWriteChecked = permState[menuPerm.key]?.write || false;
+              const disabled = isSuperuser;
+
+              const toggleMenuM = () => {
+                if (isSuperuser) return;
+                setPermState((prev) => {
+                  const newState = { ...prev };
+                  const newMenu = !prev[menuPerm.key]?.menu;
+                  newState[menuPerm.key] = { ...newState[menuPerm.key], menu: newMenu };
+                  if (!newMenu) {
+                    newState[menuPerm.key] = { ...newState[menuPerm.key], read: false, write: false };
+                  } else {
+                    newState[menuPerm.key] = { ...newState[menuPerm.key], read: true };
+                  }
+                  syncToParent(newState);
+                  return newState;
+                });
+              };
+
+              const toggleMenuL = () => {
+                if (isSuperuser) return;
+                setPermState((prev) => {
+                  const newState = { ...prev };
+                  const wasRead = prev[menuPerm.key]?.read;
+                  if (wasRead) {
+                    newState[menuPerm.key] = { read: false, write: false, menu: false };
+                  } else {
+                    newState[menuPerm.key] = { ...newState[menuPerm.key], read: true };
+                    // Check M when L is checked
+                    newState[menuPerm.key] = { ...newState[menuPerm.key], menu: true };
+                  }
+                  syncToParent(newState);
+                  return newState;
+                });
+              };
+
+              const toggleMenuE = () => {
+                if (isSuperuser) return;
+                setPermState((prev) => {
+                  const newState = { ...prev };
+                  const wasWrite = prev[menuPerm.key]?.write;
+                  if (!wasWrite) {
+                    newState[menuPerm.key] = { ...newState[menuPerm.key], write: false };
+                  } else {
+                    newState[menuPerm.key] = { read: true, write: true, menu: true };
+                  }
+                  syncToParent(newState);
+                  return newState;
+                });
+              };
+
+              return (
+                <div key={menuPerm.key} className="border border-slate-200 dark:border-dark-border rounded-lg p-4">
+                  <div className="flex items-center gap-4 mb-3">
+                    <span className="font-semibold text-gray-800 dark:text-dark-text-primary min-w-[140px]">
+                      {menuPerm.label}
                     </span>
-                    <span className="text-xs text-gray-500">(Lecture)</span>
-                  </label>
-                  {hasWritePerms && (
                     <label className="flex items-center gap-2 cursor-pointer select-none">
                       <input
                         type="checkbox"
-                        checked={writeState === true}
+                        checked={isMenuChecked}
+                        onChange={toggleMenuM}
+                        disabled={disabled}
+                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
+                      />
+                      <span className="text-xs text-gray-500">(Menu)</span>
+                    </label>
+                    {menuPerm.hasRead && (
+                      <label className="flex items-center gap-2 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={isReadChecked}
+                          onChange={toggleMenuL}
+                          disabled={disabled}
+                          className="h-4 w-4 rounded border-gray-300 text-gray-600 focus:ring-gray-500 disabled:opacity-50"
+                        />
+                        <span className="text-xs text-gray-500">(Lecture)</span>
+                      </label>
+                    )}
+                    {menuPerm.hasWrite && (
+                      <label className="flex items-center gap-2 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={isWriteChecked}
+                          onChange={toggleMenuE}
+                          disabled={disabled}
+                          className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500 disabled:opacity-50"
+                        />
+                        <span className="text-xs text-gray-500">(Écriture)</span>
+                      </label>
+                    )}
+                  </div>
+                </div>
+              );
+            }
+
+            const readState = subPerms
+              .filter((p) => p.hasRead)
+              .reduce((acc, p) => {
+                if (permState[p.key]?.read) acc.selected++;
+                acc.total++;
+                return acc;
+              }, { selected: 0, total: 0 });
+            const writeState = subPerms
+              .filter((p) => p.hasWrite)
+              .reduce((acc, p) => {
+                if (permState[p.key]?.write) acc.selected++;
+                acc.total++;
+                return acc;
+              }, { selected: 0, total: 0 });
+
+            const isReadAll = readState.total > 0 && readState.selected === readState.total;
+            const isReadSome = readState.selected > 0 && readState.selected < readState.total;
+            const isWriteAll = writeState.total > 0 && writeState.selected === writeState.total;
+            const isWriteSome = writeState.selected > 0 && writeState.selected < writeState.total;
+
+            const menuState = subPerms
+              .filter((p) => p.hasMenu)
+              .reduce((acc, p) => {
+                if (permState[p.key]?.menu) acc.selected++;
+                acc.total++;
+                return acc;
+              }, { selected: 0, total: 0 });
+            const isMenuAll = menuState.total > 0 && menuState.selected === menuState.total;
+            const isMenuSome = menuState.selected > 0 && menuState.selected < menuState.total;
+
+            const toggleMenuM = () => {
+              if (isSuperuser) return;
+              setPermState((prev) => {
+                let newState = { ...prev };
+                if (isMenuAll) {
+                  // Uncheck M for all submenus
+                  // Rule: Uncheck M → Keep L checked
+                  subPerms.forEach((p) => {
+                    if (p.hasMenu) {
+                      newState[p.key] = { ...newState[p.key], menu: false };
+                    }
+                  });
+                  // Also uncheck parent menu M
+                  newState[menuPerm.key] = { ...newState[menuPerm.key], menu: false };
+                  // Rule: Uncheck M while E=1 → Auto-uncheck E, keep L
+                  subPerms.forEach((p) => {
+                    if (p.hasWrite && newState[p.key]?.write) {
+                      newState[p.key] = { ...newState[p.key], write: false };
+                    }
+                  });
+                } else {
+                  // Check M for all submenus
+                  // Rule: Check M → Auto-check L
+                  subPerms.forEach((p) => {
+                    if (p.hasMenu) {
+                      newState[p.key] = { ...newState[p.key], menu: true };
+                    }
+                  });
+                  // Also check parent menu M
+                  newState[menuPerm.key] = { ...newState[menuPerm.key], menu: true };
+                  // Rule: Check M → Auto-check L
+                  subPerms.forEach((p) => {
+                    if (p.hasRead && newState[p.key]?.menu) {
+                      newState[p.key] = { ...newState[p.key], read: true };
+                    }
+                  });
+                }
+                syncToParent(newState);
+                return newState;
+              });
+            };
+
+            const toggleMenuRead = () => {
+              if (isSuperuser) return;
+              setPermState((prev) => {
+                let newState = { ...prev };
+                if (isReadAll) {
+                  // Uncheck L for all submenus
+                  // Rule: Uncheck L while M=1 → Auto-uncheck M and E
+                  // Rule: Uncheck L while E=1 → Auto-uncheck E and M
+                  subPerms.forEach((p) => {
+                    if (p.hasRead) {
+                      newState[p.key] = { read: false, write: false, menu: false };
+                    }
+                  });
+                } else {
+                  // Check L for all submenus
+                  // Rule: Check L → Check L only (no auto-check M)
+                  subPerms.forEach((p) => {
+                    if (p.hasRead) {
+                      newState[p.key] = { ...newState[p.key], read: true };
+                    }
+                  });
+                  newState = recomputeDependencies(newState);
+                }
+                syncToParent(newState);
+                return newState;
+              });
+            };
+
+            const toggleMenuWrite = () => {
+              if (isSuperuser) return;
+              setPermState((prev) => {
+                let newState = { ...prev };
+                if (isWriteAll) {
+                  // Uncheck E for all submenus
+                  // Rule: Uncheck E → Keep M and L checked
+                  subPerms.forEach((p) => {
+                    if (p.hasWrite) {
+                      newState[p.key] = { ...newState[p.key], write: false };
+                    }
+                  });
+                } else {
+                  // Check E for all submenus
+                  // Rule: Check E → Auto-check M and L
+                  subPerms.forEach((p) => {
+                    if (p.hasWrite) {
+                      newState[p.key] = { ...newState[p.key], read: true, write: true, menu: true };
+                    }
+                  });
+                  newState = recomputeDependencies(newState);
+                }
+                syncToParent(newState);
+                return newState;
+              });
+            };
+
+            const toggleMenuMenu = (key: string) => {
+              if (isSuperuser) return;
+              setPermState((prev) => {
+                const newState = { ...prev };
+                const newMenu = !prev[key]?.menu;
+                const wasE = prev[key]?.write;
+                
+                if (newMenu) {
+                  // Check M
+                  // Rule: Check M → Auto-check L
+                  newState[key] = { ...newState[key], menu: true, read: true };
+                  // E is NOT auto-checked (Check M doesn't imply E)
+                } else {
+                  // Uncheck M
+                  // Rule: Uncheck M → Keep L checked
+                  // Rule: Uncheck M while E=1 → Auto-uncheck E, keep L
+                  newState[key] = { ...newState[key], menu: false };
+                  if (wasE) {
+                    newState[key] = { ...newState[key], write: false };
+                  }
+                  // L stays checked
+                }
+                
+                // Update parent menu M: if no submenus have M, uncheck parent M
+                const anySubmenuHasMenu = subPerms.some((p) => newState[p.key]?.menu);
+                newState[menuPerm.key] = { ...newState[menuPerm.key], menu: anySubmenuHasMenu };
+                
+                syncToParent(newState);
+                return newState;
+              });
+            };
+
+            return (
+              <div key={menuPerm.key} className="border border-slate-200 dark:border-dark-border rounded-lg p-4">
+                <div className="flex items-center gap-4 mb-3">
+                  <span className="font-semibold text-gray-800 dark:text-dark-text-primary min-w-[140px]">
+                    {menuPerm.label}
+                  </span>
+                  {menuState.total > 0 && (
+                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={isMenuAll}
                         ref={(el) => {
-                          if (el) el.indeterminate = isWriteIndeterminate;
+                          if (el) el.indeterminate = isMenuSome;
                         }}
-                        onChange={() => toggleCategoryWrite(category)}
+                        onChange={toggleMenuM}
+                        disabled={isSuperuser}
+                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
+                      />
+                      <span className="text-xs text-gray-500">(Menu)</span>
+                    </label>
+                  )}
+                  {readState.total > 0 && (
+                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={isReadAll}
+                        ref={(el) => {
+                          if (el) el.indeterminate = isReadSome;
+                        }}
+                        onChange={toggleMenuRead}
+                        disabled={isSuperuser}
+                        className="h-4 w-4 rounded border-gray-300 text-gray-600 focus:ring-gray-500 disabled:opacity-50"
+                      />
+                      <span className="text-xs text-gray-500">(Lecture)</span>
+                    </label>
+                  )}
+                  {writeState.total > 0 && (
+                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={isWriteAll}
+                        ref={(el) => {
+                          if (el) el.indeterminate = isWriteSome;
+                        }}
+                        onChange={toggleMenuWrite}
                         disabled={isSuperuser}
                         className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500 disabled:opacity-50"
                       />
@@ -335,10 +555,11 @@ export default function UserPermissionsDialog({
                     </label>
                   )}
                 </div>
-                <div className="ml-6">
-                  {categoryPerms.map((perm) => {
+                <div className="ml-6 space-y-1">
+                  {subPerms.map((perm) => {
                     const isReadChecked = permState[perm.key]?.read || false;
                     const isWriteChecked = permState[perm.key]?.write || false;
+                    const isMenuChecked = permState[perm.key]?.menu || false;
                     const isUsersPerm = perm.key === "administration.users";
                     const disabled = isSuperuser || (currentUserIsTarget && isUsersPerm);
 
@@ -350,7 +571,19 @@ export default function UserPermissionsDialog({
                         <span className="text-gray-700 dark:text-dark-text-secondary flex-1 truncate">
                           {perm.label}
                         </span>
-                        <div className="flex items-center gap-3 w-20 justify-end">
+                        <div className="flex items-center gap-3 flex-1 justify-end">
+                          {perm.hasMenu && (
+                            <label className={`flex items-center gap-1 ${disabled ? "" : "cursor-pointer"}`}>
+                              <input
+                                type="checkbox"
+                                checked={isMenuChecked}
+                                onChange={() => toggleMenuMenu(perm.key)}
+                                disabled={disabled}
+                                className="h-3.5 w-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
+                              />
+                              <span className="text-xs text-gray-500">M</span>
+                            </label>
+                          )}
                           {perm.hasRead && (
                             <label className={`flex items-center gap-1 ${disabled ? "" : "cursor-pointer"}`}>
                               <input

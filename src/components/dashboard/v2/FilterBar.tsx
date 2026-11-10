@@ -5,6 +5,7 @@ import SearchableSelect from "../../common/SearchableSelect";
 import {
   PERIODE_ANNEE,
   PERIODE_MOIS_COURANT,
+  PERIODE_DEUX_MOIS_AVANT,
   PERIODE_PERSONNALISEE,
 } from "../../../context/useDashboardFilters";
 
@@ -44,6 +45,7 @@ export interface FilterBarProps {
 const currentYear = new Date().getFullYear();
 
 const PERIODE_OPTIONS: FilterOption[] = [
+  { value: PERIODE_DEUX_MOIS_AVANT, label: "2 mois avant" },
   { value: PERIODE_MOIS_COURANT, label: "Mois en cours" },
   { value: PERIODE_ANNEE, label: "Année" },
   { value: "01", label: "Janvier" },
@@ -60,6 +62,9 @@ const PERIODE_OPTIONS: FilterOption[] = [
   { value: "12", label: "Décembre" },
   { value: PERIODE_PERSONNALISEE, label: "Période personnalisée" },
 ];
+
+const PERIODE_OPTION_STYLE = { color: "#166534" } as React.CSSProperties; // dark green
+const PERIODE_SELECT_STYLE = { color: "#166534", backgroundColor: "#dcfce7" } as React.CSSProperties; // dark green text, light green bg
 
 const TRIMESTRE_OPTIONS: FilterOption[] = [
   { value: "", label: "Tous" },
@@ -130,9 +135,10 @@ const renderControl = (
           className={components.select}
           value={value}
           onChange={(e) => onChange(key, e.target.value)}
+          style={PERIODE_SELECT_STYLE}
         >
           {PERIODE_OPTIONS.map((p) => (
-            <option key={p.value} value={p.value}>
+            <option key={p.value} value={p.value} style={PERIODE_OPTION_STYLE}>
               {p.label}
             </option>
           ))}
@@ -145,9 +151,10 @@ const renderControl = (
           className={components.select}
           value={value}
           onChange={(e) => onChange(key, e.target.value)}
+          style={PERIODE_SELECT_STYLE}
         >
           {TRIMESTRE_OPTIONS.map((t) => (
-            <option key={t.value} value={t.value}>
+            <option key={t.value} value={t.value} style={PERIODE_OPTION_STYLE}>
               {t.label}
             </option>
           ))}
@@ -160,9 +167,10 @@ const renderControl = (
           className={components.select}
           value={value}
           onChange={(e) => onChange(key, e.target.value)}
+          style={PERIODE_SELECT_STYLE}
         >
           {ANNEE_OPTIONS.map((y) => (
-            <option key={y.value} value={y.value}>
+            <option key={y.value} value={y.value} style={PERIODE_OPTION_STYLE}>
               {y.label}
             </option>
           ))}
@@ -247,27 +255,38 @@ const FilterBar = React.memo<FilterBarProps>(
 
         {activeChips.length > 0 && (
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            {activeChips.map((chip) => (
-              <div
-                key={chip.key}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-sm text-slate-700 dark:bg-dark-bg-tertiary dark:text-dark-text-primary"
-              >
-                <span className="font-medium">{chip.label}:</span>
-                <span className="whitespace-nowrap overflow-hidden text-ellipsis">
-                  {chip.value}
-                </span>
-                {!NO_CLEAR_CHIP.includes(chip.key) && (
-                  <button
-                    type="button"
-                    onClick={() => onChange(chip.key, "")}
-                    className="rounded p-0.5 text-slate-500 hover:bg-slate-200 dark:text-dark-text-secondary dark:hover:bg-dark-bg-tertiary"
-                    title="Supprimer ce filtre"
-                  >
-                    <X size={14} />
-                  </button>
-                )}
-              </div>
-            ))}
+            {activeChips.map((chip) => {
+              const isPeriodChip = chip.key === "periode";
+              return (
+                <div
+                  key={chip.key}
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm ${
+                    isPeriodChip
+                      ? "bg-green-100 text-green-900 dark:bg-green-900/30 dark:text-green-300"
+                      : "bg-slate-100 text-slate-700 dark:bg-dark-bg-tertiary dark:text-dark-text-primary"
+                  }`}
+                >
+                  <span className="font-medium">{chip.label}:</span>
+                  <span className="whitespace-nowrap overflow-hidden text-ellipsis">
+                    {chip.value}
+                  </span>
+                  {!NO_CLEAR_CHIP.includes(chip.key) && (
+                    <button
+                      type="button"
+                      onClick={() => onChange(chip.key, "")}
+                      className={`rounded p-0.5 ${
+                        isPeriodChip
+                          ? "text-green-700 hover:bg-green-200 dark:text-green-300 dark:hover:bg-green-800/30"
+                          : "text-slate-500 hover:bg-slate-200 dark:text-dark-text-secondary dark:hover:bg-dark-bg-tertiary"
+                      }`}
+                      title="Supprimer ce filtre"
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

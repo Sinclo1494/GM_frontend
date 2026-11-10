@@ -21,6 +21,7 @@ export const NIVEAUX = ["engin", "famille", "chantier", "groupe"] as const;
  * current month when a stale range is found in localStorage.
  */
 export const PERIODE_MOIS_COURANT = "mois_courant";
+export const PERIODE_DEUX_MOIS_AVANT = "deux_mois_avant";
 export const PERIODE_ANNEE = "annee";
 export const PERIODE_PERSONNALISEE = "personnalisee";
 
@@ -84,11 +85,36 @@ export const resolveYear = (annee: string | undefined | null, fallback: number):
   return Number.isNaN(year) ? fallback : year;
 };
 
+/** Default range: billing period containing the date 2 months ago from today. */
+export const getDefaultTwoMonthsAgoRange = (): Pick<DashboardFilters, "dateDebut" | "dateFin"> => {
+  const now = new Date();
+  const twoMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 2, now.getDate());
+  const year = twoMonthsAgo.getFullYear();
+  const month = twoMonthsAgo.getMonth() + 1;
+  const day = twoMonthsAgo.getDate();
+
+  if (day >= 21) {
+    const nextMonth = month === 12 ? 1 : month + 1;
+    const nextYear = month === 12 ? year + 1 : year;
+    return {
+      dateDebut: ymd(year, month, 21),
+      dateFin: ymd(nextYear, nextMonth, 20),
+    };
+  } else {
+    const prevMonth = month === 1 ? 12 : month - 1;
+    const prevYear = month === 1 ? year - 1 : year;
+    return {
+      dateDebut: ymd(prevYear, prevMonth, 21),
+      dateFin: ymd(year, month, 20),
+    };
+  }
+};
+
 export const defaultDashboardFilters: DashboardFilters = {
   codeFiliale: "P",
   codeFamille: "",
-  ...getCurrentMonthRange(),
-  periode: PERIODE_MOIS_COURANT,
+  ...getDefaultTwoMonthsAgoRange(),
+  periode: PERIODE_DEUX_MOIS_AVANT,
   trimestre: "",
   annee: String(new Date().getFullYear()),
   niveau: "engin",

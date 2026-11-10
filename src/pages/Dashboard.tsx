@@ -43,6 +43,7 @@ import {
 import { Line } from "react-chartjs-2";
 import CrudTable from "../components/Crud/CrudTable";
 import type { ColumnDef } from "../components/Crud/CrudTable";
+import { getDefaultTwoMonthsAgoRange, loadWithTimestamp, saveWithTimestamp } from "../utils/dateUtils";
 
 ChartJS.register(
   ArcElement,
@@ -107,10 +108,13 @@ const TABS: { id: TabId; label: string }[] = [
   { id: "rentabilite", label: "RENTABILITÉ" },
 ];
 
-const today = new Date().toISOString().split("T")[0];
-const oneYearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)
-  .toISOString()
-  .split("T")[0];
+const STORAGE_KEY = "dashboard_filters";
+
+const loadFilters = (): Partial<DashboardFilters> | null => {
+  return loadWithTimestamp<Partial<DashboardFilters>>(STORAGE_KEY);
+};
+
+const defaultRange = getDefaultTwoMonthsAgoRange();
 const currentYear = new Date().getFullYear();
 const yearOptions = Array.from({ length: 21 }, (_, i) => {
   const y = currentYear - 10 + i;
@@ -126,16 +130,32 @@ export default function Dashboard() {
   const [familles, setFamilles] = useState<{ value: string; label: string }[]>([]);
   const [activeTab, setActiveTab] = useState<TabId>("kpi");
 
-  const [filters, setFilters] = useState<DashboardFilters>({
-    code_filiale: "",
-    date_debut: `${currentYear}-01-01`,
-    date_fin: `${currentYear}-12-31`,
-    code_famille: "",
-    periode: "",
-    mode: "standard",
-    niveau: "engin",
-    annee: String(currentYear),
-    trimestre: "",
+  const [filters, setFilters] = useState<DashboardFilters>(() => {
+    const saved = loadFilters();
+    if (saved) {
+      return {
+        code_filiale: saved.code_filiale ?? "",
+        date_debut: saved.date_debut ?? defaultRange.dateDebut,
+        date_fin: saved.date_fin ?? defaultRange.dateFin,
+        code_famille: saved.code_famille ?? "",
+        periode: saved.periode ?? "",
+        mode: saved.mode ?? "standard",
+        niveau: saved.niveau ?? "engin",
+        annee: saved.annee ?? String(currentYear),
+        trimestre: saved.trimestre ?? "",
+      };
+    }
+    return {
+      code_filiale: "",
+      date_debut: defaultRange.dateDebut,
+      date_fin: defaultRange.dateFin,
+      code_famille: "",
+      periode: "",
+      mode: "standard",
+      niveau: "engin",
+      annee: String(currentYear),
+      trimestre: "",
+    };
   });
 
   const [materialDetails, setMaterialDetails] = useState<any | null>(null);
@@ -259,6 +279,11 @@ const fetchMaterialDetails = useCallback(async () => {
     fetchMaterialDetails();
   }, [fetchMaterialDetails]);
 
+  // Persist filters to localStorage
+  useEffect(() => {
+    saveWithTimestamp(STORAGE_KEY, filters);
+  }, [filters]);
+
   const updateFilter = (key: keyof DashboardFilters, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
@@ -310,8 +335,8 @@ const fetchMaterialDetails = useCallback(async () => {
   const resetFilters = () => {
     setFilters({
       code_filiale: "",
-      date_debut: oneYearAgo,
-      date_fin: today,
+      date_debut: defaultRange.dateDebut,
+      date_fin: defaultRange.dateFin,
       code_famille: "",
       periode: "",
       mode: "standard",
@@ -429,6 +454,9 @@ const fetchMaterialDetails = useCallback(async () => {
     { value: "12", label: "Décembre" },
     { value: "personnalisee", label: "Période personnalisée" },
   ];
+
+  const PERIODE_OPTION_STYLE = { color: "#166534" } as React.CSSProperties;
+  const PERIODE_SELECT_STYLE = { color: "#166534", backgroundColor: "#dcfce7" } as React.CSSProperties;
 
   const modeOptions = [
     { value: "standard", label: "Standard" },
@@ -1045,9 +1073,10 @@ const fetchMaterialDetails = useCallback(async () => {
                 className={components.select}
                 value={filters.periode}
                 onChange={(e) => handlePeriodeChange(e.target.value)}
+                style={PERIODE_SELECT_STYLE}
               >
                 {periodeOptions.map((p) => (
-                  <option key={p.value} value={p.value}>{p.label}</option>
+                  <option key={p.value} value={p.value} style={PERIODE_OPTION_STYLE}>{p.label}</option>
                 ))}
               </select>
             </div>
@@ -1057,12 +1086,13 @@ const fetchMaterialDetails = useCallback(async () => {
                 className={components.select}
                 value={filters.trimestre ?? ""}
                 onChange={(e) => handleTrimestreChange(e.target.value)}
+                style={PERIODE_SELECT_STYLE}
               >
-                <option value="">Tous</option>
-                <option value="Q1">Q1</option>
-                <option value="Q2">Q2</option>
-                <option value="Q3">Q3</option>
-                <option value="Q4">Q4</option>
+                <option value="" style={PERIODE_OPTION_STYLE}>Tous</option>
+                <option value="Q1" style={PERIODE_OPTION_STYLE}>Q1</option>
+                <option value="Q2" style={PERIODE_OPTION_STYLE}>Q2</option>
+                <option value="Q3" style={PERIODE_OPTION_STYLE}>Q3</option>
+                <option value="Q4" style={PERIODE_OPTION_STYLE}>Q4</option>
               </select>
             </div>
             <div className="flex flex-col gap-1">
@@ -1099,9 +1129,10 @@ const fetchMaterialDetails = useCallback(async () => {
                     return next;
                   });
                 }}
+                style={PERIODE_SELECT_STYLE}
               >
                 {yearOptions.map((y) => (
-                  <option key={y.value} value={y.value}>{y.label}</option>
+                  <option key={y.value} value={y.value} style={PERIODE_OPTION_STYLE}>{y.label}</option>
                 ))}
               </select>
             </div>
