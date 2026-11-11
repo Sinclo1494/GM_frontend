@@ -40,7 +40,6 @@ interface JournalMateriel {
     libelle_sous_famille: string | null;
     libelle_type_marque: string | null;
     libelle_site: string | null;
-    est_bloque: boolean;
     user_id: number;
     code_filiale_g: string;
     created_at: string;
@@ -64,7 +63,6 @@ type SortField =
     | "libelle_marque"
     | "libelle_filiale"
     | "libelle_site"
-    | "est_bloque"
     | null;
 type SortOrder = "asc" | "desc";
 
@@ -88,22 +86,6 @@ const SortIcon: React.FC<SortIconProps> = ({ field, sortField, sortOrder, sortab
         <ChevronUp className="h-4 w-4 text-gray-600" />
     ) : (
         <ChevronDown className="h-4 w-4 text-gray-600" />
-    );
-};
-
-interface StatusBadgeProps {
-    estBloque: boolean;
-}
-
-const StatusBadge: React.FC<StatusBadgeProps> = ({ estBloque }) => {
-    return estBloque ? (
-        <span className={components.badge.danger}>
-            Bloqué
-        </span>
-    ) : (
-        <span className={components.badge.success}>
-            Actif
-        </span>
     );
 };
 
@@ -268,7 +250,6 @@ const columns = [
     const columnOptions = columns.map((c) => ({ key: c.key, label: c.label }));
     const [visibleColumns, setVisibleColumns] = useState<string[]>([
         ...filterControls.map((f) => f.key),
-        "est_bloque",
     ]);
 
     const isColumnVisible = (key: string) => visibleColumns.includes(key);
@@ -287,7 +268,6 @@ const columns = [
         libelle_filiale: "",
         date_acquisition: "",
         puissance_materiel: "",
-        est_bloque: "",
     });
     const [columnFilters, setColumnFilters] = useState({
         code_materiel: "",
@@ -303,7 +283,6 @@ const columns = [
         libelle_filiale: "",
         date_acquisition: "",
         puissance_materiel: "",
-        est_bloque: "",
     });
 
     const siteParams = useMemo(() => {
@@ -349,7 +328,6 @@ const columns = [
             if (columnFilters.libelle_filiale) params.libelle_filiale = columnFilters.libelle_filiale;
             if (columnFilters.date_acquisition) params.date_acquisition = columnFilters.date_acquisition;
             if (columnFilters.puissance_materiel) params.puissance_materiel = columnFilters.puissance_materiel;
-            if (columnFilters.est_bloque !== "") params.est_bloque = columnFilters.est_bloque;
 
             // Always filter by type_affectation for Journal Materiel
             params.filtered = "true";
@@ -477,7 +455,6 @@ const columns = [
             libelle_site: "",
             date_acquisition: "",
             puissance_materiel: "",
-            est_bloque: "",
         });
         setColumnFilters({
             code_materiel: "",
@@ -493,7 +470,6 @@ const columns = [
             libelle_site: "",
             date_acquisition: "",
             puissance_materiel: "",
-            est_bloque: "",
         });
         setSortField(null);
         setSortOrder("asc");
@@ -566,17 +542,24 @@ const columns = [
 
     const visibleColumnsDef = columns.filter((c) => isColumnVisible(c.key));
 
+    const getColumnWidthPx = (col: { width: string }) => {
+        const match = col.width.match(/min-w-\[(\d+)px\]/);
+        return match ? parseInt(match[1], 10) : 170;
+    };
+
     const visibleTableWidth = (() => {
         let total = 0;
         visibleColumnsDef.forEach((col) => {
-            const match = (col as { width: string }).width.match(/min-w-\[(\d+)px\]/);
-            if (match) total += parseInt(match[1], 10);
+            total += getColumnWidthPx(col);
         });
-        if (isColumnVisible("est_bloque")) total += 130;
         total += 130;
-        total += 8 * (visibleColumnsDef.length + (isColumnVisible("est_bloque") ? 1 : 0) + 1);
+        total += 8 * (visibleColumnsDef.length + 1);
         return total;
     })();
+
+    const getColWidthStyle = (col: { width: string }) => ({
+        minWidth: `${getColumnWidthPx(col)}px`,
+    });
 
     return (
         <div className="space-y-6">
@@ -713,24 +696,6 @@ const columns = [
                             );
                         })}
                         <div className="flex flex-col gap-1 flex-1 min-w-[170px]">
-                            <label className={components.label}>Statut</label>
-                            <select
-                                value={columnFilters.est_bloque}
-                                onChange={(e) =>
-                                    setColumnFilters((prev) => ({
-                                        ...prev,
-                                        est_bloque: e.target.value,
-                                    }))
-                                }
-                                onClick={(e) => e.stopPropagation()}
-                                className={components.input}
-                            >
-                                <option value="">Tous</option>
-                                <option value="false">Actif</option>
-                                <option value="true">Bloqué</option>
-                            </select>
-                        </div>
-                        <div className="flex flex-col gap-1 flex-1 min-w-[170px]">
                             <button type="button" onClick={handleReset} className={`${components.button.secondary} h-10 px-4 w-full`}>
                                 Réinitialiser
                             </button>
@@ -794,7 +759,7 @@ const columns = [
                     onScroll={handleTopScroll}
                 >
                     <div className="h-px"
-                        style={{ width: `${visibleTableWidth}px` }} />
+                        style={{ width: '100%', minWidth: `${visibleTableWidth}px` }} />
                 </div>
 
                 {/* Table */}
@@ -804,15 +769,15 @@ const columns = [
                     onScroll={handleTableScroll}
                 >
                     <table className="table-fixed"
-                        style={{ width: `${visibleTableWidth}px` }}>
+                        style={{ width: '100%', minWidth: `${visibleTableWidth}px` }}>
                         <thead className={components.table.header + " border-b-2 border-slate-300"}>
                             <tr>
                                 {visibleColumnsDef.map((column) => (
                                     <th
                                         key={column.key}
                                         onClick={() => handleSort(column.key)}
+                                        style={getColWidthStyle(column)}
                                         className={`
-                      ${column.width}
                       px-4
                       py-3
                       align-top
@@ -837,28 +802,6 @@ const columns = [
                                             </div>
                                     </th>
                                 ))}
-
-                                {isColumnVisible("est_bloque") && (
-                                    <th
-                                        onClick={() => handleSort("est_bloque")}
-                                        className="min-w-[130px] px-4 py-3 align-top cursor-pointer hover:bg-slate-200 transition-colors"
-                                    >
-                                        <div className="flex flex-col gap-2">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-dark-text-primary">
-                                                    Statut
-                                                </span>
-
-                                                <SortIcon
-                                                    field="est_bloque"
-                                                    sortField={sortField}
-                                                    sortOrder={sortOrder}
-                                                    sortable={true}
-                                                />
-                                            </div>
-                                        </div>
-                                    </th>
-                                )}
                             </tr>
                         </thead>
                         <tbody>
@@ -870,7 +813,7 @@ const columns = [
                                             }`}
                                     >
                                         {visibleColumnsDef.map((column) => (
-                                            <td key={column.key} className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
+                                            <td key={column.key} style={getColWidthStyle(column)} className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
                                                 {column.key === "code_materiel" ? (
                                                     <span className="text-gray-800 dark:text-dark-text-primary font-medium">{item.code_materiel}</span>
                                                 ) : column.key === "valeur_acquisition" || column.key === "valeur_remplacement" ? (
@@ -884,18 +827,12 @@ const columns = [
                                                 )}
                                             </td>
                                         ))}
-
-                                        {isColumnVisible("est_bloque") && (
-                                            <td className="px-4 py-3 text-center">
-                                                <StatusBadge estBloque={item.est_bloque} />
-                                            </td>
-                                        )}
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={visibleColumnsDef.length + (isColumnVisible("est_bloque") ? 1 : 0) || 1}
+                                        colSpan={visibleColumnsDef.length || 1}
                                         className="px-4 py-8 text-center text-gray-500 dark:text-dark-text-secondary"
                                     >
                                         Aucun résultat trouvé
