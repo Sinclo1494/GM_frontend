@@ -787,22 +787,24 @@ const columns = [
                     )}
                 </div>
 
+                {/* Top scrollbar */}
+                <div
+                    ref={topScrollbarRef}
+                    className="h-5 overflow-x-auto bg-slate-100 dark:bg-dark-bg-secondary border-b border-slate-200 dark:border-dark-border"
+                    onScroll={handleTopScroll}
+                >
+                    <div className="h-px"
+                        style={{ width: `${visibleTableWidth}px` }} />
+                </div>
+
                 {/* Table */}
                 <div
                     ref={tableScrollRef}
                     className="overflow-x-auto"
                     onScroll={handleTableScroll}
                 >
-                    <div
-                        ref={topScrollbarRef}
-                        className="h-5 overflow-x-auto bg-slate-100 dark:bg-dark-bg-secondary border-b border-slate-200 dark:border-dark-border"
-                        onScroll={handleTopScroll}
-                    >
-                        <div className="h-px"
-                            style={{ width: `${visibleTableWidth}px` }} />
-                    </div>
                     <table className="table-fixed"
-                        style={{ width: '100%', minWidth: `${visibleTableWidth}px` }}>
+                        style={{ width: `${visibleTableWidth}px` }}>
                         <thead className={components.table.header + " border-b-2 border-slate-300"}>
                             <tr>
                                 {visibleColumnsDef.map((column) => (
