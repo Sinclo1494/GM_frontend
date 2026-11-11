@@ -18,7 +18,7 @@ const Navbar = () => {
   const navRef = useRef<HTMLElement>(null);
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const { hasMenuPermission, loading } = usePermissions();
+  const { hasMenuPermission,permissions , loading } = usePermissions();
   const navigate = useNavigate();
 
   const closeAllDropdowns = () => {
@@ -68,7 +68,7 @@ const Navbar = () => {
     );
   }
 
-  const canSeeDashboard = hasMenuPermission("menu.dashboard");
+  const canSeeDashboard = user?.is_superuser || permissions.includes("analyse.dashboard.read");
 
   const canSeeRecapitulatifs = hasMenuPermission("menu.recapitulatifs");
   const canSeeGestion = hasMenuPermission("menu.gestion");
