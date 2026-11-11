@@ -147,6 +147,20 @@ const JournalMaterielTable: React.FC = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [goToPageInput, setGoToPageInput] = useState("1");
+    const [showMoreFilters, setShowMoreFilters] = useState(false);
+    const [columnDropdownOpen, setColumnDropdownOpen] = useState(false);
+    const columnDropdownRef = useRef<HTMLDivElement>(null);
+
+    // Close the column dropdown when clicking outside of it
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (columnDropdownRef.current && !columnDropdownRef.current.contains(event.target as Node)) {
+                setColumnDropdownOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     const { includePending, setIncludePending } = usePendingFilters();
     const { user, hasPermission, hasAnyPermission } = usePermissions();
@@ -233,33 +247,31 @@ const columns = [
     ] as const;
 
     const filterControls = [
-        { key: "code_materiel", label: "Code Matériel" },
-        { key: "designation", label: "Désignation" },
-        { key: "num_serie", label: "N° Série" },
-        { key: "immatriculation", label: "Immatriculation" },
         { key: "libelle_filiale", label: "Filiale" },
+        { key: "libelle_site", label: "Site" },
         { key: "libelle_categorie", label: "Catégorie" },
         { key: "libelle_famille", label: "Famille Matériel" },
         { key: "libelle_sous_famille", label: "Sous Famille" },
+        { key: "code_materiel", label: "Code Matériel" },
+        { key: "designation", label: "Désignation" },
+    ] as const;
+
+    const moreFilterControls = [
+        { key: "num_serie", label: "N° Série" },
+        { key: "immatriculation", label: "Immatriculation" },
         { key: "libelle_marque", label: "Marque Matériel" },
         { key: "libelle_type_marque", label: "Type Marque" },
-        { key: "libelle_site", label: "Site" },
         { key: "date_acquisition", label: "Date Acquisition" },
         { key: "puissance_materiel", label: "Puissance" },
     ] as const;
 
-    const computedTableWidth = (() => {
-        let total = 0;
-        columns.forEach((col) => {
-            const match = (col as { width: string }).width.match(/min-w-\[(\d+)px\]/);
-            if (match) total += parseInt(match[1], 10);
-        });
-        total += 130;
-        total += 8 * (columns.length + 1);
-        return total;
-    })();
+    const columnOptions = columns.map((c) => ({ key: c.key, label: c.label }));
+    const [visibleColumns, setVisibleColumns] = useState<string[]>([
+        ...filterControls.map((f) => f.key),
+        "est_bloque",
+    ]);
 
-    
+    const isColumnVisible = (key: string) => visibleColumns.includes(key);
 
     const [columnFiltersInput, setColumnFiltersInput] = useState({
         code_materiel: "",
@@ -552,6 +564,20 @@ const columns = [
         );
     }
 
+    const visibleColumnsDef = columns.filter((c) => isColumnVisible(c.key));
+
+    const visibleTableWidth = (() => {
+        let total = 0;
+        visibleColumnsDef.forEach((col) => {
+            const match = (col as { width: string }).width.match(/min-w-\[(\d+)px\]/);
+            if (match) total += parseInt(match[1], 10);
+        });
+        if (isColumnVisible("est_bloque")) total += 130;
+        total += 130;
+        total += 8 * (visibleColumnsDef.length + (isColumnVisible("est_bloque") ? 1 : 0) + 1);
+        return total;
+    })();
+
     return (
         <div className="space-y-6">
             <div className={components.table.wrapper + " overflow-x-visible"}>
@@ -564,6 +590,60 @@ const columns = [
                     </div>
 
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-600 dark:text-dark-text-secondary">Colonnes:</span>
+                            <div ref={columnDropdownRef} className="relative">
+                                <button
+                                    type="button"
+                                    onClick={() => setColumnDropdownOpen((prev) => !prev)}
+                                    className={`${components.select} cursor-pointer flex items-center justify-between min-w-[220px]`}
+                                >
+                                    <span className="truncate">
+                                        {visibleColumns.length === columnOptions.length
+                                            ? "Toutes les colonnes"
+                                            : `${visibleColumns.length} colonne(s) sélectionnée(s)`}
+                                    </span>
+                                    <ChevronDown className="h-4 w-4 text-gray-400" />
+                                </button>
+                                {columnDropdownOpen && (
+                                    <div className="absolute z-50 mt-1 w-64 max-h-64 overflow-y-auto rounded-lg border border-slate-300 bg-white shadow-lg dark:border-dark-border dark:bg-dark-card">
+                                        <div className="p-2 border-b border-slate-200 dark:border-dark-border flex items-center justify-between">
+                                            <span className="text-xs font-semibold text-gray-500 dark:text-dark-text-secondary uppercase">Colonnes</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => setVisibleColumns(columnOptions.map((c) => c.key))}
+                                                className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                                            >
+                                                Tout sélectionner
+                                            </button>
+                                        </div>
+                                        <div className="p-1">
+                                            {columnOptions.map((col) => (
+                                                <label
+                                                    key={col.key}
+                                                    className="flex items-center gap-2 px-3 py-1.5 cursor-pointer hover:bg-slate-100 dark:hover:bg-dark-bg-tertiary rounded"
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={isColumnVisible(col.key)}
+                                                        onChange={(e) => {
+                                                            if (e.target.checked) {
+                                                                setVisibleColumns((prev) => [...prev, col.key]);
+                                                            } else {
+                                                                setVisibleColumns((prev) => prev.filter((k) => k !== col.key));
+                                                            }
+                                                        }}
+                                                        className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                    />
+                                                    <span className="text-sm text-gray-700 dark:text-dark-text-primary">{col.label}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
                         <div className="flex items-center gap-2">
                             <span className="text-sm text-gray-600 dark:text-dark-text-secondary">Lignes:</span>
 
@@ -595,7 +675,7 @@ const columns = [
                     </div>
                 </div>
 
-                {/* Results info */}
+{/* Results info */}
                 <div className="px-6 py-3 bg-slate-50 dark:bg-dark-bg-secondary border-b border-slate-200 dark:border-dark-border">
                     <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
                         Affichage de <span className="font-semibold">{startIdx}</span> à{" "}
@@ -603,16 +683,6 @@ const columns = [
                         sur <span className="font-semibold text-lg text-red-700 dark:text-red-500">{totalItems}</span>{" "}
                         résultat{totalItems !== 1 ? "s" : ""}
                     </p>
-                </div>
-
-                {/* Top scrollbar */}
-                <div
-                    ref={topScrollbarRef}
-                    className="h-5 overflow-x-auto bg-slate-100 dark:bg-dark-bg-secondary border-b border-slate-200"
-                    onScroll={handleTopScroll}
-                >
-                    <div className="h-px"
-                        style={{ width: `${computedTableWidth}px` }} />
                 </div>
 
                 {/* Filtres de colonnes */}
@@ -666,6 +736,55 @@ const columns = [
                             </button>
                         </div>
                     </div>
+
+                    <div className="mt-3">
+                        <button
+                            type="button"
+                            onClick={() => setShowMoreFilters((prev) => !prev)}
+                            className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1"
+                        >
+                            {showMoreFilters ? (
+                                <>
+                                    <ChevronUp className="h-4 w-4" />
+                                    Masquer les filtres supplémentaires
+                                </>
+                            ) : (
+                                <>
+                                    <ChevronDown className="h-4 w-4" />
+                                    Plus de filtres
+                                </>
+                            )}
+                        </button>
+                    </div>
+
+                    {showMoreFilters && (
+                        <div className="mt-4 flex flex-wrap items-end gap-4 border-t border-slate-200 dark:border-dark-border pt-4">
+                            {moreFilterControls.map((f) => {
+                                const isSearchable = isSearchableSelectFilter(f.key);
+                                const value = columnFiltersInput[f.key];
+                                return (
+                                    <div key={f.key} className="flex flex-col gap-1 flex-1 min-w-[170px]">
+                                        <label className={components.label}>{f.label}</label>
+                                        {isSearchable ? (
+                                            <SearchableSelect
+                                                value={value}
+                                                onChange={handleColumnFilterChange(f.key)}
+                                                options={getFilterOptions(f.key) || []}
+                                                placeholder="Tous"
+                                                className="w-full py-1 text-xs"
+                                                onClick={(e) => e.stopPropagation()}
+                                            />
+                                        ) : (
+                                            <FilterInput
+                                                value={value}
+                                                onChange={handleColumnFilterChange(f.key)}
+                                            />
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
 
                 {/* Table */}
@@ -674,11 +793,19 @@ const columns = [
                     className="overflow-x-auto"
                     onScroll={handleTableScroll}
                 >
+                    <div
+                        ref={topScrollbarRef}
+                        className="h-5 overflow-x-auto bg-slate-100 dark:bg-dark-bg-secondary border-b border-slate-200 dark:border-dark-border"
+                        onScroll={handleTopScroll}
+                    >
+                        <div className="h-px"
+                            style={{ width: `${visibleTableWidth}px` }} />
+                    </div>
                     <table className="table-fixed"
-                        style={{ width: `${computedTableWidth}px` }}>
+                        style={{ width: '100%', minWidth: `${visibleTableWidth}px` }}>
                         <thead className={components.table.header + " border-b-2 border-slate-300"}>
                             <tr>
-                                {columns.map((column) => (
+                                {visibleColumnsDef.map((column) => (
                                     <th
                                         key={column.key}
                                         onClick={() => handleSort(column.key)}
@@ -709,25 +836,27 @@ const columns = [
                                     </th>
                                 ))}
 
-                                <th
-                                    onClick={() => handleSort("est_bloque")}
-                                    className="min-w-[130px] px-4 py-3 align-top cursor-pointer hover:bg-slate-200 transition-colors"
-                                >
-                                    <div className="flex flex-col gap-2">
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-dark-text-primary">
-                                                Statut
-                                            </span>
+                                {isColumnVisible("est_bloque") && (
+                                    <th
+                                        onClick={() => handleSort("est_bloque")}
+                                        className="min-w-[130px] px-4 py-3 align-top cursor-pointer hover:bg-slate-200 transition-colors"
+                                    >
+                                        <div className="flex flex-col gap-2">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-dark-text-primary">
+                                                    Statut
+                                                </span>
 
-                                            <SortIcon
-                                                field="est_bloque"
-                                                sortField={sortField}
-                                                sortOrder={sortOrder}
-                                                sortable={true}
-                                            />
+                                                <SortIcon
+                                                    field="est_bloque"
+                                                    sortField={sortField}
+                                                    sortOrder={sortOrder}
+                                                    sortable={true}
+                                                />
+                                            </div>
                                         </div>
-                                    </div>
-                                </th>
+                                    </th>
+                                )}
                             </tr>
                         </thead>
                         <tbody>
@@ -738,64 +867,33 @@ const columns = [
                                         className={`${components.table.row} ${idx % 2 === 0 ? "bg-white dark:bg-dark-card" : "bg-slate-50/50 dark:bg-dark-bg-secondary/50"
                                             }`}
                                     >
-                                        <td className="px-4 py-3 text-sm text-gray-800 dark:text-dark-text-primary font-medium">
-                                            {item.code_materiel}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-800 dark:text-dark-text-primary">
-                                            {item.designation}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
-                                            {item.num_serie}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
-                                            {item.immatriculation}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
-                                            {item.libelle_site || ""}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
-                                            {item.libelle_filiale || ""}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
-                                            {item.libelle_categorie || ""}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
-                                            {item.libelle_famille || ""}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
-                                            {item.libelle_sous_famille || ""}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
-                                            {item.libelle_marque || ""}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
-                                            {item.libelle_type_marque || ""}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
-                                            {formatDate(item.date_acquisition)}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-800 dark:text-dark-text-primary text-right font-medium">
-                                            {formatCurrency(item.valeur_acquisition)}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-800 dark:text-dark-text-primary text-right font-medium">
-                                            {formatCurrency(item.valeur_remplacement)}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary text-right">
-                                            {item.taux_amortissement}%
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary text-right">
-                                            {item.puissance_materiel}
-                                        </td>
+                                        {visibleColumnsDef.map((column) => (
+                                            <td key={column.key} className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
+                                                {column.key === "code_materiel" ? (
+                                                    <span className="text-gray-800 dark:text-dark-text-primary font-medium">{item.code_materiel}</span>
+                                                ) : column.key === "valeur_acquisition" || column.key === "valeur_remplacement" ? (
+                                                    <span className="text-gray-800 dark:text-dark-text-primary text-right font-medium">{formatCurrency((item as any)[column.key])}</span>
+                                                ) : column.key === "taux_amortissement" ? (
+                                                    <span className="text-right">{(item as any)[column.key]}%</span>
+                                                ) : column.key === "date_acquisition" ? (
+                                                    formatDate((item as any)[column.key])
+                                                ) : (
+                                                    (item as any)[column.key] || ""
+                                                )}
+                                            </td>
+                                        ))}
 
-                                        <td className="px-4 py-3 text-center">
-                                            <StatusBadge estBloque={item.est_bloque} />
-                                        </td>
+                                        {isColumnVisible("est_bloque") && (
+                                            <td className="px-4 py-3 text-center">
+                                                <StatusBadge estBloque={item.est_bloque} />
+                                            </td>
+                                        )}
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan={17}
+                                        colSpan={visibleColumnsDef.length + (isColumnVisible("est_bloque") ? 1 : 0) || 1}
                                         className="px-4 py-8 text-center text-gray-500 dark:text-dark-text-secondary"
                                     >
                                         Aucun résultat trouvé
