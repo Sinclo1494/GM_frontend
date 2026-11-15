@@ -231,9 +231,9 @@ const columns = [
     const filterControls = [
         { key: "libelle_filiale", label: "Filiale" },
         { key: "libelle_site", label: "Site" },
-        { key: "libelle_categorie", label: "Catégorie" },
-        { key: "libelle_famille", label: "Famille Matériel" },
-        { key: "libelle_sous_famille", label: "Sous Famille" },
+        { key: "code_categorie", label: "Catégorie" },
+        { key: "code_famille", label: "Famille Matériel" },
+        { key: "code_sous_famille", label: "Sous Famille" },
         { key: "code_materiel", label: "Code Matériel" },
         { key: "designation", label: "Désignation" },
     ] as const;
@@ -241,16 +241,24 @@ const columns = [
     const moreFilterControls = [
         { key: "num_serie", label: "N° Série" },
         { key: "immatriculation", label: "Immatriculation" },
-        { key: "libelle_marque", label: "Marque Matériel" },
-        { key: "libelle_type_marque", label: "Type Marque" },
+        { key: "code_marque", label: "Marque Matériel" },
+        { key: "code_type_marque", label: "Type Marque" },
         { key: "date_acquisition", label: "Date Acquisition" },
         { key: "puissance_materiel", label: "Puissance" },
     ] as const;
 
     const columnOptions = columns.map((c) => ({ key: c.key, label: c.label }));
-    const [visibleColumns, setVisibleColumns] = useState<string[]>([
-        ...filterControls.map((f) => f.key),
-    ]);
+    const defaultVisibleColumns = filterControls.map(f => {
+        const map: Record<string, string> = {
+            "code_categorie": "libelle_categorie",
+            "code_famille": "libelle_famille",
+            "code_sous_famille": "libelle_sous_famille",
+            "code_marque": "libelle_marque",
+            "code_type_marque": "libelle_type_marque",
+        };
+        return map[f.key] ?? f.key;
+    });
+    const [visibleColumns, setVisibleColumns] = useState<string[]>(defaultVisibleColumns);
 
     const isColumnVisible = (key: string) => visibleColumns.includes(key);
 
@@ -259,12 +267,12 @@ const columns = [
         designation: "",
         num_serie: "",
         immatriculation: "",
-        libelle_sous_famille: "",
-        libelle_type_marque: "",
+        code_sous_famille: "",
+        code_type_marque: "",
         libelle_site: "",
-        libelle_famille: "",
-        libelle_categorie: "",
-        libelle_marque: "",
+        code_famille: "",
+        code_categorie: "",
+        code_marque: "",
         libelle_filiale: "",
         date_acquisition: "",
         puissance_materiel: "",
@@ -274,12 +282,12 @@ const columns = [
         designation: "",
         num_serie: "",
         immatriculation: "",
-        libelle_sous_famille: "",
-        libelle_type_marque: "",
+        code_sous_famille: "",
+        code_type_marque: "",
         libelle_site: "",
-        libelle_famille: "",
-        libelle_categorie: "",
-        libelle_marque: "",
+        code_famille: "",
+        code_categorie: "",
+        code_marque: "",
         libelle_filiale: "",
         date_acquisition: "",
         puissance_materiel: "",
@@ -319,12 +327,12 @@ const columns = [
             if (columnFilters.designation) params.designation = columnFilters.designation;
             if (columnFilters.num_serie) params.num_serie = columnFilters.num_serie;
             if (columnFilters.immatriculation) params.immatriculation = columnFilters.immatriculation;
-            if (columnFilters.libelle_sous_famille) params.libelle_sous_famille = columnFilters.libelle_sous_famille;
-            if (columnFilters.libelle_type_marque) params.libelle_type_marque = columnFilters.libelle_type_marque;
+            if (columnFilters.code_sous_famille) params.code_sous_famille = columnFilters.code_sous_famille;
+            if (columnFilters.code_type_marque) params.code_type_marque = columnFilters.code_type_marque;
             if (columnFilters.libelle_site) params.libelle_site = columnFilters.libelle_site;
-            if (columnFilters.libelle_famille) params.libelle_famille = columnFilters.libelle_famille;
-            if (columnFilters.libelle_categorie) params.libelle_categorie = columnFilters.libelle_categorie;
-            if (columnFilters.libelle_marque) params.libelle_marque = columnFilters.libelle_marque;
+            if (columnFilters.code_famille) params.code_famille = columnFilters.code_famille;
+            if (columnFilters.code_categorie) params.code_categorie = columnFilters.code_categorie;
+            if (columnFilters.code_marque) params.code_marque = columnFilters.code_marque;
             if (columnFilters.libelle_filiale) params.libelle_filiale = columnFilters.libelle_filiale;
             if (columnFilters.date_acquisition) params.date_acquisition = columnFilters.date_acquisition;
             if (columnFilters.puissance_materiel) params.puissance_materiel = columnFilters.puissance_materiel;
@@ -387,8 +395,8 @@ const columns = [
     // Cascade: when a filiale is selected, reset the site filter and reload site
     // options for that filiale (server-side via the code_filiale param).
     useEffect(() => {
-        setColumnFiltersInput((prev) => ({ ...prev, libelle_site: "" }));
-        setColumnFilters((prev) => ({ ...prev, libelle_site: "" }));
+        setColumnFiltersInput((prev) => ({ ...prev, libelle_site: "", code_categorie: "", code_famille: "", code_sous_famille: "", code_marque: "", code_type_marque: "" }));
+        setColumnFilters((prev) => ({ ...prev, libelle_site: "", code_categorie: "", code_famille: "", code_sous_famille: "", code_marque: "", code_type_marque: "" }));
     }, [columnFiltersInput.libelle_filiale, setColumnFiltersInput, setColumnFilters]);
 
     const handleColumnFilterChange = (key: keyof typeof columnFiltersInput) => (value: string) => {
@@ -399,15 +407,15 @@ const columns = [
         switch (key) {
             case "libelle_filiale":
                 return [{ value: "", label: "Tous" }, ...filialeFilterOptions];
-            case "libelle_categorie":
+            case "code_categorie":
                 return [{ value: "", label: "Tous" }, ...categorieFilterOptions];
-            case "libelle_famille":
+            case "code_famille":
                 return [{ value: "", label: "Tous" }, ...familleFilterOptions];
-            case "libelle_sous_famille":
+            case "code_sous_famille":
                 return [{ value: "", label: "Tous" }, ...sousFamilleFilterOptions];
-            case "libelle_marque":
+            case "code_marque":
                 return [{ value: "", label: "Tous" }, ...marqueFilterOptions];
-            case "libelle_type_marque":
+            case "code_type_marque":
                 return [{ value: "", label: "Tous" }, ...typeMarqueFilterOptions];
             case "libelle_site":
                 return [{ value: "", label: "Tous" }, ...toCodeLibelle(siteOptions)];
@@ -417,7 +425,7 @@ const columns = [
     };
 
     const isSearchableSelectFilter = (key: string) => {
-        return ["libelle_filiale", "libelle_categorie", "libelle_famille", "libelle_sous_famille", "libelle_marque", "libelle_type_marque", "libelle_site"].includes(key);
+        return ["libelle_filiale", "code_categorie", "code_famille", "code_sous_famille", "code_marque", "code_type_marque", "libelle_site"].includes(key);
     };
 
     const handleSort = (field: SortField) => {
@@ -446,13 +454,13 @@ const columns = [
             designation: "",
             num_serie: "",
             immatriculation: "",
-            libelle_sous_famille: "",
-            libelle_type_marque: "",
-            libelle_famille: "",
-            libelle_categorie: "",
-            libelle_marque: "",
-            libelle_filiale: "",
+            code_sous_famille: "",
+            code_type_marque: "",
             libelle_site: "",
+            code_famille: "",
+            code_categorie: "",
+            code_marque: "",
+            libelle_filiale: "",
             date_acquisition: "",
             puissance_materiel: "",
         });
@@ -461,12 +469,16 @@ const columns = [
             designation: "",
             num_serie: "",
             immatriculation: "",
-            libelle_sous_famille: "",
-            libelle_type_marque: "",
-            libelle_famille: "",
-            libelle_categorie: "",
-            libelle_marque: "",
+            code_sous_famille: "",
+            code_type_marque: "",
+            libelle_site: "",
+            code_famille: "",
+            code_categorie: "",
+            code_marque: "",
             libelle_filiale: "",
+            date_acquisition: "",
+            puissance_materiel: "",
+        });
             libelle_site: "",
             date_acquisition: "",
             puissance_materiel: "",

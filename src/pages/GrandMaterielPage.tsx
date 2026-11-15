@@ -59,19 +59,19 @@ const CODE_LIBELLE = (code: string | null | undefined, libelle: string | null | 
     const c = (code ?? "").toString().trim();
     const l = (libelle ?? "").toString().trim();
     if (!c && !l) return <span>—</span>;
-    return <span>{c}${l ? ` - ${l}` : ""}</span>;
+    return <span>{`${c}${l ? ` - ${l}` : ""}`}</span>;
 };
 
 export default function GrandMaterielPage() {
-    const { options: filialeOptions } = useEntityOptions<any>("filiale", "code_filiale", "libelle_filiale");
-    const { options: sousFamilleOptions } = useEntityOptions<any>("sous-famille-materiel", "code_sous_famille", "libelle_sous_famille");
-    const { options: typeMarqueOptions } = useEntityOptions<any>("type-marque", "code_type_marque", "libelle_type_marque");
-    const { options: siteOptions } = useEntityOptions<any>("site", "code_site", "libelle_site");
-    const { options: etatOptions } = useEntityOptions<any>("type-etat-materiel", "code_type_etat_materiel", "libelle_type_etat_materiel");
-    const { options: typeSituationOptions } = useEntityOptions<any>("type-situation", "id", "libelle_type_situation");
-    const { options: familleOptions } = useEntityOptions<any>("famille-materiel", "code_famille", "libelle_famille");
-    const { options: categorieOptions } = useEntityOptions<any>("categorie-gm", "code_categorie", "libelle_categorie");
-    const { options: marqueOptions } = useEntityOptions<any>("marque-materiel", "code_marque", "libelle_marque");
+    const { options: filialeOptions } = useEntityOptions<any>("filiale", "code_filiale", "libelle_filiale", {}, 1000);
+    const { options: sousFamilleOptions } = useEntityOptions<any>("sous-famille-materiel", "code_sous_famille", "libelle_sous_famille", {}, 1000);
+    const { options: typeMarqueOptions } = useEntityOptions<any>("type-marque", "code_type_marque", "libelle_type_marque", {}, 1000);
+    const { options: siteOptions } = useEntityOptions<any>("site", "code_site", "libelle_site", {}, 1000);
+    const { options: etatOptions } = useEntityOptions<any>("type-etat-materiel", "code_type_etat_materiel", "libelle_type_etat_materiel", {}, 1000);
+    const { options: typeSituationOptions } = useEntityOptions<any>("type-situation", "id", "libelle_type_situation", {}, 1000);
+    const { options: familleOptions } = useEntityOptions<any>("famille-materiel", "code_famille", "libelle_famille", {}, 1000);
+    const { options: categorieOptions } = useEntityOptions<any>("categorie-gm", "code_categorie", "libelle_categorie", {}, 1000);
+    const { options: marqueOptions } = useEntityOptions<any>("marque-materiel", "code_marque", "libelle_marque", {}, 1000);
 
     const filialeFilterOptions = toCodeLibelle(filialeOptions);
     const familleFilterOptions = toCodeLibelle(familleOptions);
@@ -100,12 +100,12 @@ export default function GrandMaterielPage() {
         { key: "code_materiel", label: "Code", width: "min-w-[140px]", sortable: true, filter: { param: "code_materiel" } },
         { key: "designation", label: "Désignation", width: "min-w-[180px]", sortable: true, filter: { param: "designation" }, render: DASH },
         { key: "code_filiale_g", label: "Code Filiale", width: "min-w-[130px]", sortable: true, filter: { param: "code_filiale" }, render: DASH },
-        { key: "libelle_filiale", label: "Filiale", width: "min-w-[150px]", sortable: true, filter: { type: "select", param: "libelle_filiale", options: filialeFilterOptions }, render: DASH },
-        { key: "libelle_categorie", label: "Catégorie", width: "min-w-[160px]", sortable: true, filter: { type: "select", param: "libelle_categorie", options: categorieFilterOptions }, render: DASH },
-        { key: "libelle_famille", label: "Famille", width: "min-w-[160px]", sortable: true, filter: { type: "select", param: "libelle_famille", options: familleFilterOptions }, render: DASH },
+        { key: "libelle_filiale", label: "Filiale", width: "min-w-[150px]", sortable: true, filter: { type: "select", param: "code_filiale", options: filialeFilterOptions }, render: DASH },
+        { key: "libelle_categorie", label: "Catégorie", width: "min-w-[160px]", sortable: true, filter: { type: "select", param: "code_categorie", options: categorieFilterOptions }, render: DASH },
+        { key: "libelle_famille", label: "Famille", width: "min-w-[160px]", sortable: true, filter: { type: "select", param: "code_famille", options: familleFilterOptions }, render: DASH },
         { key: "code_sous_famille_materiel", label: "Sous-Famille", width: "min-w-[220px]", sortable: true, sortParam: "code_sous_famille", filter: { type: "select", param: "code_sous_famille", options: sousFamilleFilterOptions }, render: (_val, row) => CODE_LIBELLE(row.code_sous_famille_materiel, row.libelle_sous_famille) },
         { key: "code_type_marque", label: "Type Marque", width: "min-w-[220px]", sortable: true, filter: { type: "select", param: "code_type_marque", options: typeMarqueFilterOptions }, render: (_val, row) => CODE_LIBELLE(row.code_type_marque, row.libelle_type_marque) },
-        { key: "libelle_marque", label: "Marque", width: "min-w-[160px]", sortable: true, filter: { type: "select", param: "libelle_marque", options: marqueFilterOptions }, render: DASH },
+        { key: "libelle_marque", label: "Marque", width: "min-w-[160px]", sortable: true, filter: { type: "select", param: "code_marque", options: marqueFilterOptions }, render: DASH },
         { key: "num_serie", label: "N° Série", width: "min-w-[140px]", sortable: true, filter: { param: "num_serie" }, render: DASH },
         { key: "immatriculation", label: "Immatriculation", width: "min-w-[140px]", sortable: true, filter: { param: "immatriculation" }, render: DASH },
         { key: "date_acquisition", label: "Date Acquisition", width: "min-w-[170px]", sortable: true, filter: { param: "date_acquisition", placeholder: "JJ/MM/AAAA" }, render: DASH },

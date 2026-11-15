@@ -12,7 +12,7 @@ const CODE_LIBELLE = (code: string | null | undefined, libelle: string | null | 
     const c = (code ?? "").toString().trim();
     const l = (libelle ?? "").toString().trim();
     if (!c && !l) return <span>—</span>;
-    return <span>{c}${l ? ` - ${l}` : ""}</span>;
+    return <span>{`${c}${l ? ` - ${l}` : ""}`}</span>;
 };
 
 const toCodeLibelle = (opts: { value: string; label: string }[]) =>
