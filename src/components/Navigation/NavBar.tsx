@@ -57,7 +57,7 @@ const Navbar = () => {
     try {
       const token = localStorage.getItem("token");
       const base = import.meta.env.VITE_API_BASE_URL;
-      const res = await fetch(`${base}/journal-materiel-temp/refresh/`, {
+      const res = await fetch(`${base}/journal-materiel/refresh/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -147,15 +147,6 @@ const Navbar = () => {
                     className={dropdownItemClass}
                   >
                     Journal Matériel
-                  </Link>
-                )}
-                {hasMenuPermission("analyse.journal_materiel_temp") && (
-                  <Link
-                    to="/reports/temp-journal-materiel"
-                    onClick={closeAllDropdowns}
-                    className={dropdownItemClass}
-                  >
-                    Temp Journal Matériel
                   </Link>
                 )}
                 {hasMenuPermission("analyse.quantitative") && (

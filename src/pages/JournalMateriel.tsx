@@ -1,6 +1,6 @@
 import React from 'react'
 import { components } from "../theme/components";
-import JournalMaterielTable from '../components/JournalMateriel/JournalMaterielTable'
+import JournalMaterielTable from '../components/TempJournalMateriel/TempJournalMaterielTable'
 
 const JournalMateriel: React.FC = () => {
   return (

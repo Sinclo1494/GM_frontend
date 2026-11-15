@@ -33,4 +33,8 @@ const createPageTest = (name: string, title: string, mockImport: any) => {
 createPageTest('AnalyseExploitation', 'Analyse d\'Exploitation', () => import('../../pages/AnalyseExploitation'));
 createPageTest('AnalyseQuantitative', 'Analyse Quantitative', () => import('../../pages/AnalyseQuantitative'));
 createPageTest('Journalisation', 'Journalisation', () => import('../../pages/Journalisation'));
+vi.mock('../../components/TempJournalMateriel/TempJournalMaterielTable', () => ({
+  __esModule: true,
+  default: () => <div>JournalMaterielTableMock</div>,
+}));
 createPageTest('JournalMateriel', 'Journal Matériel', () => import('../../pages/JournalMateriel'));

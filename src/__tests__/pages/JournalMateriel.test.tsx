@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { resetAllMocks } from "../test-utils";
 import JournalMateriel from "../../pages/JournalMateriel";
 
-vi.mock("../../components/JournalMateriel/JournalMaterielTable", () => ({
+vi.mock("../../components/TempJournalMateriel/TempJournalMaterielTable", () => ({
   default: () => <div data-testid="journal-materiel-table">Table</div>,
 }));
 

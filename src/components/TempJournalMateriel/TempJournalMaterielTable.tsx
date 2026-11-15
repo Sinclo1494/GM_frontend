@@ -15,7 +15,7 @@ import { usePendingFilters } from "../../context/PendingFiltersContext";
 import { usePermissions } from "../../auth/PermissionContext";
 import SearchableSelect from "../common/SearchableSelect";
 import { useEntityOptions } from "../Crud/useEntityOptions";
-const GM_URL = "journal-materiel-temp";
+const GM_URL = "journal-materiel";
 
 const toCodeLibelle = (opts: { value: string; label: string }[]) =>
     opts.map((o) => ({ value: o.value, label: `${o.value} - ${o.label}` }));
@@ -148,7 +148,7 @@ const TempJournalMaterielTable: React.FC = () => {
     const { user, hasPermission, hasAnyPermission } = usePermissions();
     const canIncludePending =
         !!user?.is_superuser ||
-        (hasPermission("analyse.journal_materiel_temp") &&
+        (hasPermission("analyse.journal_materiel") &&
             hasAnyPermission([
                 "import.grand_materiel",
                 "import.pointage",
