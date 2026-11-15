@@ -27,6 +27,7 @@ export const PERMISSIONS: PermissionDefinition[] = [
 
   { key: "analyse.mgt_dashboard", label: "MGT Dashboard", category: "analyse", route: "/reports/mgt-dashboard", hasRead: true, hasWrite: false, hasMenu: true, parentMenu: "menu.recapitulatifs" },
   { key: "analyse.journal_materiel", label: "Journal Matériel", category: "analyse", route: "/reports/journal-materiel", hasRead: true, hasWrite: false, hasMenu: true, parentMenu: "menu.recapitulatifs" },
+  { key: "analyse.journal_materiel_temp", label: "Temp Journal Matériel", category: "analyse", route: "/reports/temp-journal-materiel", hasRead: true, hasWrite: false, hasMenu: true, parentMenu: "menu.recapitulatifs" },
   { key: "analyse.quantitative", label: "Analyse quantitative", category: "analyse", route: "/reports/analyse-quantitative", hasRead: true, hasWrite: false, hasMenu: true, parentMenu: "menu.recapitulatifs" },
   { key: "analyse.exploitation", label: "Anlyse d'Exploitation", category: "analyse", route: "/reports/analyse-exploitation", hasRead: true, hasWrite: false, hasMenu: true, parentMenu: "menu.recapitulatifs" },
 

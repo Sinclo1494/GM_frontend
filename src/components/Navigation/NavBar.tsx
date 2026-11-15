@@ -14,11 +14,12 @@ const Navbar = () => {
   const [adminOpen, setAdminOpen] = useState(false);
   const [gestionOpen, setGestionOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [refreshingJournalTemp, setRefreshingJournalTemp] = useState(false);
 
   const navRef = useRef<HTMLElement>(null);
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const { hasMenuPermission,permissions , loading } = usePermissions();
+  const { hasMenuPermission, permissions, loading } = usePermissions();
   const navigate = useNavigate();
 
   const closeAllDropdowns = () => {
@@ -48,6 +49,32 @@ const Navbar = () => {
   const handleLogout = () => {
     logout();
     navigate("/login");
+  };
+
+  const handleRefreshJournalTemp = async () => {
+    if (refreshingJournalTemp) return;
+    setRefreshingJournalTemp(true);
+    try {
+      const token = localStorage.getItem("token");
+      const base = import.meta.env.VITE_API_BASE_URL;
+      const res = await fetch(`${base}/journal-materiel-temp/refresh/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data?.detail || "refresh failed");
+      }
+      window.alert("Journal matériel temporaire recalculé.");
+    } catch (err: any) {
+      window.alert(err?.message || "Erreur lors du recalcul du journal matériel temporaire.");
+    } finally {
+      setRefreshingJournalTemp(false);
+      closeAllDropdowns();
+    }
   };
 
   const dropdownClass =
@@ -120,6 +147,15 @@ const Navbar = () => {
                     className={dropdownItemClass}
                   >
                     Journal Matériel
+                  </Link>
+                )}
+                {hasMenuPermission("analyse.journal_materiel_temp") && (
+                  <Link
+                    to="/reports/temp-journal-materiel"
+                    onClick={closeAllDropdowns}
+                    className={dropdownItemClass}
+                  >
+                    Temp Journal Matériel
                   </Link>
                 )}
                 {hasMenuPermission("analyse.quantitative") && (
@@ -396,6 +432,18 @@ const Navbar = () => {
                   >
                     Imports en attente
                   </Link>
+                )}
+                {user?.is_superuser && (
+                  <button
+                    type="button"
+                    onClick={handleRefreshJournalTemp}
+                    disabled={refreshingJournalTemp}
+                    className={`${dropdownItemClass} w-full text-left disabled:opacity-50`}
+                  >
+                    {refreshingJournalTemp
+                      ? "Recalcul journal matériel..."
+                      : "Recalculer Journal Matériel Temp"}
+                  </button>
                 )}
                 <div className="border-t border-slate-100 dark:border-dark-border my-1" />
                 <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-dark-text-secondary uppercase">Référentiels</div>

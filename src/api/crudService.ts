@@ -100,9 +100,23 @@ export async function crudOptions<T>(
     } else {
         queryParams.page_size = "10";
     }
-    const { data } = await axios.get<CrudListResponse<T>>(`${API}/${endpoint}/`, {
-        params: queryParams,
-        headers: authHeaders(),
-    });
-    return data.results;
+    try {
+        const { data } = await axios.get<CrudListResponse<T>>(`${API}/${endpoint}/options/`, {
+            params: queryParams,
+            headers: authHeaders(),
+        });
+        return data.results;
+    } catch (err) {
+        // Endpoints without the lightweight /options/ action (e.g. grand-materiel,
+        // which needs its custom cross-filiale list logic) fall back to the
+        // standard list endpoint.
+        if (axios.isAxiosError(err) && err.response?.status === 404) {
+            const { data } = await axios.get<CrudListResponse<T>>(`${API}/${endpoint}/`, {
+                params: queryParams,
+                headers: authHeaders(),
+            });
+            return data.results;
+        }
+        throw err;
+    }
 }

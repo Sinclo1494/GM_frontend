@@ -10,6 +10,7 @@ vi.mock("axios", () => ({
     put: vi.fn(),
     patch: vi.fn(),
     delete: vi.fn(),
+    isAxiosError: vi.fn(() => false),
     interceptors: { request: { use: vi.fn() }, response: { use: vi.fn() } },
     defaults: { headers: {} },
   },
@@ -68,9 +69,9 @@ describe("useEntityOptions.ts", () => {
     expect(screen.getByTestId("first-label").textContent).toBe("Alpha");
     // crudOptions requests the endpoint with page_size: 1000 + auth headers
     expect(axios.get).toHaveBeenCalledWith(
-      `${BASE_URL}/categories/`,
+      `${BASE_URL}/categories/options/`,
       expect.objectContaining({
-        params: expect.objectContaining({ page_size: 1000 }),
+        params: expect.objectContaining({ page_size: "10" }),
       }),
     );
   });
@@ -80,9 +81,9 @@ describe("useEntityOptions.ts", () => {
     render(<OptionsProbe endpoint="familles" params={{ type: "gm" }} />);
     await waitFor(() => expect(screen.getByTestId("loading").textContent).toBe("false"));
     expect(axios.get).toHaveBeenCalledWith(
-      `${BASE_URL}/familles/`,
+      `${BASE_URL}/familles/options/`,
       expect.objectContaining({
-        params: expect.objectContaining({ type: "gm", page_size: 1000 }),
+        params: expect.objectContaining({ type: "gm", page_size: "10" }),
       }),
     );
   });
@@ -105,7 +106,7 @@ describe("useEntityOptions.ts", () => {
     rerender(<OptionsProbe endpoint="other" />);
     await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(2));
     expect(axios.get).toHaveBeenLastCalledWith(
-      `${BASE_URL}/other/`,
+      `${BASE_URL}/other/options/`,
       expect.any(Object),
     );
   });

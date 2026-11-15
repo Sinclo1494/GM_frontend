@@ -1,0 +1,925 @@
+"use client";
+
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import {
+    ChevronUp,
+    ChevronDown,
+    Loader2,
+    AlertCircle,
+} from "lucide-react";
+import formatCurrency from "../../utils/FormatCurrency";
+import formatDate from "../../utils/FormatDate";
+import { components } from "../../theme/components";
+import { crudList } from "../../api/crudService";
+import { usePendingFilters } from "../../context/PendingFiltersContext";
+import { usePermissions } from "../../auth/PermissionContext";
+import SearchableSelect from "../common/SearchableSelect";
+import { useEntityOptions } from "../Crud/useEntityOptions";
+const GM_URL = "journal-materiel-temp";
+
+const toCodeLibelle = (opts: { value: string; label: string }[]) =>
+    opts.map((o) => ({ value: o.value, label: `${o.value} - ${o.label}` }));
+
+interface JournalMateriel {
+    id: number;
+    code_materiel: string;
+    designation: string;
+    num_serie: string;
+    immatriculation: string;
+    date_acquisition: string;
+    valeur_acquisition: string;
+    valeur_remplacement: string;
+    taux_amortissement: string;
+    puissance_materiel: string;
+    code_sous_famille_materiel: string;
+    code_type_marque: string;
+    libelle_famille: string | null;
+    libelle_categorie: string | null;
+    libelle_marque: string | null;
+    libelle_filiale: string | null;
+    libelle_sous_famille: string | null;
+    libelle_type_marque: string | null;
+    libelle_site: string | null;
+    user_id: number;
+    code_filiale_g: string;
+    created_at: string;
+    updated_at: string;
+}
+
+type SortField =
+    | "code_materiel"
+    | "designation"
+    | "num_serie"
+    | "immatriculation"
+    | "date_acquisition"
+    | "valeur_acquisition"
+    | "valeur_remplacement"
+    | "taux_amortissement"
+    | "puissance_materiel"
+    | "libelle_sous_famille"
+    | "libelle_type_marque"
+    | "libelle_famille"
+    | "libelle_categorie"
+    | "libelle_marque"
+    | "libelle_filiale"
+    | "libelle_site"
+    | null;
+type SortOrder = "asc" | "desc";
+
+interface SortIconProps {
+    field: Exclude<SortField, null>;
+    sortField: SortField;
+    sortOrder: SortOrder;
+    sortable: boolean;
+}
+
+const SortIcon: React.FC<SortIconProps> = ({ field, sortField, sortOrder, sortable }) => {
+    if (!sortable) {
+        return <div className="h-4 w-4 text-gray-300" />;
+    }
+
+    if (sortField !== field) {
+        return <div className="h-4 w-4 text-gray-300" />;
+    }
+
+    return sortOrder === "asc" ? (
+        <ChevronUp className="h-4 w-4 text-gray-600" />
+    ) : (
+        <ChevronDown className="h-4 w-4 text-gray-600" />
+    );
+};
+
+const FilterInput = ({
+    value,
+    onChange,
+}: {
+    value: string;
+    onChange: (value: string) => void;
+}) => (
+    <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="Filtrer..."
+        onClick={(e) => e.stopPropagation()}
+        className={components.input}
+    />
+);
+
+const TempJournalMaterielTable: React.FC = () => {
+    const { options: filialeOptions } = useEntityOptions<any>("filiale", "code_filiale", "libelle_filiale");
+    const { options: familleOptions } = useEntityOptions<any>("famille-materiel", "code_famille", "libelle_famille", {}, 1000);
+    const { options: categorieOptions } = useEntityOptions<any>("categorie-gm", "code_categorie", "libelle_categorie", {}, 1000);
+    const { options: sousFamilleOptions } = useEntityOptions<any>("sous-famille-materiel", "code_sous_famille", "libelle_sous_famille", {}, 1000);
+    const { options: marqueOptions } = useEntityOptions<any>("marque-materiel", "code_marque", "libelle_marque", {}, 1000);
+    const { options: typeMarqueOptions } = useEntityOptions<any>("type-marque", "code_type_marque", "libelle_type_marque", {}, 1000);
+    const filialeFilterOptions = useMemo(() => toCodeLibelle(filialeOptions), [filialeOptions]);
+    const familleFilterOptions = useMemo(() => toCodeLibelle(familleOptions), [familleOptions]);
+    const categorieFilterOptions = useMemo(() => toCodeLibelle(categorieOptions), [categorieOptions]);
+    const sousFamilleFilterOptions = useMemo(() => toCodeLibelle(sousFamilleOptions), [sousFamilleOptions]);
+    const marqueFilterOptions = useMemo(() => toCodeLibelle(marqueOptions), [marqueOptions]);
+    const typeMarqueFilterOptions = useMemo(() => toCodeLibelle(typeMarqueOptions), [typeMarqueOptions]);
+
+    const [data, setData] = useState<JournalMateriel[]>([]);
+    const [totalItems, setTotalItems] = useState(0);
+    const [loading, setLoading] = useState(true);
+    const [isInitialLoading, setIsInitialLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [sortField, setSortField] = useState<SortField>(null);
+    const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [goToPageInput, setGoToPageInput] = useState("1");
+    const [showMoreFilters, setShowMoreFilters] = useState(false);
+    const [columnDropdownOpen, setColumnDropdownOpen] = useState(false);
+    const columnDropdownRef = useRef<HTMLDivElement>(null);
+
+    // Close the column dropdown when clicking outside of it
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (columnDropdownRef.current && !columnDropdownRef.current.contains(event.target as Node)) {
+                setColumnDropdownOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    const { includePending, setIncludePending } = usePendingFilters();
+    const { user, hasPermission, hasAnyPermission } = usePermissions();
+    const canIncludePending =
+        !!user?.is_superuser ||
+        (hasPermission("analyse.journal_materiel_temp") &&
+            hasAnyPermission([
+                "import.grand_materiel",
+                "import.pointage",
+                "import.marque",
+                "import.type_marque",
+                "import.sous_famille",
+                "import.famille",
+                "import.categorie_gm",
+                "import.situation_affectation",
+                "import.site",
+                "import.regularisation",
+            ]));
+
+    useEffect(() => {
+        if (!canIncludePending && includePending) {
+            setIncludePending(false);
+        }
+    }, [canIncludePending, includePending, setIncludePending]);
+    const abortControllerRef = useRef<AbortController | null>(null);
+    const filterTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const tableScrollRef = useRef<HTMLDivElement>(null);
+    const topScrollbarRef = useRef<HTMLDivElement>(null);
+
+    const handleTableScroll = useCallback(() => {
+        if (tableScrollRef.current && topScrollbarRef.current) {
+            topScrollbarRef.current.scrollLeft = tableScrollRef.current.scrollLeft;
+        }
+    }, []);
+
+    const handleTopScroll = useCallback(() => {
+        if (tableScrollRef.current && topScrollbarRef.current) {
+            tableScrollRef.current.scrollLeft = topScrollbarRef.current.scrollLeft;
+        }
+    }, []);
+
+const columns = [
+        { key: "code_materiel", label: "Code Matériel", width: "min-w-[170px]", sortable: true, filterable: true },
+        { key: "designation", label: "Désignation", width: "min-w-[250px]", sortable: true, filterable: true },
+        { key: "num_serie", label: "N° Série", width: "min-w-[170px]", sortable: true, filterable: true },
+        {
+            key: "immatriculation",
+            label: "Immatriculation",
+            width: "min-w-[170px]",
+            sortable: true,
+            filterable: true,
+        },
+        { key: "libelle_site", label: "Site", width: "min-w-[150px]", sortable: true, filterable: true },
+        { key: "libelle_filiale", label: "Filiale", width: "min-w-[130px]", sortable: true, filterable: true },
+        { key: "libelle_categorie", label: "Catégorie", width: "min-w-[180px]", sortable: true, filterable: true },
+        { key: "libelle_famille", label: "Famille Matériel", width: "min-w-[180px]", sortable: true, filterable: true },
+        { key: "libelle_sous_famille", label: "Sous Famille", width: "min-w-[180px]", sortable: true, filterable: true },
+        { key: "libelle_marque", label: "Marque Matériel", width: "min-w-[180px]", sortable: true, filterable: true },
+        { key: "libelle_type_marque", label: "Type Marque", width: "min-w-[180px]", sortable: true, filterable: true },
+        {
+            key: "date_acquisition",
+            label: "Date Acquisition",
+            width: "min-w-[170px]",
+            sortable: true,
+            filterable: true,
+        },
+        {
+            key: "valeur_acquisition",
+            label: "Valeur Acquisition",
+            width: "min-w-[180px]",
+            sortable: true,
+            filterable: false,
+        },
+        {
+            key: "valeur_remplacement",
+            label: "Valeur Remp.",
+            width: "min-w-[190px]",
+            sortable: true,
+            filterable: false,
+        },
+        { key: "taux_amortissement", label: "Taux Amort.", width: "min-w-[150px]", sortable: true, filterable: false },
+        { key: "puissance_materiel", label: "Puissance", width: "min-w-[150px]", sortable: true, filterable: true },
+    ] as const;
+
+    const filterControls = [
+        { key: "libelle_filiale", label: "Filiale" },
+        { key: "libelle_site", label: "Site" },
+        { key: "libelle_categorie", label: "Catégorie" },
+        { key: "libelle_famille", label: "Famille Matériel" },
+        { key: "libelle_sous_famille", label: "Sous Famille" },
+        { key: "code_materiel", label: "Code Matériel" },
+        { key: "designation", label: "Désignation" },
+    ] as const;
+
+    const moreFilterControls = [
+        { key: "num_serie", label: "N° Série" },
+        { key: "immatriculation", label: "Immatriculation" },
+        { key: "libelle_marque", label: "Marque Matériel" },
+        { key: "libelle_type_marque", label: "Type Marque" },
+        { key: "date_acquisition", label: "Date Acquisition" },
+        { key: "puissance_materiel", label: "Puissance" },
+    ] as const;
+
+    const columnOptions = columns.map((c) => ({ key: c.key, label: c.label }));
+    const [visibleColumns, setVisibleColumns] = useState<string[]>([
+        ...filterControls.map((f) => f.key),
+    ]);
+
+    const isColumnVisible = (key: string) => visibleColumns.includes(key);
+
+    const [columnFiltersInput, setColumnFiltersInput] = useState({
+        code_materiel: "",
+        designation: "",
+        num_serie: "",
+        immatriculation: "",
+        libelle_sous_famille: "",
+        libelle_type_marque: "",
+        libelle_site: "",
+        libelle_famille: "",
+        libelle_categorie: "",
+        libelle_marque: "",
+        libelle_filiale: "",
+        date_acquisition: "",
+        puissance_materiel: "",
+    });
+    const [columnFilters, setColumnFilters] = useState({
+        code_materiel: "",
+        designation: "",
+        num_serie: "",
+        immatriculation: "",
+        libelle_sous_famille: "",
+        libelle_type_marque: "",
+        libelle_site: "",
+        libelle_famille: "",
+        libelle_categorie: "",
+        libelle_marque: "",
+        libelle_filiale: "",
+        date_acquisition: "",
+        puissance_materiel: "",
+    });
+
+    const siteParams = useMemo(() => {
+        const p: Record<string, string> = {};
+        if (columnFiltersInput.libelle_filiale) {
+            p.code_filiale = columnFiltersInput.libelle_filiale;
+        }
+        return p;
+    }, [columnFiltersInput.libelle_filiale]);
+
+    const { options: siteOptions } = useEntityOptions<any>("site", "code_site", "libelle_site", siteParams, 1000);
+
+    const fetchData = useCallback(async () => {
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
+
+        try {
+            setLoading(true);
+            setError(null);
+
+            const params: Record<string, string | number> = {};
+
+            if (sortField) {
+                const ordering = sortOrder === "desc" ? `-${sortField}` : sortField;
+                params.ordering = ordering;
+            }
+            params.page = currentPage;
+            params.page_size = itemsPerPage;
+
+            if (columnFilters.code_materiel) params.code_materiel = columnFilters.code_materiel;
+            if (columnFilters.designation) params.designation = columnFilters.designation;
+            if (columnFilters.num_serie) params.num_serie = columnFilters.num_serie;
+            if (columnFilters.immatriculation) params.immatriculation = columnFilters.immatriculation;
+            if (columnFilters.libelle_sous_famille) params.libelle_sous_famille = columnFilters.libelle_sous_famille;
+            if (columnFilters.libelle_type_marque) params.libelle_type_marque = columnFilters.libelle_type_marque;
+            if (columnFilters.libelle_site) params.libelle_site = columnFilters.libelle_site;
+            if (columnFilters.libelle_famille) params.libelle_famille = columnFilters.libelle_famille;
+            if (columnFilters.libelle_categorie) params.libelle_categorie = columnFilters.libelle_categorie;
+            if (columnFilters.libelle_marque) params.libelle_marque = columnFilters.libelle_marque;
+            if (columnFilters.libelle_filiale) params.libelle_filiale = columnFilters.libelle_filiale;
+            if (columnFilters.date_acquisition) params.date_acquisition = columnFilters.date_acquisition;
+            if (columnFilters.puissance_materiel) params.puissance_materiel = columnFilters.puissance_materiel;
+
+            // Always filter by type_affectation for Journal Materiel
+            params.filtered = "true";
+
+            // Include pending records for admin users
+            if (includePending) {
+                params.include_pending = "true";
+            }
+
+            const response = await crudList<JournalMateriel>(GM_URL, params, { signal: controller.signal });
+            const results = Array.isArray((response as any)?.results)
+                ? (response as any).results
+                : Array.isArray(response)
+                    ? (response as any)
+                    : [];
+            const count = typeof (response as any)?.count === "number" ? (response as any).count : results.length;
+            setData(results);
+            setTotalItems(count);
+            setIsInitialLoading(false);
+        } catch (err) {
+            const axiosError = err as { name?: string; message?: string; response?: { data?: { message?: string; detail?: string } } };
+            if (axiosError.name !== "CanceledError") {
+                const errorMessage =
+                    axiosError instanceof Error
+                        ? axiosError.message
+                        : "Une erreur est survenue lors du chargement des données";
+                setError(errorMessage);
+                console.error("Error fetching data:", axiosError);
+            }
+        } finally {
+            if (abortControllerRef.current === controller) {
+                abortControllerRef.current = null;
+            }
+            setLoading(false);
+        }
+    }, [sortField, sortOrder, currentPage, itemsPerPage, columnFilters, includePending]);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
+
+    useEffect(() => {
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+            if (filterTimerRef.current) clearTimeout(filterTimerRef.current);
+        };
+    }, []);
+
+    // Debounce filter inputs to avoid excessive API calls
+    useEffect(() => {
+        if (filterTimerRef.current) clearTimeout(filterTimerRef.current);
+        filterTimerRef.current = setTimeout(() => {
+            setColumnFilters(columnFiltersInput);
+            setCurrentPage(1);
+        }, 300);
+        return () => {
+            if (filterTimerRef.current) clearTimeout(filterTimerRef.current);
+        };
+    }, [columnFiltersInput]);
+
+    // Cascade: when a filiale is selected, reset the site filter and reload site
+    // options for that filiale (server-side via the code_filiale param).
+    useEffect(() => {
+        setColumnFiltersInput((prev) => ({ ...prev, libelle_site: "" }));
+        setColumnFilters((prev) => ({ ...prev, libelle_site: "" }));
+    }, [columnFiltersInput.libelle_filiale, setColumnFiltersInput, setColumnFilters]);
+
+    const handleColumnFilterChange = (key: keyof typeof columnFiltersInput) => (value: string) => {
+        setColumnFiltersInput((prev) => ({ ...prev, [key]: value }));
+    };
+
+    const getFilterOptions = (key: string) => {
+        switch (key) {
+            case "libelle_filiale":
+                return [{ value: "", label: "Tous" }, ...filialeFilterOptions];
+            case "libelle_categorie":
+                return [{ value: "", label: "Tous" }, ...categorieFilterOptions];
+            case "libelle_famille":
+                return [{ value: "", label: "Tous" }, ...familleFilterOptions];
+            case "libelle_sous_famille":
+                return [{ value: "", label: "Tous" }, ...sousFamilleFilterOptions];
+            case "libelle_marque":
+                return [{ value: "", label: "Tous" }, ...marqueFilterOptions];
+            case "libelle_type_marque":
+                return [{ value: "", label: "Tous" }, ...typeMarqueFilterOptions];
+            case "libelle_site":
+                return [{ value: "", label: "Tous" }, ...toCodeLibelle(siteOptions)];
+            default:
+                return null;
+        }
+    };
+
+    const isSearchableSelectFilter = (key: string) => {
+        return ["libelle_filiale", "libelle_categorie", "libelle_famille", "libelle_sous_famille", "libelle_marque", "libelle_type_marque", "libelle_site"].includes(key);
+    };
+
+    const handleSort = (field: SortField) => {
+        if (!field) return;
+
+        const column = columns.find(c => c.key === field);
+        if (column && !column.sortable) return;
+
+        if (sortField === field) {
+            setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+        } else {
+            setSortField(field);
+            setSortOrder("asc");
+        }
+        setCurrentPage(1);
+    };
+
+    const handleItemsPerPageChange = (value: number) => {
+        setItemsPerPage(value);
+        setCurrentPage(1);
+    };
+
+    const handleReset = () => {
+        setColumnFiltersInput({
+            code_materiel: "",
+            designation: "",
+            num_serie: "",
+            immatriculation: "",
+            libelle_sous_famille: "",
+            libelle_type_marque: "",
+            libelle_famille: "",
+            libelle_categorie: "",
+            libelle_marque: "",
+            libelle_filiale: "",
+            libelle_site: "",
+            date_acquisition: "",
+            puissance_materiel: "",
+        });
+        setColumnFilters({
+            code_materiel: "",
+            designation: "",
+            num_serie: "",
+            immatriculation: "",
+            libelle_sous_famille: "",
+            libelle_type_marque: "",
+            libelle_famille: "",
+            libelle_categorie: "",
+            libelle_marque: "",
+            libelle_filiale: "",
+            libelle_site: "",
+            date_acquisition: "",
+            puissance_materiel: "",
+        });
+        setSortField(null);
+        setSortOrder("asc");
+        setCurrentPage(1);
+    };
+
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const startIdx = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+    const endIdx = Math.min(currentPage * itemsPerPage, totalItems);
+
+    const paginationItems = useMemo(() => {
+        const items: (number | "...")[] = [];
+
+        if (totalPages <= 7) {
+            return Array.from({ length: totalPages }, (_, i) => i + 1);
+        }
+
+        items.push(1);
+
+        const start = Math.max(2, currentPage - 1);
+        const end = Math.min(totalPages - 1, currentPage + 1);
+
+        if (start > 2) {
+            items.push("...");
+        }
+
+        for (let i = start; i <= end; i++) {
+            items.push(i);
+        }
+
+        if (end < totalPages - 1) {
+            items.push("...");
+        }
+
+        items.push(totalPages);
+
+        return items;
+    }, [currentPage, totalPages]);
+
+    if (loading && isInitialLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <div className="flex flex-col items-center gap-4">
+                    <Loader2 className="h-10 w-10 text-gray-600 animate-spin" />
+                    <p className="text-gray-600 dark:text-dark-text-secondary">Chargement des données...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <div className="bg-white dark:bg-dark-card rounded-lg shadow-lg p-8 max-w-md w-full">
+                    <div className="flex items-center gap-4 mb-4">
+                        <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
+                        <h2 className="text-xl font-bold text-red-600 dark:text-red-400">Erreur</h2>
+                    </div>
+                    <p className="text-gray-700 dark:text-dark-text-primary mb-4">{error}</p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className={components.button.primary}
+                    >
+                        Réessayer
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    const visibleColumnsDef = columns.filter((c) => isColumnVisible(c.key));
+
+    const getColumnWidthPx = (col: { width: string }) => {
+        const match = col.width.match(/min-w-\[(\d+)px\]/);
+        return match ? parseInt(match[1], 10) : 170;
+    };
+
+    const visibleTableWidth = (() => {
+        let total = 0;
+        visibleColumnsDef.forEach((col) => {
+            total += getColumnWidthPx(col);
+        });
+        total += 130;
+        total += 8 * (visibleColumnsDef.length + 1);
+        return total;
+    })();
+
+    const getColWidthStyle = (col: { width: string }) => ({
+        minWidth: `${getColumnWidthPx(col)}px`,
+    });
+
+    return (
+        <div className="space-y-6">
+            <div className={components.table.wrapper + " overflow-x-visible"}>
+                {/* Header */}
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-6 border-b border-slate-200 dark:border-dark-border">
+                    <div>
+                        <h2 className="text-xl font-bold text-gray-900 dark:text-dark-text-primary">
+                            Consultation des équipements enregistrés. (Temp)
+                        </h2>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-600 dark:text-dark-text-secondary">Colonnes:</span>
+                            <div ref={columnDropdownRef} className="relative">
+                                <button
+                                    type="button"
+                                    onClick={() => setColumnDropdownOpen((prev) => !prev)}
+                                    className={`${components.select} cursor-pointer flex items-center justify-between min-w-[220px]`}
+                                >
+                                    <span className="truncate">
+                                        {visibleColumns.length === columnOptions.length
+                                            ? "Toutes les colonnes"
+                                            : `${visibleColumns.length} colonne(s) sélectionnée(s)`}
+                                    </span>
+                                    <ChevronDown className="h-4 w-4 text-gray-400" />
+                                </button>
+                                {columnDropdownOpen && (
+                                    <div className="absolute z-50 mt-1 w-64 max-h-64 overflow-y-auto rounded-lg border border-slate-300 bg-white shadow-lg dark:border-dark-border dark:bg-dark-card">
+                                        <div className="p-2 border-b border-slate-200 dark:border-dark-border flex items-center justify-between">
+                                            <span className="text-xs font-semibold text-gray-500 dark:text-dark-text-secondary uppercase">Colonnes</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => setVisibleColumns(columnOptions.map((c) => c.key))}
+                                                className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                                            >
+                                                Tout sélectionner
+                                            </button>
+                                        </div>
+                                        <div className="p-1">
+                                            {columnOptions.map((col) => (
+                                                <label
+                                                    key={col.key}
+                                                    className="flex items-center gap-2 px-3 py-1.5 cursor-pointer hover:bg-slate-100 dark:hover:bg-dark-bg-tertiary rounded"
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={isColumnVisible(col.key)}
+                                                        onChange={(e) => {
+                                                            if (e.target.checked) {
+                                                                setVisibleColumns((prev) => [...prev, col.key]);
+                                                            } else {
+                                                                setVisibleColumns((prev) => prev.filter((k) => k !== col.key));
+                                                            }
+                                                        }}
+                                                        className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                    />
+                                                    <span className="text-sm text-gray-700 dark:text-dark-text-primary">{col.label}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-600 dark:text-dark-text-secondary">Lignes:</span>
+
+                            <select
+                                value={itemsPerPage}
+                                onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                                className={components.select}
+                            >
+                                <option value={10}>10</option>
+                                <option value={20}>20</option>
+                                <option value={50}>50</option>
+                                <option value={100}>100</option>
+                            </select>
+                        </div>
+
+                        {canIncludePending && (
+                            <div className="flex items-center gap-2">
+                                <label className="flex items-center gap-2 cursor-pointer text-sm">
+                                    <input
+                                        type="checkbox"
+                                        checked={includePending}
+                                        onChange={(e) => setIncludePending(e.target.checked)}
+                                        className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    />
+                                    <span>Inclure données en attente</span>
+                                </label>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+{/* Results info */}
+                <div className="px-6 py-3 bg-slate-50 dark:bg-dark-bg-secondary border-b border-slate-200 dark:border-dark-border">
+                    <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
+                        Affichage de <span className="font-semibold">{startIdx}</span> à{" "}
+                        <span className="font-semibold">{endIdx}</span>{" "}
+                        sur <span className="font-semibold text-lg text-red-700 dark:text-red-500">{totalItems}</span>{" "}
+                        résultat{totalItems !== 1 ? "s" : ""}
+                    </p>
+                </div>
+
+                {/* Filtres de colonnes */}
+                <div className="p-4 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl">
+                    <div className="flex flex-wrap items-end gap-4">
+                        {filterControls.map((f) => {
+                            const isSearchable = isSearchableSelectFilter(f.key);
+                            const value = columnFiltersInput[f.key];
+                            return (
+                                <div key={f.key} className="flex flex-col gap-1 flex-1 min-w-[170px]">
+                                    <label className={components.label}>{f.label}</label>
+                                    {isSearchable ? (
+                                        <SearchableSelect
+                                            value={value}
+                                            onChange={handleColumnFilterChange(f.key)}
+                                            options={getFilterOptions(f.key) || []}
+                                            placeholder="Tous"
+                                            className="w-full py-1 text-xs"
+                                            onClick={(e) => e.stopPropagation()}
+                                        />
+                                    ) : (
+                                        <FilterInput
+                                            value={value}
+                                            onChange={handleColumnFilterChange(f.key)}
+                                        />
+                                    )}
+                                </div>
+                            );
+                        })}
+                        <div className="flex flex-col gap-1 flex-1 min-w-[170px]">
+                            <button type="button" onClick={handleReset} className={`${components.button.secondary} h-10 px-4 w-full`}>
+                                Réinitialiser
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="mt-3">
+                        <button
+                            type="button"
+                            onClick={() => setShowMoreFilters((prev) => !prev)}
+                            className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-1"
+                        >
+                            {showMoreFilters ? (
+                                <>
+                                    <ChevronUp className="h-4 w-4" />
+                                    Masquer les filtres supplémentaires
+                                </>
+                            ) : (
+                                <>
+                                    <ChevronDown className="h-4 w-4" />
+                                    Plus de filtres
+                                </>
+                            )}
+                        </button>
+                    </div>
+
+                    {showMoreFilters && (
+                        <div className="mt-4 flex flex-wrap items-end gap-4 border-t border-slate-200 dark:border-dark-border pt-4">
+                            {moreFilterControls.map((f) => {
+                                const isSearchable = isSearchableSelectFilter(f.key);
+                                const value = columnFiltersInput[f.key];
+                                return (
+                                    <div key={f.key} className="flex flex-col gap-1 flex-1 min-w-[170px]">
+                                        <label className={components.label}>{f.label}</label>
+                                        {isSearchable ? (
+                                            <SearchableSelect
+                                                value={value}
+                                                onChange={handleColumnFilterChange(f.key)}
+                                                options={getFilterOptions(f.key) || []}
+                                                placeholder="Tous"
+                                                className="w-full py-1 text-xs"
+                                                onClick={(e) => e.stopPropagation()}
+                                            />
+                                        ) : (
+                                            <FilterInput
+                                                value={value}
+                                                onChange={handleColumnFilterChange(f.key)}
+                                            />
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+
+                {/* Top scrollbar */}
+                <div
+                    ref={topScrollbarRef}
+                    className="h-5 overflow-x-auto bg-slate-100 dark:bg-dark-bg-secondary border-b border-slate-200 dark:border-dark-border"
+                    onScroll={handleTopScroll}
+                >
+                    <div className="h-px"
+                        style={{ width: '100%', minWidth: `${visibleTableWidth}px` }} />
+                </div>
+
+                {/* Table */}
+                <div
+                    ref={tableScrollRef}
+                    className="overflow-x-auto"
+                    onScroll={handleTableScroll}
+                >
+                    <table className="table-fixed"
+                        style={{ width: '100%', minWidth: `${visibleTableWidth}px` }}>
+                        <thead className={components.table.header + " border-b-2 border-slate-300"}>
+                            <tr>
+                                {visibleColumnsDef.map((column) => (
+                                    <th
+                                        key={column.key}
+                                        onClick={() => handleSort(column.key)}
+                                        style={getColWidthStyle(column)}
+                                        className={`
+                      px-4
+                      py-3
+                      align-top
+                      transition-colors
+                      ${column.sortable ? "hover:bg-slate-200 cursor-pointer" : ""}
+                  `}
+                                    >
+                                        <div className="flex flex-col gap-2">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-dark-text-primary">
+                                                    {column.label}
+                                                </span>
+
+                                                <SortIcon
+                                                    field={column.key}
+                                                    sortField={sortField}
+                                                    sortOrder={sortOrder}
+                                                    sortable={column.sortable}
+                                                />
+                                            </div>
+
+                                            </div>
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {(data?.length ?? 0) > 0 ? (
+                                (data ?? []).map((item, idx) => (
+                                    <tr
+                                        key={item.id}
+                                        className={`${components.table.row} ${idx % 2 === 0 ? "bg-white dark:bg-dark-card" : "bg-slate-50/50 dark:bg-dark-bg-secondary/50"
+                                            }`}
+                                    >
+                                        {visibleColumnsDef.map((column) => (
+                                            <td key={column.key} style={getColWidthStyle(column)} className="px-4 py-3 text-sm text-gray-600 dark:text-dark-text-secondary">
+                                                {column.key === "code_materiel" ? (
+                                                    <span className="text-gray-800 dark:text-dark-text-primary font-medium">{item.code_materiel}</span>
+                                                ) : column.key === "valeur_acquisition" || column.key === "valeur_remplacement" ? (
+                                                    <span className="text-gray-800 dark:text-dark-text-primary text-right font-medium">{formatCurrency((item as any)[column.key])}</span>
+                                                ) : column.key === "taux_amortissement" ? (
+                                                    <span className="text-right">{(item as any)[column.key]}%</span>
+                                                ) : column.key === "date_acquisition" ? (
+                                                    formatDate((item as any)[column.key])
+                                                ) : (
+                                                    (item as any)[column.key] || ""
+                                                )}
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td
+                                        colSpan={visibleColumnsDef.length || 1}
+                                        className="px-4 py-8 text-center text-gray-500 dark:text-dark-text-secondary"
+                                    >
+                                        Aucun résultat trouvé
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                    <div className="px-6 py-4 border-t border-slate-200 dark:border-dark-border bg-slate-50 dark:bg-dark-bg-secondary flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <button
+                            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                            disabled={currentPage === 1}
+                            className={components.button.primary}
+                        >
+                            Précédent
+                        </button>
+
+                        <div className="flex items-center gap-2">
+                            {paginationItems.map((item, index) =>
+                                item === "..." ? (
+                                    <span
+                                        key={`ellipsis-${index}`}
+                                        className="px-2 text-gray-400"
+                                    >
+                                        ...
+                                    </span>
+                                ) : (
+                                    <button
+                                        key={item}
+                                        onClick={() => setCurrentPage(item)}
+                                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${currentPage === item
+                                            ? "bg-blue-600 text-white"
+                                            : "bg-white dark:bg-dark-card text-gray-700 dark:text-dark-text-primary border border-slate-300 hover:border-blue-600"
+                                            }`}
+                                    >
+                                        {item}
+                                    </button>
+                                ),
+                            )}
+
+                            <div className="flex items-center gap-1 ml-2">
+                                <span className="text-sm text-gray-600 dark:text-dark-text-secondary whitespace-nowrap">
+                                    Aller à
+                                </span>
+                                <input
+                                    type="number"
+                                    min={1}
+                                    max={totalPages}
+                                    value={goToPageInput}
+                                    onChange={(e) => setGoToPageInput(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            const page = parseInt(goToPageInput, 10);
+                                            if (!isNaN(page) && page >= 1 && page <= totalPages) {
+                                                setCurrentPage(page);
+                                            }
+                                        }
+                                    }}
+                                    className="w-16 px-2 py-1 text-sm border border-slate-300 dark:border-dark-border rounded bg-white dark:bg-dark-card text-gray-900 dark:text-dark-text-primary"
+                                />
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() =>
+                                setCurrentPage(Math.min(totalPages, currentPage + 1))
+                            }
+                            disabled={currentPage === totalPages}
+                            className={components.button.primary}
+                        >
+                            Suivant
+                        </button>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default TempJournalMaterielTable;

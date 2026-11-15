@@ -10,27 +10,39 @@ import {
   crudOptions,
 } from '../../api/crudService';
 
-vi.mock('axios');
+vi.mock('axios', () => ({
+  default: {
+    get: vi.fn(),
+    post: vi.fn(),
+    put: vi.fn(),
+    patch: vi.fn(),
+    delete: vi.fn(),
+    isAxiosError: vi.fn(() => false),
+  },
+}));
 
-const mockAxios = axios as unknown as ReturnType<typeof vi.fn>;
+const mockAxiosGet = (axios as any).get as ReturnType<typeof vi.fn>;
+const mockAxiosPost = (axios as any).post as ReturnType<typeof vi.fn>;
+const mockAxiosPut = (axios as any).put as ReturnType<typeof vi.fn>;
+const mockAxiosPatch = (axios as any).patch as ReturnType<typeof vi.fn>;
+const mockAxiosDelete = (axios as any).delete as ReturnType<typeof vi.fn>;
 
 describe('api/crudService', () => {
   beforeEach(() => {
     vi.resetAllMocks();
-    vi.stubEnv('VITE_API_BASE_URL', 'http://localhost:8000');
+    vi.stubEnv('VITE_API_BASE_URL', 'http://localhost:8000/api');
     localStorage.clear();
   });
 
   it('crudList sends GET with params and auth headers', async () => {
     const fakeResponse = { results: [], count: 0, next: null, previous: null };
-    mockAxios.mockResolvedValue({ data: fakeResponse });
+    mockAxiosGet.mockResolvedValue({ data: fakeResponse });
 
     const result = await crudList('items', { search: 'x', page: 1 });
 
-    expect(mockAxios).toHaveBeenCalledWith(
+    expect(mockAxiosGet).toHaveBeenCalledWith(
+      'http://localhost:8000/api/items/',
       expect.objectContaining({
-        url: 'http://localhost:8000/items/',
-        method: 'get',
         params: { search: 'x', page: 1 },
         headers: {},
       })
@@ -39,14 +51,13 @@ describe('api/crudService', () => {
   });
 
   it('crudGet sends GET with id', async () => {
-    mockAxios.mockResolvedValue({ data: { id: 5 } });
+    mockAxiosGet.mockResolvedValue({ data: { id: 5 } });
 
     const result = await crudGet('items', 5);
 
-    expect(mockAxios).toHaveBeenCalledWith(
+    expect(mockAxiosGet).toHaveBeenCalledWith(
+      'http://localhost:8000/api/items/5/',
       expect.objectContaining({
-        url: 'http://localhost:8000/items/5/',
-        method: 'get',
         headers: {},
       })
     );
@@ -54,79 +65,68 @@ describe('api/crudService', () => {
   });
 
   it('crudCreate sends POST with payload', async () => {
-    mockAxios.mockResolvedValue({ data: { id: 1, name: 'new' } });
+    mockAxiosPost.mockResolvedValue({ data: { id: 1, name: 'new' } });
 
     const result = await crudCreate('items', { name: 'new' });
 
-    expect(mockAxios).toHaveBeenCalledWith(
-      expect.objectContaining({
-        url: 'http://localhost:8000/items/',
-        method: 'post',
-        data: { name: 'new' },
-        headers: {},
-      })
+    expect(mockAxiosPost).toHaveBeenCalledWith(
+      'http://localhost:8000/api/items/',
+      { name: 'new' },
+      expect.objectContaining({ headers: {} })
     );
     expect(result).toEqual({ id: 1, name: 'new' });
   });
 
   it('crudUpdate sends PUT with id and payload', async () => {
-    mockAxios.mockResolvedValue({ data: { id: 1, name: 'updated' } });
+    mockAxiosPut.mockResolvedValue({ data: { id: 1, name: 'updated' } });
 
     const result = await crudUpdate('items', 1, { name: 'updated' });
 
-    expect(mockAxios).toHaveBeenCalledWith(
-      expect.objectContaining({
-        url: 'http://localhost:8000/items/1/',
-        method: 'put',
-        data: { name: 'updated' },
-        headers: {},
-      })
+    expect(mockAxiosPut).toHaveBeenCalledWith(
+      'http://localhost:8000/api/items/1/',
+      { name: 'updated' },
+      expect.objectContaining({ headers: {} })
     );
     expect(result).toEqual({ id: 1, name: 'updated' });
   });
 
   it('crudPatch sends PATCH with id and payload', async () => {
-    mockAxios.mockResolvedValue({ data: { id: 1, name: 'patched' } });
+    mockAxiosPatch.mockResolvedValue({ data: { id: 1, name: 'patched' } });
 
     const result = await crudPatch('items', 1, { name: 'patched' });
 
-    expect(mockAxios).toHaveBeenCalledWith(
-      expect.objectContaining({
-        url: 'http://localhost:8000/items/1/',
-        method: 'patch',
-        data: { name: 'patched' },
-        headers: {},
-      })
+    expect(mockAxiosPatch).toHaveBeenCalledWith(
+      'http://localhost:8000/api/items/1/',
+      { name: 'patched' },
+      expect.objectContaining({ headers: {} })
     );
     expect(result).toEqual({ id: 1, name: 'patched' });
   });
 
   it('crudDelete sends DELETE with id', async () => {
-    mockAxios.mockResolvedValue({});
+    mockAxiosDelete.mockResolvedValue({});
 
     await crudDelete('items', 1);
 
-    expect(mockAxios).toHaveBeenCalledWith(
+    expect(mockAxiosDelete).toHaveBeenCalledWith(
+      'http://localhost:8000/api/items/1/',
       expect.objectContaining({
-        url: 'http://localhost:8000/items/1/',
-        method: 'delete',
         headers: {},
       })
     );
   });
 
   it('crudOptions fetches results with page_size=1000', async () => {
-    mockAxios.mockResolvedValue({
+    mockAxiosGet.mockResolvedValue({
       data: { results: [{ id: 1 }, { id: 2 }], count: 2, next: null, previous: null },
     });
 
-    const result = await crudOptions('items', { q: 'a' });
+    const result = await crudOptions('items', { q: 'a' }, 1000);
 
-    expect(mockAxios).toHaveBeenCalledWith(
+    expect(mockAxiosGet).toHaveBeenCalledWith(
+      'http://localhost:8000/api/items/options/',
       expect.objectContaining({
-        url: 'http://localhost:8000/items/',
-        method: 'get',
-        params: { q: 'a', page_size: 1000 },
+        params: { q: 'a', page_size: '1000' },
         headers: {},
       })
     );
@@ -135,11 +135,12 @@ describe('api/crudService', () => {
 
   it('includes Authorization header when token is present', async () => {
     localStorage.setItem('token', 'tok123');
-    mockAxios.mockResolvedValue({ data: { results: [] } });
+    mockAxiosGet.mockResolvedValue({ data: { results: [] } });
 
     await crudList('items');
 
-    expect(mockAxios).toHaveBeenCalledWith(
+    expect(mockAxiosGet).toHaveBeenCalledWith(
+      'http://localhost:8000/api/items/',
       expect.objectContaining({
         headers: { Authorization: 'Bearer tok123' },
       })
@@ -147,11 +148,12 @@ describe('api/crudService', () => {
   });
 
   it('sends empty headers when no token', async () => {
-    mockAxios.mockResolvedValue({ data: { results: [] } });
+    mockAxiosGet.mockResolvedValue({ data: { results: [] } });
 
     await crudList('items');
 
-    expect(mockAxios).toHaveBeenCalledWith(
+    expect(mockAxiosGet).toHaveBeenCalledWith(
+      'http://localhost:8000/api/items/',
       expect.objectContaining({
         headers: {},
       })
