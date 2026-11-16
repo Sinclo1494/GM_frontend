@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import DashboardV2Shell, {
   type DashboardTabId,
 } from "../components/dashboard/v2/DashboardV2Shell";
@@ -18,7 +18,7 @@ const TABS: { id: DashboardTabId; label: string }[] = [
   { id: "parc", label: "PARC" },
 ];
 
-const renderTab = (tab: DashboardTabId) => {
+const renderScreen = (tab: DashboardTabId) => {
   switch (tab) {
     case "apercu":
       return <ApercuScreen />;
@@ -39,6 +39,7 @@ const renderTab = (tab: DashboardTabId) => {
 
 export default function NewDashboard() {
   const [activeTab, setActiveTab] = useState<DashboardTabId>("apercu");
+  const renderTab = useCallback(() => renderScreen(activeTab), [activeTab]);
 
   return (
     <DashboardV2Shell
@@ -47,7 +48,7 @@ export default function NewDashboard() {
       tabs={TABS}
       activeTab={activeTab}
       onTabChange={setActiveTab}
-      renderTab={() => renderTab(activeTab)}
+      renderTab={renderTab}
     />
   );
 }

@@ -6,11 +6,13 @@ import {
     ChevronDown,
     Loader2,
     AlertCircle,
+    Download,
 } from "lucide-react";
 import formatCurrency from "../../utils/FormatCurrency";
 import formatDate from "../../utils/FormatDate";
 import { components } from "../../theme/components";
 import { crudList } from "../../api/crudService";
+import { exportJournalMateriel } from "../../utils/exportPDF";
 import { usePendingFilters } from "../../context/PendingFiltersContext";
 import { usePermissions } from "../../auth/PermissionContext";
 import SearchableSelect from "../common/SearchableSelect";
@@ -262,6 +264,7 @@ const columns = [
 
     const isColumnVisible = (key: string) => visibleColumns.includes(key);
 
+    const [isExporting, setIsExporting] = useState(false);
     const [columnFiltersInput, setColumnFiltersInput] = useState({
         code_materiel: "",
         designation: "",
@@ -491,6 +494,121 @@ const columns = [
     };
 
     const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+    const handleExportPdf = useCallback(async () => {
+        setIsExporting(true);
+        try {
+            const baseParams: Record<string, string | number> = {};
+
+            if (sortField) {
+                const ordering = sortOrder === "desc" ? `-${sortField}` : sortField;
+                baseParams.ordering = ordering;
+            }
+
+            if (columnFilters.code_materiel) baseParams.code_materiel = columnFilters.code_materiel;
+            if (columnFilters.designation) baseParams.designation = columnFilters.designation;
+            if (columnFilters.num_serie) baseParams.num_serie = columnFilters.num_serie;
+            if (columnFilters.immatriculation) baseParams.immatriculation = columnFilters.immatriculation;
+            if (columnFilters.code_sous_famille) baseParams.code_sous_famille = columnFilters.code_sous_famille;
+            if (columnFilters.code_type_marque) baseParams.code_type_marque = columnFilters.code_type_marque;
+            if (columnFilters.libelle_site) baseParams.libelle_site = columnFilters.libelle_site;
+            if (columnFilters.code_famille) baseParams.code_famille = columnFilters.code_famille;
+            if (columnFilters.code_categorie) baseParams.code_categorie = columnFilters.code_categorie;
+            if (columnFilters.code_marque) baseParams.code_marque = columnFilters.code_marque;
+            if (columnFilters.libelle_filiale) baseParams.libelle_filiale = columnFilters.libelle_filiale;
+            if (columnFilters.date_acquisition) baseParams.date_acquisition = columnFilters.date_acquisition;
+            if (columnFilters.puissance_materiel) baseParams.puissance_materiel = columnFilters.puissance_materiel;
+
+            baseParams.filtered = "true";
+            if (includePending) {
+                baseParams.include_pending = "true";
+            }
+
+            const PAGE_SIZE = 1000;
+            const allResults: JournalMateriel[] = [];
+            let page = 1;
+            let total = 0;
+
+            while (true) {
+                const response = await crudList<JournalMateriel>(GM_URL, {
+                    ...baseParams,
+                    page,
+                    page_size: PAGE_SIZE,
+                });
+                const chunk = Array.isArray((response as any)?.results)
+                    ? (response as any).results
+                    : Array.isArray(response)
+                        ? (response as any)
+                        : [];
+                total = typeof (response as any)?.count === "number" ? (response as any).count : chunk.length;
+                allResults.push(...chunk);
+                if (chunk.length < PAGE_SIZE || allResults.length >= total) {
+                    break;
+                }
+                page += 1;
+            }
+
+            if (allResults.length === 0) {
+                alert("Aucun résultat à exporter.");
+                return;
+            }
+
+            const visibleCols = columns.filter((c) => visibleColumns.includes(c.key));
+            const activeFilters: { label: string; value: string }[] = [];
+            const filterLabelMap: Record<string, string> = {
+                libelle_filiale: "Filiale",
+                libelle_site: "Site",
+                code_categorie: "Catégorie",
+                code_famille: "Famille Matériel",
+                code_sous_famille: "Sous Famille",
+                code_materiel: "Code Matériel",
+                designation: "Désignation",
+                num_serie: "N° Série",
+                immatriculation: "Immatriculation",
+                code_marque: "Marque Matériel",
+                code_type_marque: "Type Marque",
+                date_acquisition: "Date Acquisition",
+                puissance_materiel: "Puissance",
+            };
+
+            // Code-based filters: resolve the stored code to its "code - libellé"
+            // label using the same option lists that populate the filter selects.
+            const codeFilterOptions: Record<string, { value: string; label: string }[]> = {
+                libelle_filiale: filialeFilterOptions,
+                libelle_site: toCodeLibelle(siteOptions),
+                code_categorie: categorieFilterOptions,
+                code_famille: familleFilterOptions,
+                code_sous_famille: sousFamilleFilterOptions,
+                code_marque: marqueFilterOptions,
+                code_type_marque: typeMarqueFilterOptions,
+            };
+
+            for (const key of Object.keys(filterLabelMap)) {
+                const val = (columnFilters as Record<string, string>)[key];
+                if (!val) continue;
+                const opts = codeFilterOptions[key];
+                const match = opts?.find((o) => o.value === val);
+                const displayValue = match ? match.label : val;
+                activeFilters.push({ label: filterLabelMap[key], value: displayValue });
+            }
+            if (includePending) {
+                activeFilters.push({ label: "Données en attente", value: "Incluses" });
+            }
+
+            exportJournalMateriel({
+                rows: allResults as unknown as Record<string, string | number | null | undefined>[],
+                columns: visibleCols.map((c) => ({ key: c.key, label: c.label })),
+                filters: activeFilters,
+            });
+        } catch (err) {
+            const message = err instanceof Error ? err.message : "Une erreur est survenue lors de l'export.";
+            alert(`Erreur lors de l'export PDF : ${message}`);
+            console.error("Error exporting PDF:", err);
+        } finally {
+            setIsExporting(false);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [sortField, sortOrder, columnFilters, includePending, visibleColumns, filialeFilterOptions, siteOptions, categorieFilterOptions, familleFilterOptions, sousFamilleFilterOptions, marqueFilterOptions, typeMarqueFilterOptions]);
     const startIdx = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
     const endIdx = Math.min(currentPage * itemsPerPage, totalItems);
 
@@ -582,11 +700,25 @@ const columns = [
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-6 border-b border-slate-200 dark:border-dark-border">
                     <div>
                         <h2 className="text-xl font-bold text-gray-900 dark:text-dark-text-primary">
-                            Consultation des équipements enregistrés. (Temp)
+                            Consultation des équipements enregistrés.
                         </h2>
                     </div>
 
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                        <button
+                            type="button"
+                            onClick={handleExportPdf}
+                            disabled={isExporting}
+                            className={`${components.button.primary} flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed`}
+                        >
+                            {isExporting ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                                <Download className="h-4 w-4" />
+                            )}
+                            Exporter PDF
+                        </button>
+
                         <div className="flex items-center gap-2">
                             <span className="text-sm text-gray-600 dark:text-dark-text-secondary">Colonnes:</span>
                             <div ref={columnDropdownRef} className="relative">

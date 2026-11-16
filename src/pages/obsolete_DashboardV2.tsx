@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import DashboardV2Shell, {
   type DashboardTabId,
 } from "../components/dashboard/v2/DashboardV2Shell";
 import ApercuScreen from "../components/dashboard/v2/screens/ApercuScreen";
-import SituationScreen from "../components/dashboard/v2/screens/SituationScreen";
+import SituationScreen from "../components/dashboard/v2/screens/obsolete_SituationScreen";
 import DisponibiliteScreen from "../components/dashboard/v2/screens/DisponibiliteScreen";
 import MaintenanceScreen from "../components/dashboard/v2/screens/MaintenanceScreen";
 import RendementScreen from "../components/dashboard/v2/screens/RendementScreen";
@@ -20,15 +20,32 @@ const SCREENS: { id: DashboardTabId; label: string }[] = [
   { id: "parc", label: "PARC" },
 ];
 
-/**
- * `/dashboard-v2` — same shell as `/reports/dashboard-v2`
- * (`pages/NewDashboard`): FilterBar + HealthBar + tabs + the lazy screens.
- * It used to render the screens bare, so its filters were frozen on whatever
- * had been persisted last and the health KPIs were invisible; the shell is now
- * shared instead of duplicated.
- */
+const renderScreen = (tab: DashboardTabId) => {
+  switch (tab) {
+    case "apercu":
+      return <ApercuScreen />;
+    case "situation":
+      return <SituationScreen />;
+    case "disponibilite":
+      return <DisponibiliteScreen />;
+    case "maintenance":
+      return <MaintenanceScreen />;
+    case "rendement":
+      return <RendementScreen />;
+    case "finances":
+      return <FinancesScreen />;
+    case "parc":
+      return <ParcScreen />;
+    default:
+      return <ApercuScreen />;
+  }
+};
+
 export default function DashboardV2() {
   const [activeScreen, setActiveScreen] = useState<DashboardTabId>("apercu");
+  const renderTab = useCallback(() => renderScreen(activeScreen), [
+    activeScreen,
+  ]);
 
   return (
     <DashboardV2Shell
@@ -37,26 +54,7 @@ export default function DashboardV2() {
       tabs={SCREENS}
       activeTab={activeScreen}
       onTabChange={setActiveScreen}
-      renderTab={() => {
-        switch (activeScreen) {
-          case "apercu":
-            return <ApercuScreen />;
-          case "situation":
-            return <SituationScreen />;
-          case "disponibilite":
-            return <DisponibiliteScreen />;
-          case "maintenance":
-            return <MaintenanceScreen />;
-          case "rendement":
-            return <RendementScreen />;
-          case "finances":
-            return <FinancesScreen />;
-          case "parc":
-            return <ParcScreen />;
-          default:
-            return <ApercuScreen />;
-        }
-      }}
+      renderTab={renderTab}
     />
   );
 }

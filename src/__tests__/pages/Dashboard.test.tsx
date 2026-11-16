@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import Dashboard from '../../pages/Dashboard';
+import Dashboard from '../../pages/obsolete_Dashboard';
 
 vi.mock('../../api/dataServices');
 vi.mock('../../components/Crud/CrudTable', () => ({

@@ -12,6 +12,7 @@ import {
   filtersToParams,
   NiveauHeader,
   pct,
+  fmtNumber,
   formatMonth,
 } from "../index";
 import type { BreakdownColumn } from "../index";
@@ -198,7 +199,9 @@ function DisponibiliteScreenImpl() {
       <Section title={`Disponibilité — ${entityHeader}`} accent="green">
         <div className="grid grid-cols-1 gap-6 min-w-0 lg:grid-cols-3">
           <div className="lg:col-span-1 min-w-0">
-            <DonutChart data={donutHoursData} />
+            <div className="relative w-full" style={{ height: 260 }}>
+              <DonutChart data={donutHoursData} />
+            </div>
           </div>
           <div className="lg:col-span-2 min-w-0" style={{ height: 360 }}>
             <Line data={lineData} options={disponibiliteLineOptions} />

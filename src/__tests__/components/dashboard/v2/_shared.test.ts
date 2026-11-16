@@ -7,7 +7,7 @@ import {
   formatQuarter,
   filtersToParams,
   computeVisibleFilters,
-} from "../../../../components/dashboard/v2/screens/_shared";
+} from "../../../../components/dashboard/v2/screens/_sharedUtils";
 import { defaultDashboardFilters } from "../../../../context/useDashboardFilters";
 
 describe("components/dashboard/v2/screens/_shared", () => {

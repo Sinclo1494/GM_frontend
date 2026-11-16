@@ -237,7 +237,9 @@ function MaintenanceScreenImpl() {
   return (
     <div className="min-w-0">
       <Section title="Évolution (12 mois)" accent="red">
-        <SmallMultiples items={smallMultiplesItems} />
+        <div className="min-w-0">
+          <SmallMultiples items={smallMultiplesItems} />
+        </div>
       </Section>
 
       <Section title="Totaux" accent="red">

@@ -2,51 +2,22 @@ import { Suspense, useMemo, type ReactNode } from "react";
 import { useDashboardFilters } from "../../../hooks/useDashboardFilters";
 import FilterBar from "./FilterBar";
 import HealthBar from "./HealthBar";
-// Imported from the concrete modules, not from "./index": the barrel re-exports
-// this file, so going through it would create an import cycle.
 import {
   LoadingSpinner,
   ErrorBox,
+} from "./screens/_sharedComponents";
+import {
   computeActiveChips,
   computeVisibleFilters,
   filtersToV1,
   healthKpisFromOverview,
   makeFilterHandler,
   useFilialesFamelles,
-} from "./screens/_shared";
-import {
-  DashboardOverviewProvider,
-  useDashboardOverview,
-} from "./DashboardOverviewContext";
-import type { DashboardV2FilterKey } from "./FilterBar";
-
-export type DashboardTabId =
-  | "apercu"
-  | "situation"
-  | "disponibilite"
-  | "maintenance"
-  | "rendement"
-  | "finances"
-  | "parc";
-
-/**
- * Ordered controls of each tab.
- *
- * `niveau` only appears where an endpoint actually groups by it
- * (`/disponibilite`, `/maintenance`, `/rendement`, `/finances`); the overview,
- * situation and filiale-stats endpoints ignore it, so offering it on those tabs
- * would promise a filter that does nothing. `trimestre` only appears where the
- * underlying series is quarterly (rentabilite).
- */
-export const TAB_FILTERS: Record<DashboardTabId, DashboardV2FilterKey[]> = {
-  apercu: ["code_filiale", "code_famille", "periode", "trimestre", "annee"],
-  situation: ["code_filiale", "code_famille", "periode", "annee"],
-  disponibilite: ["code_filiale", "code_famille", "periode", "annee", "niveau"],
-  maintenance: ["code_filiale", "code_famille", "periode", "annee", "niveau"],
-  rendement: ["code_filiale", "code_famille", "periode", "annee", "niveau"],
-  finances: ["code_filiale", "code_famille", "periode", "trimestre", "annee", "niveau"],
-  parc: ["code_filiale", "code_famille", "periode", "annee"],
-};
+} from "./screens/_sharedUtils";
+import { useDashboardOverview } from "./useDashboardOverview";
+import { DashboardOverviewProvider } from "./DashboardOverviewProvider";
+import type { DashboardTabId } from "./dashboardTabs";
+import { TAB_FILTERS } from "./dashboardTabs";
 
 export interface DashboardV2ShellProps {
   title: string;

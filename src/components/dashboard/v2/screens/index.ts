@@ -1,5 +1,4 @@
 export { default as ApercuScreen } from "./ApercuScreen";
-export { default as SituationScreen } from "./SituationScreen";
 export { default as DisponibiliteScreen } from "./DisponibiliteScreen";
 export { default as MaintenanceScreen } from "./MaintenanceScreen";
 export { default as RendementScreen } from "./RendementScreen";
@@ -16,13 +15,8 @@ export {
   fmtMillions,
   pct,
   safePct,
-  Section,
-  StatusBadge,
-  AmberBadge,
   NiveauLabel,
   NiveauHeader,
-  LoadingSpinner,
-  ErrorBox,
   filtersToParams,
   filtersToV1,
   makeFilterHandler,
@@ -32,11 +26,18 @@ export {
   formatQuarter,
   computeActiveChips,
   computeVisibleFilters,
-} from "./_shared";
+} from "./_sharedUtils";
+export {
+  Section,
+  StatusBadge,
+  AmberBadge,
+  LoadingSpinner,
+  ErrorBox,
+} from "./_sharedComponents";
 export type {
   ScreenFilterChip,
   FilterSetters,
   FilterBarValues,
   FilterParamsOptions,
   DashboardFiltersPick,
-} from "./_shared";
+} from "./_sharedUtils";

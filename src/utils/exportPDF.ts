@@ -11,6 +11,27 @@ import type {
   AnalyseExploitationType,
 } from "../types/analyseExploitation";
 
+export interface JournalMaterielRow {
+  [key: string]: string | number | null | undefined;
+}
+
+export interface JournalMaterielColumn {
+  key: string;
+  label: string;
+}
+
+export interface JournalMaterielFilterEntry {
+  label: string;
+  value: string;
+}
+
+export interface ExportJournalMaterielOptions {
+  rows: JournalMaterielRow[];
+  columns: JournalMaterielColumn[];
+  filters: JournalMaterielFilterEntry[];
+  editionDate?: Date;
+}
+
 const COLORS = {
   primary: [31, 78, 121] as [number, number, number],
   secondary: [221, 235, 247] as [number, number, number],
@@ -548,4 +569,132 @@ export function exportAnalyseExploitation(
   drawFooter(pdf);
 
   pdf.save("Analyse_Exploitation.pdf");
+}
+
+function formatDateFrExport(dateStr: string): string {
+  if (!dateStr) return "";
+  const [y, m, d] = dateStr.split("-");
+  if (!y || !m || !d) return dateStr;
+  return `${d}/${m}/${y}`;
+}
+
+export function exportJournalMateriel(options: ExportJournalMaterielOptions): void {
+  const { rows, columns, filters, editionDate } = options;
+  const now = editionDate ?? new Date();
+  const editionDateStr = now.toLocaleDateString("fr-FR");
+  const editionDateIso = now.toISOString().slice(0, 10);
+
+  const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const margin = 10;
+  let cursorY = margin;
+
+  // Blue banner (matches other exports)
+  pdf.setFillColor(...COLORS.primary);
+  pdf.rect(0, 0, pageWidth, 16, "F");
+  pdf.setTextColor(...COLORS.white);
+  pdf.setFont("helvetica", "bold");
+  pdf.setFontSize(15);
+  pdf.text("Journal Matériel", margin, 7);
+  cursorY += 16 + 6;
+
+  pdf.setTextColor(...COLORS.text);
+  pdf.setFont("helvetica", "normal");
+  pdf.setFontSize(9);
+  pdf.text(`Date d'édition : ${editionDateStr}`, margin, cursorY);
+  cursorY += 6;
+
+  // Filters recap block
+  pdf.setFont("helvetica", "bold");
+  pdf.setFontSize(10);
+  pdf.setTextColor(...COLORS.primary);
+  pdf.text("Filtres appliqués :", margin, cursorY);
+  cursorY += 5;
+  pdf.setFont("helvetica", "normal");
+  pdf.setFontSize(9);
+  pdf.setTextColor(...COLORS.text);
+  if (filters.length === 0) {
+    pdf.text("Aucun filtre appliqué.", margin, cursorY);
+    cursorY += 5;
+  } else {
+    for (const f of filters) {
+      pdf.text(`  • ${f.label} : ${f.value}`, margin, cursorY);
+      cursorY += 5;
+    }
+  }
+  cursorY += 3;
+
+  const head = [columns.map((c) => c.label)];
+  const body = rows.map((item) =>
+    columns.map((col) => {
+      const raw = item[col.key];
+      if (raw === null || raw === undefined) return "";
+      if (col.key === "valeur_acquisition" || col.key === "valeur_remplacement") {
+        const num = Number(raw);
+        return isNaN(num)
+          ? String(raw)
+          : new Intl.NumberFormat("fr-FR", { style: "currency", currency: "DZD" }).format(num);
+      }
+      if (col.key === "taux_amortissement") {
+        return `${raw}%`;
+      }
+      if (col.key === "date_acquisition") {
+        return formatDateFrExport(String(raw));
+      }
+      return String(raw);
+    })
+  );
+
+  autoTable(pdf, {
+    head,
+    body,
+    startY: cursorY,
+    margin: { left: margin, right: margin, top: margin, bottom: 15 },
+    rowPageBreak: "avoid",
+    styles: {
+      font: "helvetica",
+      fontSize: 7,
+      cellPadding: 2,
+      overflow: "linebreak",
+      lineColor: COLORS.border,
+      lineWidth: 0.2,
+      textColor: COLORS.text,
+      valign: "middle",
+      halign: "left",
+    },
+    headStyles: {
+      fillColor: COLORS.primary,
+      textColor: COLORS.white,
+      fontStyle: "bold",
+      fontSize: 7,
+      valign: "middle",
+      halign: "center",
+    },
+    bodyStyles: {
+      fillColor: COLORS.white,
+      valign: "middle",
+    },
+    alternateRowStyles: { fillColor: COLORS.light },
+  });
+
+  // Draw footer on every page after the table is fully rendered so the
+  // total page count is accurate.
+  const pageCount = pdf.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    pdf.setPage(i);
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(8);
+    pdf.setTextColor(120);
+    pdf.text(
+      `Page ${i} / ${pageCount}`,
+      pageWidth - margin,
+      pageHeight - 8,
+      { align: "right" }
+    );
+pdf.text(`Journal Matériel — ${editionDateStr}`, margin, pageHeight - 8);
+  }
+  pdf.setTextColor(...COLORS.text);
+
+  pdf.save(`journal_materiel_${editionDateIso}.pdf`);
 }

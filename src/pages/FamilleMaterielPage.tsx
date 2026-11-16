@@ -28,7 +28,7 @@ export default function FamilleMaterielPage() {
 
     const columns: ColumnDef<FamilleMateriel>[] = [
         { key: "code_famille", label: "Famille", width: "min-w-[220px]", sortable: true, filter: { type: "select", param: "code_famille", options: familleFilterOptions }, render: (_val, row) => CODE_LIBELLE(row.code_famille, row.libelle_famille) },
-        { key: "code_categorie_gm", label: "CatÃ©gorie", width: "min-w-[220px]", sortable: true, filter: { type: "select", param: "code_categorie_gm", options: categorieFilterOptions }, render: (_val, row) => <span>{row.code_categorie_gm ?? "—"}</span> },
+        { key: "code_categorie_gm", label: "Catégorie", width: "min-w-[220px]", sortable: true, filter: { type: "select", param: "code_categorie_gm", options: categorieFilterOptions }, render: (_val, row) => <span>{row.code_categorie_gm ?? "—"}</span> },
         { key: "est_bloque", label: "Statut", width: "min-w-[100px]", sortable: true, filter: { type: "select", param: "est_bloque", options: [{ value: "false", label: "Actif" }, { value: "true", label: "BloquÃ©" }] }, render: (val: unknown) => (
             <span className={val ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 px-2 py-0.5 rounded-full text-xs font-semibold" : "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full text-xs font-semibold"}>
                 {val ? "BloquÃ©" : "Actif"}

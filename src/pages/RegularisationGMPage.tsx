@@ -16,7 +16,7 @@ const columns: ColumnDef<RegularisationGM>[] = [
     { key: "mmaa", label: "Mois/Année", width: "min-w-[120px]", sortable: true, filter: { param: "mmaa" } },
     { key: "montant_regularisation", label: "Montant", width: "min-w-[130px]", sortable: true, filter: { param: "montant_regularisation" } },
     { key: "observation", label: "Observation", width: "min-w-[200px]", sortable: true, filter: { param: "observation" } },
-    { key: "date_modification", label: "Modifié le", width: "min-w-[160px]", sortable: true, filter: { param: "date_modification", placeholder: "JJ/MM/AAAA" }, render: (val: unknown) => <>{val ?? "â€”"}</> },
+    { key: "date_modification", label: "Modifié le", width: "min-w-[160px]", sortable: true, filter: { param: "date_modification", placeholder: "JJ/MM/AAAA" }, render: (val: unknown) => <>{val ?? "—"}</> },
     { key: "est_bloque", label: "Statut", width: "min-w-[100px]", sortable: true, filter: { type: "select", param: "est_bloque", options: [{ value: "false", label: "Actif" }, { value: "true", label: "Bloqué" }] }, render: (val: unknown) => (
         <span className={val ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 px-2 py-0.5 rounded-full text-xs font-semibold" : "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full text-xs font-semibold"}>
             {val ? "Bloqué" : "Actif"}

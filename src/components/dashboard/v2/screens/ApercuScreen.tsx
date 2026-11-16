@@ -15,7 +15,7 @@ import {
   fmtNumber,
   fmtMillions,
 } from "../index";
-import { useDashboardOverview } from "../DashboardOverviewContext";
+import { useDashboardOverview } from "../useDashboardOverview";
 import { DASHBOARD_TARGETS } from "../dashboardTargets";
 import { getDashboardV2Situation } from "../../../../api/dashboardV2Services";
 import type { DashboardV2Situation } from "../../../../types/dashboardV2";
@@ -100,13 +100,15 @@ function ApercuScreenImpl() {
       <Section title="PARC" accent="blue">
         <div className="flex flex-col items-center gap-4 min-w-0">
           <div className="w-full max-w-xs min-w-0">
-            <DonutChart
-              data={donutData}
-              centerLabel={fmtNumber(
-                situationDist.reduce((sum, s) => sum + (Number(s.count) || 0), 0),
-              )}
-              colors={donutColors}
-            />
+            <div className="relative w-full" style={{ height: 260 }}>
+              <DonutChart
+                data={donutData}
+                centerLabel={fmtNumber(
+                  situationDist.reduce((sum, s) => sum + (Number(s.count) || 0), 0),
+                )}
+                colors={donutColors}
+              />
+            </div>
             <p className="mt-2 text-xs text-gray-500 dark:text-dark-text-secondary text-center">
               {fmtNumber(situationTotal)} engins avec situation sur un parc de{" "}
               {fmtNumber(parcTotal)}
@@ -188,10 +190,12 @@ function ApercuScreenImpl() {
         <Section title="Répartition du parc par filiale" accent="teal">
           <div className="grid grid-cols-1 gap-6 min-w-0 lg:grid-cols-3">
             <div className="lg:col-span-2 min-w-0">
-              <DonutChart
-                data={filialeDonutData}
-                centerLabel={fmtNumber(filialeDonutTotal)}
-              />
+              <div className="relative w-full" style={{ height: 260 }}>
+                <DonutChart
+                  data={filialeDonutData}
+                  centerLabel={fmtNumber(filialeDonutTotal)}
+                />
+              </div>
             </div>
             <div className="lg:col-span-1 min-w-0">
               <div className="space-y-2 max-h-64 overflow-y-auto">

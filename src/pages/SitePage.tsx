@@ -20,9 +20,9 @@ const fields = [
 
 const columns: ColumnDef<Site>[] = [
     { key: "code_site", label: "Code", width: "min-w-[150px]", sortable: true, filter: { param: "code_site" } },
-    { key: "libelle_site", label: "LibellÃ©", width: "min-w-[200px]", sortable: true, filter: { param: "libelle_site" } },
+    { key: "libelle_site", label: "Libellé", width: "min-w-[200px]", sortable: true, filter: { param: "libelle_site" } },
     { key: "code_filiale", label: "Filiale", width: "min-w-[150px]", sortable: true, filter: { param: "code_filiale" } },
-    { key: "code_region", label: "RÃ©gion", width: "min-w-[130px]", sortable: true, filter: { param: "code_region" } },
+    { key: "code_region", label: "Région", width: "min-w-[130px]", sortable: true, filter: { param: "code_region" } },
     { key: "type_site", label: "Type", width: "min-w-[130px]", sortable: true, filter: { param: "type_site" } },
     { key: "code_agence", label: "Agence", width: "min-w-[130px]", sortable: true, filter: { param: "code_agence" } },
     { key: "est_bloque", label: "Statut", width: "min-w-[100px]", sortable: true, filter: { type: "select", param: "est_bloque", options: [{ value: "false", label: "Actif" }, { value: "true", label: "BloquÃ©" }] }, render: (val: unknown) => (

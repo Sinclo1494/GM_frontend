@@ -149,7 +149,9 @@ function SituationScreenImpl() {
       <Section title="Répartition des situations" accent="blue">
         <div className="grid grid-cols-1 gap-6 min-w-0 lg:grid-cols-3">
           <div className="lg:col-span-1 min-w-0">
-            <DonutChart data={donutData} />
+            <div className="relative w-full" style={{ height: 260 }}>
+              <DonutChart data={donutData} />
+            </div>
           </div>
           <div className="lg:col-span-2 min-w-0" style={{ height: 360 }}>
             <Line data={lineData} options={lineOptions} />

@@ -278,10 +278,14 @@ function FinancesScreenImpl() {
       <Section title="CA saisi vs calculé et taux d'affectation" accent="purple">
         <div className="grid grid-cols-1 gap-6 min-w-0 md:grid-cols-2">
           <div className="min-w-0">
-            <DonutChart data={caDonutData} />
+            <div className="relative w-full" style={{ height: 260 }}>
+              <DonutChart data={caDonutData} />
+            </div>
           </div>
           <div className="min-w-0">
-            <DonutChart data={affectationDonutData} centerLabel={`${fmtNumber(tauxAffectationPct)}%`} />
+            <div className="relative w-full" style={{ height: 260 }}>
+              <DonutChart data={affectationDonutData} centerLabel={`${fmtNumber(tauxAffectationPct)}%`} />
+            </div>
           </div>
         </div>
       </Section>

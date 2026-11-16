@@ -27,13 +27,12 @@ export type {
 } from "./FilterBar";
 
 export { default as DashboardV2Shell } from "./DashboardV2Shell";
-export type { DashboardV2ShellProps, DashboardTabId } from "./DashboardV2Shell";
-export { TAB_FILTERS } from "./DashboardV2Shell";
+export type { DashboardV2ShellProps } from "./DashboardV2Shell";
+export type { DashboardTabId } from "./dashboardTabs";
+export { TAB_FILTERS } from "./dashboardTabs";
 
-export {
-  DashboardOverviewProvider,
-  useDashboardOverview,
-} from "./DashboardOverviewContext";
+export { useDashboardOverview } from "./useDashboardOverview";
+export { DashboardOverviewProvider } from "./DashboardOverviewProvider";
 export type { DashboardOverviewState } from "./DashboardOverviewContext";
 
 export { DASHBOARD_TARGETS } from "./dashboardTargets";
@@ -85,7 +84,6 @@ export type {
 
 export {
   ApercuScreen,
-  SituationScreen,
   DisponibiliteScreen,
   MaintenanceScreen,
   RendementScreen,

@@ -6,17 +6,17 @@ import formatCurrency from "../utils/FormatCurrency";
 import JournalMateriel from "./JournalMateriel";
 import AnalyseQuantitative from "./AnalyseQuantitative";
 import AnalyseExploitation from "./AnalyseExploitation";
-import DisponibiliteTab from "../components/dashboard/kpi/DisponibiliteTab";
-import PanneTab from "../components/dashboard/kpi/PanneTab";
-import MtbfTab from "../components/dashboard/kpi/MtbfTab";
-import MttrTab from "../components/dashboard/kpi/MttrTab";
-import TauxUtilisationTab from "../components/dashboard/kpi/TauxUtilisationTab";
-import TauxChomageTab from "../components/dashboard/kpi/TauxChomageTab";
-import TauxAffectationTab from "../components/dashboard/kpi/TauxAffectationTab";
-import CaLocationInterneTab from "../components/dashboard/kpi/CaLocationInterneTab";
-import CoutPanneTab from "../components/dashboard/kpi/CoutPanneTab";
-import RendementTab from "../components/dashboard/kpi/RendementTab";
-import RentabiliteTab from "../components/dashboard/kpi/RentabiliteTab";
+import DisponibiliteTab from "../components/dashboard/kpi/obsolete_DisponibiliteTab";
+import PanneTab from "../components/dashboard/kpi/obsolete_PanneTab";
+import MtbfTab from "../components/dashboard/kpi/obsolete_MtbfTab";
+import MttrTab from "../components/dashboard/kpi/obsolete_MttrTab";
+import TauxUtilisationTab from "../components/dashboard/kpi/obsolete_TauxUtilisationTab";
+import TauxChomageTab from "../components/dashboard/kpi/obsolete_TauxChomageTab";
+import TauxAffectationTab from "../components/dashboard/kpi/obsolete_TauxAffectationTab";
+import CaLocationInterneTab from "../components/dashboard/kpi/obsolete_CaLocationInterneTab";
+import CoutPanneTab from "../components/dashboard/kpi/obsolete_CoutPanneTab";
+import RendementTab from "../components/dashboard/kpi/obsolete_RendementTab";
+import RentabiliteTab from "../components/dashboard/kpi/obsolete_RentabiliteTab";
 import PaginationControls from "../components/common/PaginationControls";
 import type {
   DashboardData,

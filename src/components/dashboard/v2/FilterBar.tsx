@@ -1,6 +1,6 @@
 ﻿import React from "react";
 import { components } from "../../../theme/components";
-import { X } from "lucide-react";
+import { X, Download } from "lucide-react";
 import SearchableSelect from "../../common/SearchableSelect";
 import {
   PERIODE_ANNEE,
@@ -37,6 +37,7 @@ export interface FilterBarProps {
   visibleFilters: DashboardV2FilterKey[];
   onChange: (key: DashboardV2FilterKey, value: string) => void;
   onReset: () => void;
+  onExport?: () => void;
   activeChips: FilterChip[];
   filiales?: FilterOption[];
   familles?: FilterOption[];
@@ -229,7 +230,8 @@ const CONTROL_LABELS: Record<DashboardV2FilterKey, string> = {
 };
 
 const FilterBar = React.memo<FilterBarProps>(
-  ({ filters, visibleFilters, onChange, onReset, activeChips, filiales = [], familles = [] }) => {
+  ({ filters, visibleFilters, onChange, onReset, onExport, activeChips, filiales = [], familles = [] }) => {
+    const hasExport = typeof onExport === "function";
     return (
       <div className="p-4 bg-white dark:bg-dark-card border-b border-slate-200 dark:border-dark-border">
         <div className="flex flex-wrap items-end gap-3">
@@ -251,6 +253,18 @@ const FilterBar = React.memo<FilterBarProps>(
               Réinitialiser
             </button>
           </div>
+          {hasExport && (
+            <div className="flex flex-col gap-1">
+              <button
+                type="button"
+                onClick={onExport}
+                className={`${components.button.primary} h-10 px-4 text-sm flex items-center gap-1.5`}
+              >
+                <Download size={16} />
+                Exporter PDF
+              </button>
+            </div>
+          )}
         </div>
 
         {activeChips.length > 0 && (
