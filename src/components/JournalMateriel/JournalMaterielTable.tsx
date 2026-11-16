@@ -479,10 +479,6 @@ const columns = [
             date_acquisition: "",
             puissance_materiel: "",
         });
-            libelle_site: "",
-            date_acquisition: "",
-            puissance_materiel: "",
-        });
         setSortField(null);
         setSortOrder("asc");
         setCurrentPage(1);

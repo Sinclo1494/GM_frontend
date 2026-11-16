@@ -1,7 +1,6 @@
 import { useCallback, useState } from "react";
-import DashboardV2Shell, {
-  type DashboardTabId,
-} from "../components/dashboard/v2/DashboardV2Shell";
+import DashboardV2Shell from "../components/dashboard/v2/DashboardV2Shell";
+import type { DashboardTabId } from "../components/dashboard/v2/dashboardTabs";
 import ApercuScreen from "../components/dashboard/v2/screens/ApercuScreen";
 import DisponibiliteScreen from "../components/dashboard/v2/screens/DisponibiliteScreen";
 import MaintenanceScreen from "../components/dashboard/v2/screens/MaintenanceScreen";

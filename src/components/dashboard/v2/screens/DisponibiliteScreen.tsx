@@ -12,7 +12,6 @@ import {
   filtersToParams,
   NiveauHeader,
   pct,
-  fmtNumber,
   formatMonth,
 } from "../index";
 import type { BreakdownColumn } from "../index";
