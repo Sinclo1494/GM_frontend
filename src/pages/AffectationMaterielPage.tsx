@@ -35,7 +35,7 @@ const columns: ColumnDef<AffectationMateriel>[] = [
 ];
 
 export default function AffectationMaterielPage() {
-    const { options: materielOptions } = useEntityOptions<any>("grand-materiel", "code_materiel", "designation");
+    const { options: materielOptions } = useEntityOptions<any>("grand-materiel", "code_materiel", "designation", {}, undefined, true);
     const { options: filialeOptions } = useEntityOptions<any>("filiale", "code_filiale", "libelle_filiale");
     const { options: siteOptions } = useEntityOptions<any>("site", "code_site", "libelle_site");
 

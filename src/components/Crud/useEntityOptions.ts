@@ -8,6 +8,7 @@ export function useEntityOptions<T extends Record<string, unknown>>(
     labelKey: keyof T,
     params: Record<string, string> = {},
     page_size?: number,
+    skipOptions = false,
 ): { options: OptionItem[]; loading: boolean; error: string | null } {
     const [options, setOptions] = useState<OptionItem[]>([]);
     const [loading, setLoading] = useState(false);
@@ -17,7 +18,7 @@ export function useEntityOptions<T extends Record<string, unknown>>(
         let cancelled = false;
         setLoading(true);
         setError(null);
-        crudOptions<T>(endpoint, params, page_size)
+        crudOptions<T>(endpoint, params, page_size, skipOptions)
             .then((items) => {
                 if (cancelled) return;
                 const mapped = items.map((item) => ({
@@ -36,7 +37,7 @@ export function useEntityOptions<T extends Record<string, unknown>>(
         return () => {
             cancelled = true;
         };
-        }, [endpoint, JSON.stringify(params), valueKey, labelKey, page_size]);
+        }, [endpoint, JSON.stringify(params), valueKey, labelKey, page_size, skipOptions]);
 
     return { options, loading, error };
 }

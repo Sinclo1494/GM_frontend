@@ -93,6 +93,7 @@ export async function crudOptions<T>(
     endpoint: string,
     params: Record<string, string> = {},
     page_size?: number,
+    skipOptions = false,
 ): Promise<T[]> {
     const queryParams: Record<string, string> = { ...params };
     if (page_size !== undefined) {
@@ -100,23 +101,24 @@ export async function crudOptions<T>(
     } else {
         queryParams.page_size = "10";
     }
-    try {
-        const { data } = await axios.get<CrudListResponse<T>>(`${API}/${endpoint}/options/`, {
+    if (skipOptions) {
+        const { data } = await axios.get<CrudListResponse<T>>(`${API}/${endpoint}/`, {
             params: queryParams,
             headers: authHeaders(),
         });
         return data.results;
-    } catch (err) {
-        // Endpoints without the lightweight /options/ action (e.g. grand-materiel,
-        // which needs its custom cross-filiale list logic) fall back to the
-        // standard list endpoint.
-        if (axios.isAxiosError(err) && err.response?.status === 404) {
-            const { data } = await axios.get<CrudListResponse<T>>(`${API}/${endpoint}/`, {
-                params: queryParams,
-                headers: authHeaders(),
-            });
-            return data.results;
-        }
-        throw err;
     }
+    const { data, status } = await axios.get<CrudListResponse<T>>(`${API}/${endpoint}/options/`, {
+        params: queryParams,
+        headers: authHeaders(),
+        validateStatus: (s) => s === 200 || s === 404,
+    });
+    if (status === 404) {
+        const { data: fallback } = await axios.get<CrudListResponse<T>>(`${API}/${endpoint}/`, {
+            params: queryParams,
+            headers: authHeaders(),
+        });
+        return fallback.results;
+    }
+    return data.results;
 }
